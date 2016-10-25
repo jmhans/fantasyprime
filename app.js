@@ -5,7 +5,7 @@ document.getElementById("msg").innerHTML = "Paragraph changed!"
 //Added a comment
 
 
-var url = "https://spreadsheets.google.com/feeds/cells/0AtMEoZDi5-pedElCS1lrVnp0Yk1vbFdPaUlOc3F3a2c/od6/public/basic?alt=json";
+var url = "https://spreadsheets.google.com/feeds/cells/1-T37CNjD3u4mO2p21rKbajCPgyhigC-M9pySexxF_Pg/od6/public/basic?alt=json";
 $.ajax({
     url: url,
     dataType: "jsonp",
