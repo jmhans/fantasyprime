@@ -1,6 +1,6 @@
 ﻿//$("#msg").html("change it");
 
-document.getElementById("msg").innerHTML = 'change it';
+document.getElementById("msg").innerHTML = "Paragraph changed!"
 
 //Added a comment
 
