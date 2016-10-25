@@ -4,7 +4,13 @@ document.getElementById("msg").innerHTML = "Paragraph changed!"
 
 //Added a comment
 
-$.get("https://spreadsheets.google.com/feeds/list/0AtMEoZDi5-pedElCS1lrVnp0Yk1vbFdPaUlOc3F3a2c/od6/public/values?alt=json-in-script&callback=x", function (data) {
-    $("#msg").html(data);
-    alert("Load was performed.");
-});
+
+var url = "https://spreadsheets.google.com/feeds/cells/0AtMEoZDi5-pedElCS1lrVnp0Yk1vbFdPaUlOc3F3a2c/od6/public/basic?alt=json";
+$.ajax({
+    url: url,
+    dataType: "jsonp",
+    success: function (data) {
+        // data.feed.entry is an array of objects that represent each cell
+        alert('got here!');
+    },
+})
