@@ -1,5 +1,7 @@
-﻿$("#msg").html("change it");
-alert("Load was performed.");
+﻿//$("#msg").html("change it");
+
+document.getElementById("msg").innerHTML = 'change it';
+
 //Added a comment
 
 $.get("https://spreadsheets.google.com/feeds/list/0AtMEoZDi5-pedElCS1lrVnp0Yk1vbFdPaUlOc3F3a2c/od6/public/values?alt=json-in-script&callback=x", function (data) {
