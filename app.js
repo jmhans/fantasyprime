@@ -1,4 +1,4 @@
-﻿$("#msg").html("say something");
+﻿$("#msg").html("change it");
 
 //Added a comment
 
