@@ -8,24 +8,8 @@
                 separator: ';'
             },
             dist: {
-                src: ['app/min-safe/js/*.js'],
+                src: ['app/**/*.js'],
                 dest: 'app/dist/<%= pkg.name %>.js'
-            }
-        },
-        ngAnnotate: {
-            options: {
-                singleQuotes: true,
-            },
-            app1: {
-                files: [
-                    {
-                        'app/min-safe/js/controllers.js': ['app/js/controllers.js'],
-                        'app/min-safe/js/directives.js': ['app/js/directives.js'],
-                        'app/min-safe/js/filters.js': ['app/js/filters.js'],
-                        'app/min-safe/js/services.js': ['app/js/services.js'],
-                        'app/min-safe/js/app.js': ['app/js/app.js'],
-                    },
-                ],
             }
         },
         uglify: {
