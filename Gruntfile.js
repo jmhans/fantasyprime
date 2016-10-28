@@ -8,8 +8,24 @@
                 separator: ';'
             },
             dist: {
-                src: ['app/js/*.js'],
+                src: ['app/min-safe/js/*.js'],
                 dest: 'app/dist/<%= pkg.name %>.js'
+            }
+        },
+        ngAnnotate: {
+            options: {
+                singleQuotes: true,
+            },
+            app1: {
+                files: [
+                    {
+                        'app/min-safe/js/controllers.js': ['app/js/controllers.js'],
+                        'app/min-safe/js/directives.js': ['app/js/directives.js'],
+                        'app/min-safe/js/filters.js': ['app/js/filters.js'],
+                        'app/min-safe/js/services.js': ['app/js/services.js'],
+                        'app/min-safe/js/app.js': ['app/js/app.js'],
+                    },
+                ],
             }
         },
         uglify: {
@@ -37,11 +53,14 @@
     });
 
     // Load the plugin that provides the "uglify" task.
+    // grunt.loadNpmTasks('grunt-ng-annotate');
     grunt.loadNpmTasks('grunt-contrib-uglify');
     grunt.loadNpmTasks('grunt-contrib-jshint');
     grunt.loadNpmTasks('grunt-contrib-concat');
 
+
+
     // Default task(s).
-    grunt.registerTask('default', ['concat', 'uglify']);
+    grunt.registerTask('default', [ 'concat', 'uglify']);
 
 };

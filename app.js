@@ -11,6 +11,5 @@ $.ajax({
     dataType: "jsonp",
     success: function (data) {
         // data.feed.entry is an array of objects that represent each cell
-        alert('got here!');
     },
 })
