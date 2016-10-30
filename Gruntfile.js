@@ -8,9 +8,11 @@
                 separator: ';'
             },
             dist: {
-                src: [  'app/bower_components/angular/angular.js',
+                src: [
                         'app/bower_components/angular-route/angular-route.js',
-                        'app/js/*.js'],
+                        'app/bower_components/angular/angular.js',
+                        'app/js/*.js'
+                ],
                 dest: 'app/dist/<%= pkg.name %>.js'
             }
         },
