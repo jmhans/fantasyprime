@@ -8,7 +8,7 @@
                 separator: ';'
             },
             dist: {
-                src: ['app/js/*.js'],
+                src: ['app/js/*.js', 'app/bower_components/*.js'],
                 dest: 'app/dist/<%= pkg.name %>.js'
             }
         },
