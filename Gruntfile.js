@@ -9,7 +9,7 @@
             },
             dist: {
                 src: [  'app/bower_components/angular/angular.js',
-                        'app/bower_components/angular-route/angular-route.js/*.js',
+                        'app/bower_components/angular-route/angular-route.js',
                         'app/js/*.js'],
                 dest: 'app/dist/<%= pkg.name %>.js'
             }
