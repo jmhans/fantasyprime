@@ -1,5 +1,8 @@
 <p>This is the partial for fantasy football.</p>
 <p>
     <div id="msg"></div>
-  Showing data for: {{ssData}}
+    <ul>
+        <li ng-repeat="dataItem in ssData">{{dataItem.title.$t}} : {{dataItem.content.$t}}</li>
+    </ul>
+
 </p>
