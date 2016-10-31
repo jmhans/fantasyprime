@@ -23115,7 +23115,26 @@ function ngViewFillContentFactory($compile, $controller, $route) {
 
 
 })(window, window.angular);
-;
+;'use strict';
+
+/* Controllers */
+
+angular.module('myApp.FF', [])
+  .controller('FantasyFootball', ['$scope', '$http', function ($scope, $http) {
+      $scope.$on('$viewContentLoaded', function () {
+
+          //Added a comment
+
+          var url = "https://spreadsheets.google.com/feeds/list/1-T37CNjD3u4mO2p21rKbajCPgyhigC-M9pySexxF_Pg/om6s0f5/public/basic?alt=json";
+          $http.get(url).then(function (data) {
+              document.getElementById("msg").innerHTML = "Spreadsheet Data Retrieved";
+              $scope.ssData = data;
+          }
+          );
+
+
+      });
+  }]);;
 
 // Declare app level module which depends on filters, and services
 angular.module('myApp', [
@@ -23123,11 +23142,13 @@ angular.module('myApp', [
   'myApp.filters',
   'myApp.services',
   'myApp.directives',
-  'myApp.controllers'
+  'myApp.controllers',
+  'myApp.FF'
 ]).
 config(['$routeProvider', function($routeProvider) {
   $routeProvider.when('/view1', {templateUrl: 'partials/partial1.html', controller: 'MyCtrl1'});
-  $routeProvider.when('/view2', {templateUrl: 'partials/partial2.html', controller: 'MyCtrl2'});
+  $routeProvider.when('/view2', { templateUrl: 'partials/partial2.html', controller: 'MyCtrl2' });
+  $routeProvider.when('/fffb', { templateUrl: 'partials/fffb.html', controller: 'FantasyFootball' });
   $routeProvider.otherwise({redirectTo: '/view1'});
 }]);
 ;'use strict';
@@ -23172,7 +23193,6 @@ angular.module('myApp.filters', []).
       return String(text).replace(/\%VERSION\%/mg, version);
     };
   }]);
-;//$("#msg").html("change it");
 ;'use strict';
 
 /* Services */
