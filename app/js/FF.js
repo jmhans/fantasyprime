@@ -15,6 +15,45 @@ angular.module('myApp.FF', [])
           }
           );
 
+          (function (d, script) {
+              script = d.createElement('script');
+              script.type = 'text/javascript';
+              script.async = true;
+              script.onload = function () {
+                  // remote script has loaded
+              };
+              script.src = 'https://apis.google.com/js/client.js?onload=checkAuth';
+              d.getElementsByTagName('head')[0].appendChild(script);
+          }(document));
+
+
+
+          listMajors();
+
 
       });
   }]);
+
+
+
+
+function listMajors() {
+    gapi.client.sheets.spreadsheets.values.get({
+        spreadsheetId: '1yLdsc_2T9k6I1PVKManfbO6ZliNC1Auu4cLqqXIB_ns',
+        range: 'RosterRecords!A:G',
+    }).then(function (response) {
+        var range = response.result;
+        if (range.values.length > 0) {
+            appendPre('Name, Major:');
+            for (i = 0; i < range.values.length; i++) {
+                var row = range.values[i];
+                // Print columns A and E, which correspond to indices 0 and 4.
+                appendPre(row[1] + ', ' + row[2] + ', ' + row[6]);
+            }
+        } else {
+            appendPre('No data found.');
+        }
+    }, function (response) {
+        appendPre('Error: ' + response.result.error.message);
+    });
+}

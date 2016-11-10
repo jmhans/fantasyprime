@@ -1,3 +1,15 @@
+<script src="https://apis.google.com/js/client.js?onload=checkAuth">
+</script>
+
+<div id="authorize-div" style="display: none">
+    <span>Authorize access to Google Sheets API</span>
+    <!--Button for the user to click to initiate auth sequence -->
+    <button id="authorize-button" onclick="handleAuthClick(event)">
+        Authorize
+    </button>
+</div>
+<pre id="output"></pre>
+
 <p>This is the partial for fantasy football.</p>
 <p>
     <div id="msg"></div>
