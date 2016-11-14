@@ -23145,9 +23145,6 @@ angular.module('myApp.FF', [])
 
 
 
-          listMajors();
-
-
       });
   }]);
 
