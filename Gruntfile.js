@@ -1,4 +1,5 @@
-﻿module.exports = function (grunt) {
+﻿/// <binding BeforeBuild='default' />
+module.exports = function (grunt) {
 
     // Project configuration.
     grunt.initConfig({
@@ -12,6 +13,17 @@
                         'app/bower_components/angular-route/angular-route.js',
                         'app/js/*.js'],
                 dest: 'app/dist/<%= pkg.name %>.js'
+            },
+            lib: {
+                src: [  'bower_components/angular/angular.js',
+                        'bower_components/angular-ui-router/release/angular-ui-router.js',
+                        'bower_components/angular-ui-router-menus/dist/angular-ui-router-menus.js',
+                        'hellosolarsystem.js',
+                        'services/*.js',
+                        'components/*.js'
+                        
+                ],
+                dest: 'lib/<%= pkg.name %>.js'
             }
         },
         uglify: {
@@ -21,6 +33,11 @@
             dist: {
                 files: {
                     'app/dist/<%= pkg.name %>.min.js': ['<%= concat.dist.dest %>']
+                }
+            },
+            lib: {
+                files: {
+                    'lib/<%= pkg.name %>.min.js': ['<%= concat.lib.dest %>']
                 }
             }
         },
