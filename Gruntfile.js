@@ -18,9 +18,10 @@ module.exports = function (grunt) {
                 src: [  'bower_components/angular/angular.js',
                         'bower_components/angular-ui-router/release/angular-ui-router.js',
                         'bower_components/angular-ui-router-menus/dist/angular-ui-router-menus.js',
+                        'bower_components/angular-google-gapi/dist/angular-google-gapi.js',
                         'main.js',
                         'services/*.js',
-                        'components/*.js'
+                        'components/**/*.js'
                         
                 ],
                 dest: 'lib/<%= pkg.name %>.js'

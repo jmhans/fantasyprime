@@ -1,0 +1,15 @@
+﻿<h4>Team Roster</h4>
+<div class="flex-h">
+    <div>
+        <h3>Roster Records:</h3>
+        <ul>
+            <li ng-repeat="rosterRec in $ctrl.roster">
+                <a ui-sref-active="active" ui-sref="teams.roster({ rosterOwner: rosterRec.Owner })">
+                    {{rosterRec['TeamName (Ref Only)']}}
+                </a>
+            </li>
+        </ul>
+    </div>
+</div>
+
+<button ui-sref="teams">Close</button>
