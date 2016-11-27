@@ -15,6 +15,7 @@
                 return teams.find(teamMatchesParam)
             });
         }
+
     }
 
     return service;

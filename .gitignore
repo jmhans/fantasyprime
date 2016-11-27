@@ -149,6 +149,7 @@ publish/
 # Uncomment if necessary however generally it will be regenerated when needed
 #!**/packages/repositories.config
 
+
 # Windows Azure Build Output
 csx/
 *.build.csdef
@@ -173,6 +174,7 @@ ClientBin/
 *.publishsettings
 node_modules/
 orleans.codegen.cs
+bower_components/
 
 # RIA/Silverlight projects
 Generated_Code/

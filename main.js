@@ -45,15 +45,16 @@ myApp.config(function ($stateProvider) {
             name: 'teams.roster',
             url: '/{teamId}/roster',
             component: 'roster',
-            // This state defines a 'people' resolve
-            // It delegates to the PeopleService to HTTP fetch (async)
-            // The people component receives this via its `bindings: `
             resolve: {
-                roster: function (RostersService, $stateParams) {
-                    return RostersService.getOwnerRoster('Justin');
+                team: function (teams, $stateParams) {
+                    return teams.find(function (team) {
+                        return team.id === $stateParams.teamId;
+                    });
+                },
+                roster: function (RostersService, team) {
+                    return RostersService.getOwnerRoster(team.name);
                 }
-            },
-            menu: 'Fantasy Teams'
+            }
         }
 
 
