@@ -37,6 +37,9 @@ myApp.config(function ($stateProvider) {
                 return teams.find(function (team) {
                     return team.id === $stateParams.teamId;
                 });
+            },
+            selectedTeamId: function (team) {
+                return team.teamId;
             }
         }
       },
@@ -97,4 +100,6 @@ myApp.run(['$http', '$rootScope', function ($http, $rootScope) {
      gapi.load('client', start);
 
 }
+
+
 ]);
