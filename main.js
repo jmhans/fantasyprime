@@ -1,12 +1,12 @@
 ﻿
-var myApp = angular.module('fantasyfantasy', ['ui.router', 'ui.router.menus', 'angular-google-gapi']);
+var myApp = angular.module('fantasyfantasy', ['ui.router', 'ui.router.menus', 'angular-google-gapi', 'datatables']);
 
 myApp.config(function ($stateProvider) {
     // An array of state definitions
     var states = [
 
       {
-          name: 'standings',
+          name: 'standings',    
           url: '/standings',
           menu: 'Standings',
           component: 'standings'

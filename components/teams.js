@@ -5,7 +5,12 @@ angular.module('fantasyfantasy').component('teams', {
     bindings: { teams: '<' },
     controller: function ($state) {
         this.selectTeam = function () {
-            $state.go('teams.team', { "teamId": this.selectedTeam.id })
+            if ($state.current.name === 'teams') {
+                $state.go('teams.team', { "teamId": this.selectedTeam.id })
+            } else {
+                $state.go($state.current.name, { "teamId": this.selectedTeam.id })
+            }
+            
         }
 
     },

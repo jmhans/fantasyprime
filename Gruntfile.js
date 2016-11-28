@@ -15,10 +15,13 @@ module.exports = function (grunt) {
                 dest: 'app/dist/<%= pkg.name %>.js'
             },
             lib: {
-                src: [  'bower_components/angular/angular.js',
+                src: [  'bower_components/jquery/dist/jquery.js',
+                        'bower_components/datatables.net/js/jquery.dataTables.js',
+                        'bower_components/angular/angular.js',
                         'bower_components/angular-ui-router/release/angular-ui-router.js',
                         'bower_components/angular-ui-router-menus/dist/angular-ui-router-menus.js',
                         'bower_components/angular-google-gapi/dist/angular-google-gapi.js',
+                        'bower_components/angular-datatables/dist/angular-datatables.js', 
                         'main.js',
                         'services/*.js',
                         'components/**/*.js'
@@ -26,6 +29,15 @@ module.exports = function (grunt) {
                 ],
                 dest: 'lib/<%= pkg.name %>.js'
             }
+        },
+        concat_css: {
+            options: {
+                // Task-specific options go here. 
+            },
+            all: {
+                src: ["bower_components/angular-datatables/dist/css/angular-datatables.css"],
+                dest: "css/styles.css"
+            },
         },
         uglify: {
             options: {
@@ -61,10 +73,10 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-contrib-uglify');
     grunt.loadNpmTasks('grunt-contrib-jshint');
     grunt.loadNpmTasks('grunt-contrib-concat');
-
+    grunt.loadNpmTasks('grunt-concat-css');
 
 
     // Default task(s).
-    grunt.registerTask('default', [ 'concat', 'uglify']);
+    grunt.registerTask('default', [ 'concat', 'uglify', 'concat_css']);
 
 };
