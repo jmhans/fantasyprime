@@ -4,7 +4,7 @@
     templateUrl: 'components/roster/roster.html'
 })
 
-function RosterTableCtrl(DTOptionsBuilder, DTColumnDefBuilder) {
+function RosterTableCtrl($http, DTOptionsBuilder, DTColumnDefBuilder) {
     var vm = this;
     vm.dtOptions = DTOptionsBuilder.newOptions().withPaginationType('full_numbers');
     vm.dtColumnDefs = [
@@ -20,4 +20,5 @@ function RosterTableCtrl(DTOptionsBuilder, DTColumnDefBuilder) {
     function dropTeam(index) {
         vm.roster.splice(index, 1);
     }
+
 }
