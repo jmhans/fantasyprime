@@ -40,7 +40,7 @@
                     i += teamRecords.length - 1;
                 }
 
-                return activeRecords;
+            return activeRecords;
             });
         },
 

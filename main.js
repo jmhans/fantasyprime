@@ -4,26 +4,58 @@ var myApp = angular.module('fantasyfantasy', ['ui.router', 'ui.router.menus', 'a
 myApp.config(function ($stateProvider) {
     // An array of state definitions
     var states = [
-
+        {
+            name: 'league',
+            url: '/league',
+            menu: 'League',
+            component: 'league'
+        },
+        {
+            name: 'teams.roster',
+            url: '/{teamId}/roster',
+            component: 'roster',
+            resolve: {
+                team: function (teams, $rootScope, $stateParams, TeamsService) {
+                    return teams.find(function (team) {
+                        TeamsService.getTeam($stateParams.teamId).then(function (tm) {
+                            $rootScope.selectedTeam = tm;
+                        })
+                        return team.id === $stateParams.teamId;
+                        
+                    });
+                },
+                roster: function (RostersService, team) {
+                    return RostersService.getOwnerRoster(team.name);
+                }
+            },
+            menu: 'Roster Teams'
+        },
       {
-          name: 'standings',    
+          name: 'teams',
+          url: '/teams',
+          menu: 'All Teams',
+          component: 'teams',
+          resolve: {
+              teams: function (TeamsService) {
+                  return TeamsService.getAllTeams();
+              },
+              fantasy_teams: function (RostersService) {
+                  return RostersService.getActiveRosters();
+              }
+
+          }
+      },
+      {
+          name: 'standings',
           url: '/standings',
           menu: 'Standings',
           component: 'standings'
       },
       {
-          name: 'teams',
-          url: '/teams',
-          component: 'teams',
-          // This state defines a 'people' resolve
-          // It delegates to the PeopleService to HTTP fetch (async)
-          // The people component receives this via its `bindings: `
-          resolve: {
-              teams: function (TeamsService) {
-                  return TeamsService.getAllTeams();
-              }
-          },
-          menu: 'Teams'
+          name: 'scoreboard',
+          url: '/scoreboard',
+          menu: 'Scoreboard',
+          component: 'scoreboard'
       },
       {
         name: 'teams.team',
@@ -44,23 +76,6 @@ myApp.config(function ($stateProvider) {
         }
       },
 
-        {
-            name: 'teams.roster',
-            url: '/{teamId}/roster',
-            component: 'roster',
-            resolve: {
-                team: function (teams, $stateParams) {
-                    return teams.find(function (team) {
-                        return team.id === $stateParams.teamId;
-                    });
-                },
-                roster: function (RostersService, team) {
-                    return RostersService.getOwnerRoster(team.name);
-                }
-            }
-        }
-
-
     ]
 
     // Loop over the state definitions and register them
@@ -70,8 +85,20 @@ myApp.config(function ($stateProvider) {
 });
 
 // To account for plunker embeds timing out, preload the async data
-myApp.run(['$http', '$rootScope', function ($http, $rootScope) {
-    $http.get('data/data.json', { cache: true });
+myApp.run(['$http', '$rootScope', 'TeamsService', '$state', function ($http, $rootScope, TeamsService, $state) {
+    // $http.get('data/data.json', { cache: true });
+       
+    $rootScope.teams;
+    $rootScope.selectedTeam;
+
+    getTeams();
+
+    function getTeams() {
+        TeamsService.getAllTeams()
+        .then(function (tms) {
+            $rootScope.teams = tms;
+        })
+    }
 
     function start() {
         // 2. Initialize the JavaScript client library.
