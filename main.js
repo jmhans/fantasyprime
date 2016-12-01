@@ -16,13 +16,11 @@ myApp.config(function ($stateProvider) {
             component: 'roster',
             resolve: {
                 team: function (teams, $rootScope, $stateParams, TeamsService) {
-                    return teams.find(function (team) {
-                        TeamsService.getTeam($stateParams.teamId).then(function (tm) {
-                            $rootScope.selectedTeam = tm;
-                        })
-                        return team.id === $stateParams.teamId;
-                        
+                    return TeamsService.getTeam($stateParams.teamId).then(function (tm) {
+                        $rootScope.selectedTeam = tm;
+                        return $rootScope.selectedTeam;
                     });
+
                 },
                 roster: function (RostersService, team) {
                     return RostersService.getOwnerRoster(team.name);

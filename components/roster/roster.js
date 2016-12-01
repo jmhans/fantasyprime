@@ -6,7 +6,9 @@
 
 function RosterTableCtrl($http, DTOptionsBuilder, DTColumnDefBuilder) {
     var vm = this;
-    vm.dtOptions = DTOptionsBuilder.newOptions().withPaginationType('full_numbers');
+    vm.dtOptions = DTOptionsBuilder.newOptions()
+        .withOption('paging', false)
+        .withOption('searching', false);
     vm.dtColumnDefs = [
         DTColumnDefBuilder.newColumnDef(0),
         DTColumnDefBuilder.newColumnDef(1),

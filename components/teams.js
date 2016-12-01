@@ -14,9 +14,7 @@ angular.module('fantasyfantasy').component('teams', {
         }
 
     },
-    template: '<div>Choose a team:</div>' +
-              '<select ng-options= "tm.name for tm in $ctrl.teams track by tm.id" ng-model="$ctrl.selectedTeam" ng-change="$ctrl.selectTeam()"></select><p />' + 
-              '<a ui-sref="teams.roster({teamId : $ctrl.selectedTeam.id})">Roster</a> | ' +
+    template: '<a ui-sref="teams.roster({teamId : $ctrl.selectedTeam.id})">Roster</a> | ' +
               '<a ui-sref="teams.team({teamId : $ctrl.selectedTeam.id})">Team Information</a>' +
               '<ui-view></ui-view>'
 })
