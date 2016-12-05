@@ -1,13 +1,6 @@
-﻿<h4>Team Roster</h4>
+﻿<h4>All Teams</h4>
 <div class="flex-h">
     <div>
-        <!--<ul>
-            <li ng-repeat="rosterRec in $ctrl.roster">
-                <a ui-sref-active="active" ui-sref="teams.roster({ rosterOwner: rosterRec.Owner })">
-                    {{rosterRec['TeamName (Ref Only)']}}
-                </a>
-            </li>
-        </ul>-->
         <div>
             <form class="form-inline">
                 <table datatable="ng" dt-options="$ctrl.dtOptions" dt-column-defs="$ctrl.dtColumnDefs" class="row-border hover stripe">
@@ -21,11 +14,11 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <tr ng-repeat="rosterRec in $ctrl.roster">
+                        <tr ng-repeat="rosterRec in $ctrl.fantasy_teams">
                             <td>{{ rosterRec.TeamID }}</td>
                             <td>{{ rosterRec['TeamName (Ref Only)'] }}</td>
                             <td>{{ rosterRec.Owner }}</td>
-                            <td>{{ rosterRec.Position }}</td>
+                            <td></td>
                             <td>
                                 <button type="button" ng-click="$ctrl.removePerson($index)" class="btn btn-danger"><i class="fa fa-trash-o"></i></button>
                             </td>
@@ -38,5 +31,5 @@
 
     </div>
 </div>
-<button ng-click="$ctrl.updateTeamRecord()">UpdateRecord</button>
+
 <button ui-sref="teams">Close</button>

@@ -8,12 +8,14 @@ myApp.config(function ($stateProvider) {
             name: 'league',
             url: '/league',
             menu: 'League',
-            component: 'league'
+            component: 'league',
+            requiresParams: false
         },
         {
-            name: 'teams.roster',
-            url: '/{teamId}/roster',
+            name: 'teams.team.roster',
+            url: '/roster',
             component: 'roster',
+            requiresParams: true,
             resolve: {
                 team: function (teams, $rootScope, $stateParams, TeamsService) {
                     return TeamsService.getTeam($stateParams.teamId).then(function (tm) {
@@ -25,14 +27,30 @@ myApp.config(function ($stateProvider) {
                 roster: function (RostersService, team) {
                     return RostersService.getOwnerRoster(team.name);
                 }
-            },
-            menu: 'Roster Teams'
+
+            }
         },
+        {
+            name: 'teams.team.detail',
+            url: '/info',
+            component: 'info',
+            resolve: {
+                team: function (teams, $rootScope, $stateParams, TeamsService) {
+                    return TeamsService.getTeam($stateParams.teamId).then(function (tm) {
+                        $rootScope.selectedTeam = tm;
+                        return $rootScope.selectedTeam;
+                    }); 
+                }
+            },
+            requiresParams: false,
+            menu: "My Team"
+        },
+
       {
           name: 'teams',
           url: '/teams',
-          menu: 'All Teams',
           component: 'teams',
+          requiresParams: false,
           resolve: {
               teams: function (TeamsService) {
                   return TeamsService.getAllTeams();
@@ -47,31 +65,43 @@ myApp.config(function ($stateProvider) {
           name: 'standings',
           url: '/standings',
           menu: 'Standings',
+          requiresParams: false,
           component: 'standings'
       },
       {
           name: 'scoreboard',
           url: '/scoreboard',
           menu: 'Scoreboard',
+          requiresParams: false,
           component: 'scoreboard'
       },
       {
-        name: 'teams.team',
-            // This state takes a URL parameter called teamId
-        url: '/{teamId}',
-        component: 'team',
-        // This state defines a 'person' resolve
-        // It delegates to the PeopleService, passing the personId parameter
-        resolve: {
-            team: function (teams, $stateParams) {
-                return teams.find(function (team) {
-                    return team.id === $stateParams.teamId;
-                });
-            },
-            selectedTeamId: function (team) {
-                return team.teamId;
-            }
-        }
+          name: 'teams.team',
+          // This state takes a URL parameter called teamId
+          url: '/{teamId:int}',
+          component: 'team',
+          // This state defines a 'person' resolve
+          // It delegates to the PeopleService, passing the personId parameter
+          requiresParams: true,
+          resolve: {
+              team: function (teams, $rootScope, $stateParams, TeamsService) {
+                  return TeamsService.getTeam($stateParams.teamId).then(function (tm) {
+                      $rootScope.selectedTeam = tm;
+                      return $rootScope.selectedTeam;
+                  });
+              }
+          },
+          params: {
+              teamId: 1
+          }
+      },
+      {
+          name: 'teams.freeagents',
+          // This state takes a URL parameter called teamId
+        url: '/allteams',
+        component: 'allteams',
+          menu: 'All Teams',
+        requiresParams: false
       },
 
     ]
@@ -83,11 +113,11 @@ myApp.config(function ($stateProvider) {
 });
 
 // To account for plunker embeds timing out, preload the async data
-myApp.run(['$http', '$rootScope', 'TeamsService', '$state', function ($http, $rootScope, TeamsService, $state) {
+myApp.run(['$http', '$rootScope', 'TeamsService', '$state', '$stateParams', function ($http, $rootScope, TeamsService, $state, $stateParams) {
     // $http.get('data/data.json', { cache: true });
-       
-    $rootScope.teams;
-    $rootScope.selectedTeam;
+
+    $rootScope.$state = $state;
+    $rootScope.$stateParams = $stateParams;
 
     getTeams();
 
@@ -98,33 +128,8 @@ myApp.run(['$http', '$rootScope', 'TeamsService', '$state', function ($http, $ro
         })
     }
 
-    function start() {
-        // 2. Initialize the JavaScript client library.
-        gapi.client.init({
-            'apiKey': 'AIzaSyCz_JWHeHrf-AUs2YlZlwcu3q3XRJQoon8',
-            'discoveryDocs': ['https://sheets.googleapis.com/$discovery/rest?version=v4'],
-            // clientId and scope are optional if auth is not required.
-            'clientId': '1005055514218-blfai4g2nid0s7bvvdgc1ekltvfnk591.apps.googleusercontent.com',
-            'scope': ["https://www.googleapis.com/auth/spreadsheets"].join(' '),
-        }).then(function () {
-            // 3. Initialize and make the API request.
-            $rootScope.GApi = gapi.client;
-            //return gapi.client;
-            /*return gapi.client.sheets.spreadsheets.values.get({
-                spreadsheetId: '1yLdsc_2T9k6I1PVKManfbO6ZliNC1Auu4cLqqXIB_ns',
-                range: 'RosterRecords!A:G',
-            }).then(function (response) {
-
-                return response;
-            });*/
-        }, function (reason) {
-            console.log('Error: ' + reason.result.error.message);
-        });
-    };
-    // 1. Load the JavaScript client library.
-     gapi.load('client', start);
-
 }
 
 
 ]);
+

@@ -1,12 +1,17 @@
-﻿angular.module('fantasyfantasy').service('RostersService', function ($http, $rootScope) {
+﻿angular.module('fantasyfantasy').service('RostersService', ['GoogleSheetsService', function (GoogleSheetsService) {
+
     var service = {
         getAllRosterRecords: function () {
-           return $rootScope.GApi.sheets.spreadsheets.values.get({
-                spreadsheetId: '1yLdsc_2T9k6I1PVKManfbO6ZliNC1Auu4cLqqXIB_ns',
-                range: 'RosterRecords!A:G',
-            }).then(function (resp) {
-                return convertSSArraytoJSON(resp.result.values);
+            GoogleSheetsService.login().then(function (data) {
+                console.log(data.email);
+            }, function (err) {
+                console.log('Failed: ' + err);
             });
+
+
+            return GoogleSheetsService.getAllRanges().then(function (ret) {
+                return ret.RosterRecords;
+            })
         },
 
         getActiveRosters: function () {
@@ -16,9 +21,9 @@
                     var aDate = new Date(a.StartDate.replace(/-/g, "/"));
                     var bDate = new Date(b.StartDate.replace(/-/g, "/"));
                     if (aDate < bDate)
-                        return -1;
-                    if (aDate > bDate)
                         return 1;
+                    if (aDate > bDate)
+                        return -1;
                     return 0;
                 })[0];
             }
@@ -56,4 +61,4 @@
     }
 
     return service;
-})
+}])

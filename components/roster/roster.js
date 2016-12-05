@@ -4,7 +4,7 @@
     templateUrl: 'components/roster/roster.html'
 })
 
-function RosterTableCtrl($http, DTOptionsBuilder, DTColumnDefBuilder) {
+function RosterTableCtrl($http, DTOptionsBuilder, DTColumnDefBuilder, GoogleSheetsService) {
     var vm = this;
     vm.dtOptions = DTOptionsBuilder.newOptions()
         .withOption('paging', false)
@@ -18,9 +18,24 @@ function RosterTableCtrl($http, DTOptionsBuilder, DTColumnDefBuilder) {
     ];
 
     vm.dropTeam = dropTeam;
+    vm.updateTeamRecord = updateTeamRecord;
 
     function dropTeam(index) {
         vm.roster.splice(index, 1);
+    }
+
+
+    function updateTeamRecord() {
+        tmRec = {
+            "RecNo": 363,
+            "TeamID": "fakeID",
+            "TeamName (Ref Only)": "fakeName",
+            "Owner": "fakeOwner",
+            "Position" : "fakeBench"
+
+        }
+
+        GoogleSheetsService.writeRosterRecord(tmRec)
     }
 
 }

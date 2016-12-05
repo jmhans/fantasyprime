@@ -2,34 +2,34 @@
   "app": "fantasyprime",
   "teams": [
     {
-      "id": "1",
+      "id": 1,
       "name": "Justin"
     }, 
-    {"id":  "2",
+    {"id":  2,
       "name": "Andy"
     },
-    {"id":  "3",
+    {"id":  3,
       "name": "Aaron"
     },
-    {"id":  "4",
+    {"id":  4,
       "name": "Josh"
     },
-    {"id":  "5",
+    {"id":  5,
       "name": "Brendan"
     },
-    {"id":  "6",
+    {"id":  6,
       "name": "Adam"
     },
-    {"id":  "7",
+    {"id":  7,
       "name": "Kyle"
     },
-    {"id":  "8",
+    {"id":  8,
       "name": "Austin"
     },
-    {"id":  "9",
+    {"id":  9,
       "name": "Mikey"
     },
-    {"id":  "10",
+    {"id":  10,
       "name": "Trevor"
     }
   ]

@@ -4,9 +4,10 @@
 <head>
     <!--<script src="//npmcdn.com/angular@latest/angular.js"></script>
     <script src="//npmcdn.com/angular-ui-router@1.0.0-beta.3/release/angular-ui-router.js"></script>-->
-    <script src="https://apis.google.com/js/api.js"></script>
-    <script src="lib/fantasyprime.js"></script>
+    <!--script src="https://apis.google.com/js/api.js"></!--script>-->
 
+    <script src="lib/fantasyprime.js"></script>
+    
     <style>
         .active { color: red; font-weight: bold }
         .statevis {
@@ -26,7 +27,8 @@
     
     <link rel="stylesheet" href="css/styles.css" />
 
-    
+    <script src="https://apis.google.com/js/client.js">
+    </script>
 </head>
 
 <body ng-app="fantasyfantasy">
@@ -37,23 +39,24 @@
         </div>
 
         <ul class="nav navbar-nav" menus="menuItems">
-            <li ng-repeat="menu in menuItems"><a ui-sref="{{menu.state.name}}({teamId : selectedTeam.id})">{{menu.name}}</a></li>
+            <li ng-repeat="menu in menuItems">
+                <a ng-if="menu.state.requiresParams == true" ui-sref="{{menu.state.name}}({teamId : selectedTeam.id})">{{menu.name}}</a>
+                <a ng-if="menu.state.requiresParams == false" ui-sref="{{menu.state.name}}">{{menu.name}}</a>
+
+            </li>
         </ul>
         <ul class="nav navbar-nav navbar-right">
             <li class="dropdown">
                 <a class="dropdown-toggle" data-toggle="dropdown">{{selectedTeam.name}}<span class="caret"></span>
                 </a>
                 <ul class="dropdown-menu">
-                    <li ng-repeat="tm in teams"><a ui-sref="teams.roster({teamId : {{tm.id}}})">{{tm.name}}</a></li>
+                    <li ng-repeat="tm in teams"><a ui-sref="teams.team.roster({teamId : {{tm.id}}})">{{tm.name}}</a></li>
                 </ul>
             </li>
 
         </ul>
 
     </nav>
- 
-
-    <div ui-view></div>
 
     <div id="authorize-div" style="display: none">
         <span>Authorize access to Google Sheets API</span>
@@ -62,6 +65,19 @@
             Authorize
         </button>
     </div>
+    <pre id="output"></pre>
+
+    <div ui-view>
+    <pre id="uiRouterInfo">
+      $state = {{$state.current.name}}
+      $stateParams = {{$stateParams}}
+      $state full url = {{ $state.$current.url.source }}    
+    </pre>
+
+    </div>
+
+    
+
     <div id="msg"></div>
 </body>
 </html>
