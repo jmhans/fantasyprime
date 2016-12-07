@@ -2,28 +2,27 @@
 
     var service = {
         getAllRosterRecords: function () {
-            GoogleSheetsService.login().then(function (data) {
-                console.log(data.email);
+            
+            return GoogleSheetsService.getData().then(function (data) {
+                return data.RosterRecords;
             }, function (err) {
                 console.log('Failed: ' + err);
             });
+            //return Promise.resolve([1, 2, 3, 4, 5, 6]);
 
-
-            return GoogleSheetsService.getAllRanges().then(function (ret) {
-                return ret.RosterRecords;
-            })
         },
 
         getActiveRosters: function () {
             function activeRecForTeam(teamRecs) {
                 return teamRecs.sort(function (a, b) {
-
+                    if (typeof(a.StartDate) !== 'undefined') {
                     var aDate = new Date(a.StartDate.replace(/-/g, "/"));
                     var bDate = new Date(b.StartDate.replace(/-/g, "/"));
                     if (aDate < bDate)
                         return 1;
                     if (aDate > bDate)
                         return -1;
+                    }
                     return 0;
                 })[0];
             }

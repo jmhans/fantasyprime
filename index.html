@@ -7,14 +7,18 @@
     <!--script src="https://apis.google.com/js/api.js"></!--script>-->
 
     <script src="lib/fantasyprime.js"></script>
-    
+
     <style>
-        .active { color: red; font-weight: bold }
+        .active {
+            color: red;
+            font-weight: bold;
+        }
+
         .statevis {
-          position: fixed;
-          right: 2em;
-          top: 2em;
-          z-index: -1;
+            position: fixed;
+            right: 2em;
+            top: 2em;
+            z-index: -1;
         }
     </style>
 
@@ -24,7 +28,7 @@
 
     <!-- Optional theme -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
-    
+
     <link rel="stylesheet" href="css/styles.css" />
 
     <script src="https://apis.google.com/js/client.js">
@@ -32,8 +36,8 @@
 </head>
 
 <body ng-app="fantasyfantasy">
-    <nav class="navbar navbar-default navbar-inverse" >
-        
+    <nav class="navbar navbar-default navbar-inverse">
+
         <div class="navbar-header">
             <a class="navbar-brand" href="#">WebsiteName</a>
         </div>
@@ -47,7 +51,8 @@
         </ul>
         <ul class="nav navbar-nav navbar-right">
             <li class="dropdown">
-                <a class="dropdown-toggle" data-toggle="dropdown">{{selectedTeam.name}}<span class="caret"></span>
+                <a class="dropdown-toggle" data-toggle="dropdown">
+                    {{selectedTeam.name}}<span class="caret"></span>
                 </a>
                 <ul class="dropdown-menu">
                     <li ng-repeat="tm in teams"><a ui-sref="teams.team.roster({teamId : {{tm.id}}})">{{tm.name}}</a></li>
@@ -68,7 +73,7 @@
     <pre id="output"></pre>
 
     <div ui-view>
-    <pre id="uiRouterInfo">
+        <pre id="uiRouterInfo">
       $state = {{$state.current.name}}
       $stateParams = {{$stateParams}}
       $state full url = {{ $state.$current.url.source }}    
@@ -76,8 +81,9 @@
 
     </div>
 
-    
+
 
     <div id="msg"></div>
 </body>
 </html>
+

@@ -19,7 +19,9 @@ function RosterTableCtrl($http, DTOptionsBuilder, DTColumnDefBuilder, GoogleShee
 
     vm.dropTeam = dropTeam;
     vm.updateTeamRecord = updateTeamRecord;
-
+    vm.handleAuthClick = GoogleSheetsService._handleAuthClick;
+    vm.handleSignoutClick = GoogleSheetsService._handleSignoutClick;
+    
     function dropTeam(index) {
         vm.roster.splice(index, 1);
     }
