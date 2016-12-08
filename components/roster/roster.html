@@ -32,9 +32,12 @@
                             <td>{{ rosterRec.TeamID }}</td>
                             <td>{{ rosterRec['TeamName (Ref Only)'] }}</td>
                             <td>{{ rosterRec.Owner }}</td>
-                            <td>{{ rosterRec.Position }}</td>
+                            <td><select ng-model="rosterRec.Position">
+                                    <option>Starter</option>
+                                    <option>Bench</option>
+                                </select></td>
                             <td>
-                                <button type="button" ng-click="$ctrl.removePerson($index)" class="btn btn-danger"><i class="fa fa-trash-o"></i></button>
+                                <button type="button" ng-click="$ctrl.removePerson($index)" class="btn btn-danger">Move to {{rosterRec.Position == 'Starter' ? 'Bench': 'Starter'}}</button>
                             </td>
                         </tr>
                     </tbody>

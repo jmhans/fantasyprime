@@ -62,12 +62,13 @@ angular.module('fantasyfantasy').service('GoogleSheetsService', ['$rootScope', '
             };
 
 
-            return gapi.sheets.spreadsheets.values.append({
+            return gapi.client.sheets.spreadsheets.values.append({
                 spreadsheetId: ssID,
                 range: 'RosterRecords!A1',
-                body: {
-                    'values': [insertRecs] 
-                }
+                valueInputOption: 'USER_ENTERED',
+                insertDataOption: 'INSERT_ROWS',
+                includeValuesInResponse: true,
+                values: insertRecs
             }).then(function (resp) {
 
             })
