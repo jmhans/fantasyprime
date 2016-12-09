@@ -17,7 +17,7 @@
         </ul>-->
         <div>
             <form class="form-inline">
-                <table datatable="ng" dt-options="$ctrl.dtOptions" dt-column-defs="$ctrl.dtColumnDefs" class="row-border hover stripe">
+                <table datatable="ng" dt-options="$ctrl.dtOptions" dt-column-defs="$ctrl.dtColumnDefs" dt-instance="$ctrl.dtInstance"class="row-border hover stripe">
                     <thead>
                         <tr>
                             <th>ID</th>
@@ -32,12 +32,12 @@
                             <td>{{ rosterRec.TeamID }}</td>
                             <td>{{ rosterRec['TeamName (Ref Only)'] }}</td>
                             <td>{{ rosterRec.Owner }}</td>
-                            <td><select ng-model="rosterRec.Position">
+                            <td><select ng-model="rosterRec.Position" ng-change="$ctrl.changePosition($index)">
                                     <option>Starter</option>
                                     <option>Bench</option>
                                 </select></td>
                             <td>
-                                <button type="button" ng-click="$ctrl.removePerson($index)" class="btn btn-danger">Move to {{rosterRec.Position == 'Starter' ? 'Bench': 'Starter'}}</button>
+                               <!-- <button type="button" ng-click="$ctrl.removePerson($index)" class="btn btn-danger">Move to {{rosterRec.Position == 'Starter' ? 'Bench': 'Starter'}}</button>-->
                             </td>
                         </tr>
                     </tbody>
