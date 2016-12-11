@@ -8,13 +8,9 @@
 <h4>Team Roster</h4>
 <div class="flex-h">
     <div>
-        <!--<ul>
-            <li ng-repeat="rosterRec in $ctrl.roster">
-                <a ui-sref-active="active" ui-sref="teams.roster({ rosterOwner: rosterRec.Owner })">
-                    {{rosterRec['TeamName (Ref Only)']}}
-                </a>
-            </li>
-        </ul>-->
+ 
+        <div class="alert alert-danger">(Note: not 'Position' field not actively connnected -- changing item does nothing...)</div>
+
         <div>
             <form class="form-inline">
                 <table datatable="ng" dt-options="$ctrl.dtOptions" dt-column-defs="$ctrl.dtColumnDefs" dt-instance="$ctrl.dtInstance"class="row-border hover stripe">
@@ -23,7 +19,7 @@
                             <th>ID</th>
                             <th>Team Name</th>
                             <th>Team Owner</th>
-                            <th>Position</th>
+                            <th>Position </th>
                             <th></th>
                         </tr>
                     </thead>

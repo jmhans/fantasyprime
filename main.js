@@ -66,7 +66,12 @@ myApp.config(function ($stateProvider) {
           url: '/standings',
           menu: 'Standings',
           requiresParams: false,
-          component: 'standings'
+          component: 'standings',
+          resolve: {
+              standings: function (GoogleSheetsService) {
+                  return GoogleSheetsService.getStandings();
+              }
+          }
       },
       {
           name: 'scoreboard',

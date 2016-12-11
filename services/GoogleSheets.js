@@ -2,7 +2,9 @@
 // Note: All returnRanges will be sent back as a JSON object where the name of the element is the name of the sheet. (Or, technically, the stuff before the ! in the range name). 
 var returnRanges = [
     'RosterRecords!A:G',
-    'Scores!A:Y'
+    'Scores!A:Y',
+    'Standings',
+    'Regular Season Standings'
 ]
 
 
@@ -40,6 +42,27 @@ angular.module('fantasyfantasy').service('GoogleSheetsService', ['$rootScope', '
     var deferred = $q.defer();
     
     var service = {
+
+        getStandings: function () {
+            
+            return service.getData().then(function (data) {
+                return data.Standings;
+            }, function (err) {
+                console.log('Failed: ' + err);
+            });
+            //return Promise.resolve([1, 2, 3, 4, 5, 6]);
+
+        },
+        getScores: function () {
+            
+            return service.getData().then(function (data) {
+                return data.Scores;
+            }, function (err) {
+                console.log('Failed: ' + err);
+            });
+
+        },
+
         writeRosterRecord: function (newRecords) {
             var insertRecs = [];
             if (typeof (newRecords) === 'object') {
