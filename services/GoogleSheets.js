@@ -3,6 +3,7 @@
 var returnRanges = [
     'RosterRecords!A:G',
     'Scores!A:Y',
+    'ScoreFlattener!A:S',
     'Standings',
     'Regular Season Standings'
 ]
@@ -56,11 +57,16 @@ angular.module('fantasyfantasy').service('GoogleSheetsService', ['$rootScope', '
         getScores: function () {
             
             return service.getData().then(function (data) {
-                return data.Scores;
+                return data.ScoreFlattener;
             }, function (err) {
                 console.log('Failed: ' + err);
             });
 
+        },
+        getScoresforWeek: function (wkID) {
+            return service.getScores().then(function (data) {
+                return data.filter(function (itm) { return (itm.Week == wkID); });
+            });
         },
 
         writeRosterRecord: function (newRecords) {

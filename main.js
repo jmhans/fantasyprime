@@ -75,10 +75,18 @@ myApp.config(function ($stateProvider) {
       },
       {
           name: 'scoreboard',
-          url: '/scoreboard',
+          url: '/scoreboard/{weekId:int}',
           menu: 'Scoreboard',
           requiresParams: false,
-          component: 'scoreboard'
+          component: 'scoreboard',
+          resolve: {
+              scores: function (GoogleSheetsService, $stateParams) {
+                  return GoogleSheetsService.getScoresforWeek($stateParams.weekId);
+              }
+          },
+          params: {
+              weekId: 14
+          }
       },
       {
           name: 'teams.team',
