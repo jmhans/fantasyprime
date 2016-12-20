@@ -1,0 +1,21 @@
+﻿{
+  "weeks": [
+    {"WeekId":1,"Roster Lock Time":"2016-09-09T00:00:00.000Z","Waiver Period Start":"2016-09-02T00:00:00.000Z","Waiver Period End":"2016-09-07T22:00:00.000Z","Scores Final":"2016-09-13T04:59:00.000Z"},
+    {"WeekId":2,"Roster Lock Time":"2016-09-16T00:00:00.000Z","Waiver Period Start":"2016-09-09T00:00:00.000Z","Waiver Period End":"2016-09-14T22:00:00.000Z","Scores Final":"2016-09-20T04:59:00.000Z"},
+    {"WeekId":3,"Roster Lock Time":"2016-09-23T00:00:00.000Z","Waiver Period Start":"2016-09-16T00:00:00.000Z","Waiver Period End":"2016-09-21T22:00:00.000Z","Scores Final":"2016-09-27T04:59:00.000Z"},
+    {"WeekId":4,"Roster Lock Time":"2016-09-30T00:00:00.000Z","Waiver Period Start":"2016-09-23T00:00:00.000Z","Waiver Period End":"2016-09-28T22:00:00.000Z","Scores Final":"2016-10-04T04:59:00.000Z"},
+    {"WeekId":5,"Roster Lock Time":"2016-10-07T00:00:00.000Z","Waiver Period Start":"2016-09-30T00:00:00.000Z","Waiver Period End":"2016-10-05T22:00:00.000Z","Scores Final":"2016-10-11T04:59:00.000Z"},
+    {"WeekId":6,"Roster Lock Time":"2016-10-14T00:00:00.000Z","Waiver Period Start":"2016-10-07T00:00:00.000Z","Waiver Period End":"2016-10-12T22:00:00.000Z","Scores Final":"2016-10-18T04:59:00.000Z"},
+    {"WeekId":7,"Roster Lock Time":"2016-10-21T00:00:00.000Z","Waiver Period Start":"2016-10-14T00:00:00.000Z","Waiver Period End":"2016-10-19T22:00:00.000Z","Scores Final":"2016-10-25T04:59:00.000Z"},
+    {"WeekId":8,"Roster Lock Time":"2016-10-28T00:00:00.000Z","Waiver Period Start":"2016-10-21T00:00:00.000Z","Waiver Period End":"2016-10-26T22:00:00.000Z","Scores Final":"2016-11-01T04:59:00.000Z"},
+    {"WeekId":9,"Roster Lock Time":"2016-11-04T00:00:00.000Z","Waiver Period Start":"2016-10-28T00:00:00.000Z","Waiver Period End":"2016-11-02T22:00:00.000Z","Scores Final":"2016-11-08T05:59:00.000Z"},
+    {"WeekId":10,"Roster Lock Time":"2016-11-11T01:00:00.000Z","Waiver Period Start":"2016-11-04T00:00:00.000Z","Waiver Period End":"2016-11-09T23:00:00.000Z","Scores Final":"2016-11-15T05:59:00.000Z"},
+    {"WeekId":11,"Roster Lock Time":"2016-11-18T01:00:00.000Z","Waiver Period Start":"2016-11-11T01:00:00.000Z","Waiver Period End":"2016-11-16T23:00:00.000Z","Scores Final":"2016-11-22T05:59:00.000Z"},
+    {"WeekId":12,"Roster Lock Time":"2016-11-24T17:30:00.000Z","Waiver Period Start":"2016-11-18T01:00:00.000Z","Waiver Period End":"2016-11-23T23:00:00.000Z","Scores Final":"2016-11-29T05:59:00.000Z"},
+    {"WeekId":13,"Roster Lock Time":"2016-12-02T01:00:00.000Z","Waiver Period Start":"2016-11-24T17:30:00.000Z","Waiver Period End":"2016-11-30T23:00:00.000Z","Scores Final":"2016-12-06T05:59:00.000Z"},
+    {"WeekId":14,"Roster Lock Time":"2016-12-09T01:00:00.000Z","Waiver Period Start":"2016-12-02T01:00:00.000Z","Waiver Period End":"2016-12-07T23:00:00.000Z","Scores Final":"2016-12-13T05:59:00.000Z"},
+    {"WeekId":15,"Roster Lock Time":"2016-12-16T01:00:00.000Z","Waiver Period Start":"2016-12-09T01:00:00.000Z","Waiver Period End":"2016-12-14T23:00:00.000Z","Scores Final":"2016-12-20T05:59:00.000Z"},
+    {"WeekId":16,"Roster Lock Time":"2016-12-23T01:00:00.000Z","Waiver Period Start":"2016-12-16T01:00:00.000Z","Waiver Period End":"2016-12-21T23:00:00.000Z","Scores Final":"2016-12-27T05:59:00.000Z"}
+  ]
+
+}

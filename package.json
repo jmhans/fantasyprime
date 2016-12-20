@@ -12,7 +12,8 @@
     "grunt-contrib-uglify": "^2.0.0",
     "grunt-ng-annotate": "^3.0.0",
     "grunt-concat-css" : "^0.3.1",
-    "jquery": "^3.1.1"
+    "jquery": "^3.1.1", 
+    "angular-ui-bootstrap": "^2.3.1"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"

@@ -1,34 +1,7 @@
-﻿<!--<script async defer src="https://apis.google.com/js/api.js"
-        onload="this.onload=function(){};handleClientLoad()"
-        onreadystatechange="if (this.readyState === 'complete') this.onload()"></script>
-<button id="authorize-button" ng-click="handleAuthClick()">Authorize</button>
-<button id="signout-button" ng-click="handleSignoutClick()">Sign Out</button>-->
+﻿
+<div class="container">
+    <h4>Scoreboard</h4>
+    <ul uib-pagination total-items="totalItems" items-per-page="1" ng-model="selectedWeek" ng-change="pageChanged()"></ul>
+    <ui-view></ui-view>
 
-
-<h4>Scoreboard</h4>
-<div class="card">
-    <div class="card-header">
-        Justin
-    </div>
-    <div class="card-block">
-        <table class="card-text">
-            <thead>
-                <tr>
-                    <th>Team</th>
-                    <th>Score</th>
-                    <th>Score</th>
-                    <th>Opposing Team</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr ng-repeat="rec in $ctrl.scores | filter: { Owner: 'Justin' }">
-                    <td>{{rec['Team Name']}}</td>
-                    <td>{{rec['Score']}}</td>
-                    <td>{{rec['Opp Score']}}</td>
-                    <td>{{rec['Opp Name']}}</td>
-                </tr>
-            </tbody>
-
-        </table>
-    </div>
 </div>

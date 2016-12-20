@@ -3,7 +3,7 @@
 var returnRanges = [
     'RosterRecords!A:G',
     'Scores!A:Y',
-    'ScoreFlattener!A:S',
+    'ScoreFlattener!A:V',
     'Standings',
     'Regular Season Standings'
 ]
