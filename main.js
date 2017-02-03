@@ -1,7 +1,7 @@
 ﻿
 var myApp = angular.module('fantasyfantasy', ['ui.router', 'ui.router.menus', 'angular-google-gapi', 'datatables', 'ui.bootstrap']);
 
-myApp.config(function ($stateProvider) {
+myApp.config(function ($stateProvider, $locationProvider, $urlRouterProvider) {
     // An array of state definitions
     var states = [
         {
@@ -192,6 +192,9 @@ myApp.config(function ($stateProvider) {
     states.forEach(function (state) {
         $stateProvider.state(state);
     });
+    $locationProvider.html5Mode(true);
+    $urlRouterProvider.otherwise('/');
+
 });
 
 // To account for plunker embeds timing out, preload the async data
