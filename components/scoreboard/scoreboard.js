@@ -27,9 +27,8 @@
 
         });
 
-        $scope.weekChanged = function () {
-            $scope.goToWeek($scope.selectedWeek);
-        }
+        
+
 
     }
 })

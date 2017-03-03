@@ -8,15 +8,20 @@ module.exports = function (grunt) {
             options: {
                 separator: ';'
             },
-
+            dist: {
+                src: [  'app/bower_components/angular/angular.js',
+                        'app/bower_components/angular-route/angular-route.js',
+                        'app/js/*.js'],
+                dest: 'app/dist/<%= pkg.name %>.js'
+            },
             lib: {
-                src: [  'node_modules/jquery/dist/jquery.js',
-                        'node_modules/datatables.net/js/jquery.dataTables.js',
-                        'node_modules/angular/angular.js',
-                        'node_modules/angular-ui-router/release/angular-ui-router.js',
-                        'node_modules/angular-ui-router-menus/dist/angular-ui-router-menus.js',
-                        'node_modules/angular-google-gapi/dist/angular-google-gapi.js',
-                        'node_modules/angular-datatables/dist/angular-datatables.js',
+                src: [  'bower_components/jquery/dist/jquery.js',
+                        'bower_components/datatables.net/js/jquery.dataTables.js',
+                        'bower_components/angular/angular.js',
+                        'bower_components/angular-ui-router/release/angular-ui-router.js',
+                        'bower_components/angular-ui-router-menus/dist/angular-ui-router-menus.js',
+                        'bower_components/angular-google-gapi/dist/angular-google-gapi.js',
+                        'bower_components/angular-datatables/dist/angular-datatables.js',
                         'node_modules/angular-ui-bootstrap/dist/ui-bootstrap-tpls.js', 
                         'main.js',
                         'services/*.js',
@@ -31,13 +36,18 @@ module.exports = function (grunt) {
                 // Task-specific options go here. 
             },
             all: {
-                src: ["node_modules/angular-datatables/dist/css/angular-datatables.css"],
+                src: ["bower_components/angular-datatables/dist/css/angular-datatables.css"],
                 dest: "css/styles.css"
             },
         },
         uglify: {
             options: {
                 banner: '/*! <%= pkg.name %> <%= grunt.template.today("yyyy-mm-dd") %> */\n'
+            },
+            dist: {
+                files: {
+                    'app/dist/<%= pkg.name %>.min.js': ['<%= concat.dist.dest %>']
+                }
             },
             lib: {
                 files: {
