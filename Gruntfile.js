@@ -22,6 +22,7 @@ module.exports = function (grunt) {
                         'node_modules/angular-ui-router-menus/dist/angular-ui-router-menus.js',
                         'node_modules/angular-google-gapi/dist/angular-google-gapi.js',
                         'node_modules/angular-datatables/dist/angular-datatables.js',
+                        'node_modules/angular-datatables/dist/plugins/bootstrap/angular-datatables.bootstrap.js',
                         'node_modules/angular-ui-bootstrap/dist/ui-bootstrap-tpls.js', 
                         'main.js',
                         'services/*.js',
@@ -36,7 +37,10 @@ module.exports = function (grunt) {
                 // Task-specific options go here. 
             },
             all: {
-                src: ["node_modules/angular-datatables/dist/css/angular-datatables.css"],
+                src: [
+                    "node_modules/angular-datatables/dist/css/angular-datatables.css",
+                    "node_modules/angular-datatables/dist/plugins/bootstrap/datatables.bootstrap.min.css"
+                ],
                 dest: "css/styles.css"
             },
         },

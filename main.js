@@ -1,5 +1,5 @@
 ﻿
-var myApp = angular.module('fantasyfantasy', ['ui.router', 'ui.router.menus', 'angular-google-gapi', 'datatables', 'ui.bootstrap']);
+var myApp = angular.module('fantasyfantasy', ['ui.router', 'ui.router.menus', 'angular-google-gapi', 'datatables', 'datatables.bootstrap', 'ui.bootstrap']);
 
 myApp.config(function ($stateProvider) {
     // An array of state definitions
@@ -185,6 +185,18 @@ myApp.config(function ($stateProvider) {
           menu: 'All Teams',
         requiresParams: false
       },
+      {
+          name: 'golf',
+          url: '/golf',
+          component: 'golf',
+          menu: 'Golf',
+          resolve: {
+              leaders: function (golfService) {
+                  return golfService.getLeaderboard();
+              }
+          },
+          requiresParams: false
+      }
 
     ]
 

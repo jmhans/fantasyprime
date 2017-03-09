@@ -1,0 +1,33 @@
+﻿Space for Fantasy Golf info
+
+<h4>Team Roster</h4>
+<div class="flex-h" style="width:25%">
+    <div>
+        <div>
+            <form class="form-inline">
+                <table datatable="ng" dt-options="$ctrl.dtOptions" dt-column-defs="$ctrl.dtColumnDefs" dt-instance="$ctrl.dtInstance" class="display compact">
+                    <thead>
+                        <tr>
+                            <th>Rank</th>
+                            <th>Player</th>
+                            <th>Score</th>
+                            <th></th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr ng-repeat="rosterRec in $ctrl.leaders">
+                            <td>{{ rosterRec.rank }}</td>
+                            <td>{{ rosterRec.displayName }}</td>
+                            <td>{{ rosterRec.stats[1].displayValue }}</td>
+                            <td>{{ rosterRec.stats[13].displayValue }}</td>
+                            <td></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </form>
+        </div>
+
+
+    </div>
+</div>
