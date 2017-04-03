@@ -31,7 +31,9 @@ app.component('abl', {
 
 function ablCtrl($http, $scope) {
   
-    var vm = this;  
+    var vm = this;
+
+    //test comment
 
     vm.treeOptions = {
         accept: function (sourceNodeScope, destNodesScope, destIndex) {
