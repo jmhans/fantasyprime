@@ -1,11 +1,37 @@
-﻿angular.module('fantasyfantasy').component('golf', {
-    bindings: { leaders: '<' },
+﻿
+var app = angular.module('fantasyfantasy')
+
+app.config(function ($stateProvider) {
+    var state = {
+        name: 'golf',
+        url: '/golf',
+        component: 'golf',
+        menu: { name: 'Golf', priority: 1000000 , tag: 'topmenu'},
+        resolve: {
+            leaders: function (golfService) {
+                return golfService.getLeaderboard();
+            },
+            picks: function (golfService) {
+                return golfService.getPicks();
+            }
+        },
+        requiresParams: false
+    }; 
+
+    $stateProvider.state(state);
+    
+});
+
+
+app.component('golf', {
+    bindings: { leaders: '<', picks: '<' },
     templateUrl: 'components/golf/golf.html',
-    controller: golfCtrl
+    controller: golfCtrl,
+    controllerAs: 'vm'
 })
 
 
-function golfCtrl($http, DTOptionsBuilder, DTColumnDefBuilder) {
+function golfCtrl($http, $scope, DTOptionsBuilder, DTColumnDefBuilder) {
     $.fn.dataTable.ext.order['dom-select'] = function (settings, col) {
         return this.api().column(col, { order: 'index' }).nodes().map(function (td, i) {
             return $('select', td).val();
@@ -25,6 +51,14 @@ function golfCtrl($http, DTOptionsBuilder, DTColumnDefBuilder) {
         DTColumnDefBuilder.newColumnDef(4)
     ];
     vm.dtInstance = {};
+    vm.selectedPlyr = { PlayerName: '' };
+
+    var setHighlights = function () {
+        console.log(vm.selectedPlyr.PlayerName + ' chosen.');
+
+    }
+
+    $scope.$watch('vm.selectedPlyr', setHighlights);
     
 
 }

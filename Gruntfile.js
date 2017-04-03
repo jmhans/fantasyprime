@@ -23,7 +23,10 @@ module.exports = function (grunt) {
                         'node_modules/angular-google-gapi/dist/angular-google-gapi.js',
                         'node_modules/angular-datatables/dist/angular-datatables.js',
                         'node_modules/angular-datatables/dist/plugins/bootstrap/angular-datatables.bootstrap.js',
-                        'node_modules/angular-ui-bootstrap/dist/ui-bootstrap-tpls.js', 
+                        'node_modules/angular-ui-bootstrap/dist/ui-bootstrap-tpls.js',
+                        'node_modules/angular-ui-sortable/dist/sortable.js',
+                        'node_modules/ng-sortable/dist/ng-sortable.js',
+                        'node_modules/angular-ui-tree/dist/angular-ui-tree.js',
                         'main.js',
                         'services/*.js',
                         'components/**/*.js'
@@ -39,7 +42,10 @@ module.exports = function (grunt) {
             all: {
                 src: [
                     "node_modules/angular-datatables/dist/css/angular-datatables.css",
-                    "node_modules/angular-datatables/dist/plugins/bootstrap/datatables.bootstrap.min.css"
+                    "node_modules/angular-datatables/dist/plugins/bootstrap/datatables.bootstrap.min.css",
+                    "node_modules/ng-sortable/dist/ng-sortable.style.min.css",
+                    "node_modules/angular-ui-tree/dist/angular-ui-tree.css"
+                    /*"node_modules/jquery-ui/themes/base/jquery-ui.css"*/
                 ],
                 dest: "css/styles.css"
             },
@@ -85,3 +91,15 @@ module.exports = function (grunt) {
     grunt.registerTask('default', [ 'concat', 'uglify', 'concat_css']);
 
 };
+
+
+
+
+
+
+
+
+
+
+
+

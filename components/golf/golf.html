@@ -1,11 +1,16 @@
 ﻿Space for Fantasy Golf info
 
 <h4>Team Roster</h4>
+<select ng-model="vm.selectedPlyr" ng-options="x.PlayerName for x in vm.picks">
+</select>
+
+<div>{{vm.selectedPlyr}}</div>
+
 <div class="flex-h" style="width:25%">
     <div>
         <div>
             <form class="form-inline">
-                <table datatable="ng" dt-options="$ctrl.dtOptions" dt-column-defs="$ctrl.dtColumnDefs" dt-instance="$ctrl.dtInstance" class="display compact">
+                <table datatable="ng" dt-options="vm.dtOptions" dt-column-defs="vm.dtColumnDefs" dt-instance="vm.dtInstance" class="display compact">
                     <thead>
                         <tr>
                             <th>Rank</th>
@@ -16,7 +21,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <tr ng-repeat="rosterRec in $ctrl.leaders">
+                        <tr ng-repeat="rosterRec in vm.leaders">
                             <td>{{ rosterRec.rank }}</td>
                             <td>{{ rosterRec.displayName }}</td>
                             <td>{{ rosterRec.stats[1].displayValue }}</td>

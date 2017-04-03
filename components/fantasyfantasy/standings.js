@@ -1,7 +1,29 @@
-﻿angular.module('fantasyfantasy').component('standings', {
+﻿var app = angular.module('fantasyfantasy')
+
+
+app.config(function ($stateProvider) {
+    var st = {
+        name: 'ff.standings',
+        url: '/standings',
+        menu: { name: 'Standings', priority: 300 },
+        requiresParams: false,
+        component: 'standings',
+        resolve: {
+            standings: function (GoogleSheetsService) {
+                return GoogleSheetsService.getStandings();
+            }
+        }
+    };
+    $stateProvider.state(st);
+
+});
+
+
+
+app.component('standings', {
     bindings: { standings: '<' },
     controller: StandingsCtrl,
-    templateUrl: 'components/standings.html'
+    templateUrl: 'components/fantasyfantasy/standings.html'
 });
 
 function StandingsCtrl($http, DTOptionsBuilder, DTColumnDefBuilder, GoogleSheetsService) {

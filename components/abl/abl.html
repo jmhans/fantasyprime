@@ -1,0 +1,34 @@
+﻿
+
+<h4>ABL page</h4>
+﻿<div>
+
+    <table class="table table-bordered no-footer" ui-tree="treeOptions">
+        <thead>
+            <tr>
+                <th>Player</th>
+                <th>Position</th>
+                <th>MLB ID</th>
+                <th>Team</th>
+                <th>ABL</th>
+                <th>APA</th>
+            </tr>
+        </thead>
+        <tbody ui-tree-nodes="" ng-model="vm.plyrs">
+            <tr ng-repeat="item in vm.plyrs"  ui-tree-node>
+                <td ><span class="glyphicon glyphicon-menu-hamburger" aria-hidden="true"  ui-tree-handle></span> {{ item.PLAYER }}</td>
+                <td>{{ item.POSITION }}</td>
+                <td>{{ item.MLB_ID }}</td>
+                <td>{{ item.MLB_TEAM }}</td>
+                <td>{{ item.ABL }}</td>
+                <td>{{ item.APA }}</td>
+            </tr>
+        </tbody>
+    </table>
+
+</div>
+
+
+
+
+

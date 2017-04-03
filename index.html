@@ -8,6 +8,7 @@
 
     <script src="lib/fantasyprime.js"></script>
 
+
     <style>
         .active {
             color: red;
@@ -39,12 +40,13 @@
     <nav class="navbar navbar-default navbar-inverse">
 
         <div class="navbar-header">
-            <a class="navbar-brand" href="#">WebsiteName</a>
+            <a class="navbar-brand" href="#">Actuarial Games</a>
         </div>
 
-        <ul class="nav navbar-nav" menus="menuItems">
-            <li ng-repeat="menu in menuItems">
+        <ul class="nav navbar-nav" menus="menuItems" tag="topmenu">
+            <li ng-repeat="menu in menuItems | orderBy:'-priority'">
                 <a ng-if="menu.state.requiresParams == true" ui-sref="{{menu.state.name}}({teamId : selectedTeam.id})">{{menu.name}}</a>
+
                 <a ng-if="menu.state.requiresParams == false" ui-sref="{{menu.state.name}}">{{menu.name}}</a>
 
             </li>
@@ -63,15 +65,14 @@
 
     </nav>
 
-    <div id="authorize-div" style="display: none">
+    <!--<div id="authorize-div" style="display: none">
         <span>Authorize access to Google Sheets API</span>
-        <!--Button for the user to click to initiate auth sequence -->
+        <!--Button for the user to click to initiate auth sequence ->
         <button id="authorize-button" onclick="handleAuthClick(event)">
             Authorize
         </button>
-    </div>
-        <div ui-view>
-    </div>
+    </div>-->
+    <div ui-view></div>
 
 
 

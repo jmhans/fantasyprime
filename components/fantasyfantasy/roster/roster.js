@@ -1,8 +1,34 @@
-﻿angular.module('fantasyfantasy').component('roster', {
+﻿var app = angular.module('fantasyfantasy')
+
+app.config(function ($stateProvider) {
+    var state = {
+        name: 'ff.teams.team.roster',
+        url: '/roster',
+        component: 'roster',
+        requiresParams: true,
+        resolve: {
+            team: function (teams, $rootScope, $stateParams, TeamsService) {
+                return TeamsService.getTeam($stateParams.teamId).then(function (tm) {
+                    $rootScope.selectedTeam = tm;
+                    return $rootScope.selectedTeam;
+                });
+
+            },
+            roster: function (RostersService, team) {
+                return RostersService.getOwnerRoster(team.name);
+            }
+
+        }
+    };
+    $stateProvider.state(state);
+   });
+
+app.component('roster', {
     bindings: { roster: '<'},
     controller: RosterTableCtrl, 
-    templateUrl: 'components/roster/roster.html'
+    templateUrl: 'components/fantasyfantasy/roster/roster.html'
 })
+
 
 function RosterTableCtrl($http, DTOptionsBuilder, DTColumnDefBuilder, GoogleSheetsService) {
     $.fn.dataTable.ext.order['dom-select'] = function (settings, col) {

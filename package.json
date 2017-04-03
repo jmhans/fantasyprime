@@ -19,7 +19,9 @@
     "angular-google-gapi": "^1.0.1",
     "datatables": "^1.10.13",
     "datatables.net": "^1.10.13",
-    "angular-datatables": "0.5.5"
+    "angular-datatables": "0.5.5",
+    "angular-ui-sortable": "^0.17.0", 
+    "angular-ui-tree": "^2.22.5"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
