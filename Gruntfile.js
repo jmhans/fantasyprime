@@ -27,6 +27,8 @@ module.exports = function (grunt) {
                         'node_modules/angular-ui-sortable/dist/sortable.js',
                         'node_modules/ng-sortable/dist/ng-sortable.js',
                         'node_modules/angular-ui-tree/dist/angular-ui-tree.js',
+                        'node_modules/angular-google-chart/ng-google-chart.js',
+                        'node_modules/papaparse/papaparse.js',
                         'main.js',
                         'services/*.js',
                         'components/**/*.js'
@@ -76,7 +78,27 @@ module.exports = function (grunt) {
                     document: true
                 }
             }
-        }
+        },
+        'ftp-deploy': {
+            x10: {
+                auth: {
+                    host: 'ftp.actuarialgames.x10host.com',
+                    port: 21,
+                    authKey: 'site3'
+                },
+                src: 'webapp/',
+                dest: ''
+            }
+        },
+        copy: {
+            main: {
+                files: [
+                  // includes files within path
+                  { expand: true, src: ['lib/*', 'data/*', 'css/*', 'index.html', 'main.js', 'components/**/*.html'], dest: 'webapp/' }
+
+                ],
+            },
+        },
     });
 
     // Load the plugin that provides the "uglify" task.
@@ -85,10 +107,13 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-contrib-jshint');
     grunt.loadNpmTasks('grunt-contrib-concat');
     grunt.loadNpmTasks('grunt-concat-css');
+    grunt.loadNpmTasks('grunt-contrib-copy');
+    grunt.loadNpmTasks('grunt-ftp-deploy');
 
 
     // Default task(s).
-    grunt.registerTask('default', [ 'concat', 'uglify', 'concat_css']);
+    grunt.registerTask('default', ['concat', 'uglify', 'concat_css']);
+    grunt.registerTask('pkg_and_deploy', ['default', 'copy', 'ftp-deploy']);
 
 };
 

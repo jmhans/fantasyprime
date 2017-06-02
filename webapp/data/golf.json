@@ -1,0 +1,62 @@
+{
+  
+  "Tournament": "2697",
+  "Players": [
+    {
+      "PlayerName": "Matt Affeldt",
+      "Picks": [ "Haas, B", "Matsuyama, H", "Mcilroy, R", "Rose, J", "Spieth, J", "Stenson, H" ]
+    },
+    {
+      "PlayerName": "Tim Affeldt",
+      "Picks": [ "Berger, D", "Molinari, F", "Rose, J", "Spieth, J", "Stenson, H", "Woodland, G" ]
+    },
+    {
+      "PlayerName": "Derek Caron",
+      "Picks": [ "Haas, B", "Kaymer, M", "Mcilroy, R", "Spieth, J", "Stenson, H", "Woodland, G" ]
+    },
+    {
+      "PlayerName": "Ken Caron",
+      "Picks": [ "DeLaet, G", "Kaymer, M", "Matsuyama, H", "Pieters, T", "Rose, J", "Watson, B" ]
+    },
+    {
+      "PlayerName": "Todd Espelien",
+      "Picks": [ "Berger, D", "Kaymer, M", "Kuchar, M", "Rahm, J", "Rose, J", "Stenson, H" ]
+    },
+    {
+      "PlayerName": "Jeff Frie",
+      "Picks": [ "Bryan, W", "Kaymer, M", "Oosthuizen, L", "Spieth, J", "Stenson, H", "Woodland, G" ]
+    },
+    {
+      "PlayerName": "Josh Grove",
+      "Picks": [ "Haas, B", "Hatton, T", "Johnson, D", "Matsuyama, H", "Rose, J", "Spieth, J" ]
+    },
+    {
+      "PlayerName": "Justin Hanson",
+      "Picks": [ "Haas, B", "Fowler, R", "Mcilroy, R", "Molinari, F", "Rose, J", "Woodland, G" ]
+    },
+    {
+      "PlayerName": "Aaron Jallo",
+      "Picks": [ "DeLaet, G", "Garcia, S", "Johnson, D", "Oosthuizen, L", "Stenson, H", "Woodland, G" ]
+    },
+    {
+      "PlayerName": "Aaron Lindman",
+      "Picks": [ "Bryan, W", "Johnson, D", "Kaymer, M", "Matsuyama, H", "Oosthuizen, L", "Scott, A" ]
+    },
+    {
+      "PlayerName": "Brian Perry",
+      "Picks": [ "Kuchar, M", "Rahm, J", "Rose, J", "Stenson, H", "Snedeker, B", "Walker, J" ]
+    },
+    {
+      "PlayerName": "Mike Roering",
+      "Picks": [ "Bryan, W", "Hatton, T", "Johnson, D", "Mcilroy, R", "Rahm, J", "Reed, P" ]
+    },
+    {
+      "PlayerName": "Amado Sleiman",
+      "Picks": [ "Delaet, G", "Hatton, T", "Matsuyama, H", "Rose, J", "Stenson, H", "Woodland, G" ]
+    },
+    {
+      "PlayerName": "Karl Waage",
+      "Picks": [ "Haas, B", "Johnson, D", "Rose, J", "Spieth, J", "Stenson, H", "Woodland, G" ]
+    }
+  ]
+}

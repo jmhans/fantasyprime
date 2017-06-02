@@ -1,0 +1,48 @@
+﻿<!--<script async defer src="https://apis.google.com/js/api.js"
+        onload="this.onload=function(){};handleClientLoad()"
+        onreadystatechange="if (this.readyState === 'complete') this.onload()"></script>
+<button id="authorize-button" ng-click="handleAuthClick()">Authorize</button>
+<button id="signout-button" ng-click="handleSignoutClick()">Sign Out</button>-->
+
+
+<h4>Team Roster</h4>
+<div class="flex-h">
+    <div>
+ 
+        <div class="alert alert-danger">(Note: not 'Position' field not actively connnected -- changing item does nothing...)</div>
+
+        <div>
+            <form class="form-inline">
+                <table datatable="ng" dt-options="$ctrl.dtOptions" dt-column-defs="$ctrl.dtColumnDefs" dt-instance="$ctrl.dtInstance"class="row-border hover stripe">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Team Name</th>
+                            <th>Team Owner</th>
+                            <th>Position </th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr ng-repeat="rosterRec in $ctrl.roster">
+                            <td>{{ rosterRec.TeamID }}</td>
+                            <td>{{ rosterRec['TeamName (Ref Only)'] }}</td>
+                            <td>{{ rosterRec.Owner }}</td>
+                            <td><select ng-model="rosterRec.Position" ng-change="$ctrl.changePosition($index)">
+                                    <option>Starter</option>
+                                    <option>Bench</option>
+                                </select></td>
+                            <td>
+                               <!-- <button type="button" ng-click="$ctrl.removePerson($index)" class="btn btn-danger">Move to {{rosterRec.Position == 'Starter' ? 'Bench': 'Starter'}}</button>-->
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </form>
+        </div>
+
+
+    </div>
+</div>
+<button ng-click="$ctrl.updateTeamRecord()">UpdateRecord</button>
+<button ui-sref="teams">Close</button>
