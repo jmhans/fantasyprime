@@ -9,11 +9,17 @@ app.config(function ($stateProvider) {
         menu: { name: 'Andy vs Justin', priority: 1 , tag: 'topmenu'},
         requiresParams: false,
         resolve: {
-            bbRecs : function (propBetService) {
+            /*bbRecs : function (propBetService) {
                 return propBetService.getBBData();
             },
             configData: function (propBetService) {
                 return propBetService.getConfigData();
+            },*/
+            bbRecs : function (propBetService) {
+                return propBetService.getBBDataJSON();
+            },
+            configData: function (propBetService) {
+                return propBetService.getConfigDataJSON();
             }
         }
     }; 
@@ -38,10 +44,6 @@ function propBetCtrl($http, $scope, $q, googleChartApiPromise) {
 
 
     function apiLoadSuccess(result) {
-        /*var table = new google.visualization.arrayToDataTable($scope.$ctrl.bbRecs);
-        var view = new google.visualization.DataView(table);
-
-        view.setColumns([0, 1, 6, 11, 14]);*/
 
         $scope.$ctrl.filteredRecs = $scope.$ctrl.configData.filter(function (rec) { 
             return (rec.Season == $scope.curYr);
@@ -51,14 +53,12 @@ function propBetCtrl($http, $scope, $q, googleChartApiPromise) {
 
         $scope.$ctrl.filteredRecs.forEach(function (rec) {
 
-
-
             var cols = [Number(rec['X series'])];
 
-            if (rec['Dark Blue'] != '') { cols.push(Number(rec['Dark Blue'])); }
-            if (rec['Dark Red'] != '') { cols.push(Number(rec['Dark Red'])); }
-            if (rec['Light Blue'] != '') { cols.push(Number(rec['Light Blue'])); }
-            if (rec['Light Red'] != '') { cols.push(Number(rec['Light Red'])); }
+            if (rec['Dark Blue'] != null) { cols.push(Number(rec['Dark Blue'])); }
+            if (rec['Dark Red'] != null) { cols.push(Number(rec['Dark Red'])); }
+            if (rec['Light Blue'] != null) { cols.push(Number(rec['Light Blue'])); }
+            if (rec['Light Red'] != null) { cols.push(Number(rec['Light Red'])); }
 
             $scope.$ctrl.myBetCharts.push(
                 drawChart(
@@ -88,7 +88,7 @@ function propBetCtrl($http, $scope, $q, googleChartApiPromise) {
         var arrayData = $scope.$ctrl.bbRecs;
 
         // this new DataTable object holds all the data
-        var data = new google.visualization.arrayToDataTable(arrayData);
+        var data = new google.visualization.arrayToDataTable(arrayData, opt_firstRowIsData=false);
 
         // this view can select a subset of the data at a time
         var view = new google.visualization.DataView(data);
