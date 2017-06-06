@@ -39,10 +39,11 @@ app.component('propbets', {
 function propBetCtrl($http, $scope, $q, googleChartApiPromise) {
    
     $scope.curYr = 2017;
-
     $scope.yrs = [];
 
     $q.when($scope.$ctrl.configData, setYrs);
+
+    $q.all({ api: googleChartApiPromise }).then(drawAll);
 
     function setYrs() {
         $scope.$ctrl.configData.forEach(function (rec) {
@@ -53,17 +54,21 @@ function propBetCtrl($http, $scope, $q, googleChartApiPromise) {
     }
 
     $scope.$watch('curYr', function () {
-        $q.all({ api: googleChartApiPromise }).then(drawAll);
-    })
+
+        $scope.$ctrl.filteredRecs = $scope.$ctrl.configData.filter(function (rec) {
+            return (rec.Season == $scope.curYr);
+        });
+        $scope.$ctrl.bbRecs_filtered = $scope.$ctrl.bbRecs.filter(function (rec, idx) { return ((rec[17] == $scope.curYr) || (idx == 0)); });
+        drawAll();
+
+    });
 
     function drawAll(result) {
 
         drawTable();
 
-        $scope.$ctrl.filteredRecs = $scope.$ctrl.configData.filter(function (rec) { 
-            return (rec.Season == $scope.curYr);
-        });
-
+        $scope.$ctrl.arrayData = new google.visualization.arrayToDataTable($scope.$ctrl.bbRecs_filtered, opt_firstRowIsData = false);
+        
         $scope.$ctrl.filteredRecs.forEach(function (rec) {
 
             var cols = [Number(rec['X series'])];
@@ -81,9 +86,9 @@ function propBetCtrl($http, $scope, $q, googleChartApiPromise) {
                     );
         });
 
-        //$scope.myChartObject = drawChart("WinDiff", [0, 25, 25], "Yep", 0);
 
     };
+
 
     function drawTable() {
 	    
@@ -103,14 +108,10 @@ function propBetCtrl($http, $scope, $q, googleChartApiPromise) {
 
     function drawChart(chartTitle, dataCols, yLabel, altMinY) {
 
-        var arrayData = $scope.$ctrl.bbRecs;
-
         // this new DataTable object holds all the data
-        var data = new google.visualization.arrayToDataTable(arrayData, opt_firstRowIsData=false);
-
+        
         // this view can select a subset of the data at a time
-        var view = new google.visualization.DataView(data);
-        view.setRows(data.getFilteredRows([{ column: 17, value: $scope.curYr }]));
+        var view = new google.visualization.DataView($scope.$ctrl.arrayData);
 
         view.setColumns(dataCols);
         var minY = view.getColumnRange(1).min;
