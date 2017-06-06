@@ -4,8 +4,12 @@
 
 
 <div class="container-fluid">
+    <select ng-model="curYr" ng-options="x for x in yrs"></select>
+
+    <div id="betTable" google-chart chart="betTable"></div>
+
     <div ng-repeat="cht in $ctrl.filteredRecs">
-        <div id="repeatBlock{{cht.Chart}}" google-chart chart="{{cht.Title}}"></div>
+        <div id="repeatBlock{{cht.Chart}}" google-chart chart="{{cht.SafeTitle}}"></div>
     </div>
     <div id='messageBoxId' name='messageBoxId'></div>
 
