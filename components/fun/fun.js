@@ -18,6 +18,9 @@ app.config(function ($stateProvider) {
 
                 return ret;
             },
+            updateTime: function (propBetService) {
+                return propBetService.getLastUpdateTime();
+            },
             betSummary: function (propBetService) {
                 return propBetService.getBetSummaryJSON();
             }
@@ -30,7 +33,7 @@ app.config(function ($stateProvider) {
 
 
 app.component('propbets', {
-    bindings: { bbRecs: '<', configData: '<'  ,betSummary: '<'},
+    bindings: { bbRecs: '<', configData: '<'  ,betSummary: '<', updateTime: '<'},
     templateUrl: 'components/fun/fun.html',
     controller: propBetCtrl
 })
