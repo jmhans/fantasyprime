@@ -37,32 +37,37 @@
 </head>
 
 <body ng-app="fantasyfantasy">
-    <nav class="navbar navbar-default navbar-inverse">
+    <nav class="navbar navbar-default navbar-inverse navbar-toggleable-md">
+        <!--<button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>-->
 
-        <div class="navbar-header">
-            <a class="navbar-brand" href="#">Actuarial Games</a>
+        <div class="navbar-collapse" id="navbarSupportedContent">
+            
+            <div class="navbar-header">
+                <a class="navbar-brand" href="#">Actuarial Games</a>
+            </div>
+
+            <ul class="nav navbar-nav " menus="menuItems" tag="topmenu">
+                <li ng-repeat="menu in menuItems | orderBy:'-priority'">
+                    <a ng-if="menu.state.requiresParams == true" ui-sref="{{menu.state.name}}({teamId : selectedTeam.id})">{{menu.name}}</a>
+
+                    <a ng-if="menu.state.requiresParams == false" ui-sref="{{menu.state.name}}">{{menu.name}}</a>
+
+                </li>
+            </ul>
+            <ul class="nav navbar-nav navbar-right">
+                <li class="dropdown">
+                    <a class="dropdown-toggle" data-toggle="dropdown">
+                        {{selectedTeam.name}}<span class="caret"></span>
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li ng-repeat="tm in teams"><a ui-sref="teams.team.roster({teamId : {{tm.id}}})">{{tm.name}}</a></li>
+                    </ul>
+                </li>
+
+            </ul>
         </div>
-
-        <ul class="nav navbar-nav" menus="menuItems" tag="topmenu">
-            <li ng-repeat="menu in menuItems | orderBy:'-priority'">
-                <a ng-if="menu.state.requiresParams == true" ui-sref="{{menu.state.name}}({teamId : selectedTeam.id})">{{menu.name}}</a>
-
-                <a ng-if="menu.state.requiresParams == false" ui-sref="{{menu.state.name}}">{{menu.name}}</a>
-
-            </li>
-        </ul>
-        <ul class="nav navbar-nav navbar-right">
-            <li class="dropdown">
-                <a class="dropdown-toggle" data-toggle="dropdown">
-                    {{selectedTeam.name}}<span class="caret"></span>
-                </a>
-                <ul class="dropdown-menu">
-                    <li ng-repeat="tm in teams"><a ui-sref="teams.team.roster({teamId : {{tm.id}}})">{{tm.name}}</a></li>
-                </ul>
-            </li>
-
-        </ul>
-
     </nav>
 
     <!--<div id="authorize-div" style="display: none">
