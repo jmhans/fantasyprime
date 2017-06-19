@@ -100,8 +100,8 @@ function propBetCtrl($http, $scope, $q, googleChartApiPromise) {
  	  
         // this view can select a subset of the data at a time
         var view = new google.visualization.DataView(data);
-        view.setRows(data.getFilteredRows([{ column: 8, value: $scope.curYr }]));
-        view.setColumns([0,1,2,3,4,5,6,7]);
+        view.setRows(data.getFilteredRows([{ column: 14, value: $scope.curYr }]));
+        view.setColumns([0,1,2,3,4,5,6,7,8,9,10,11,12,13]);
 
         $scope.betTable = {
             type: "Table",
