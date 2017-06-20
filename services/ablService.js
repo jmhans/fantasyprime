@@ -15,6 +15,12 @@ angular.module('fantasyfantasy').service('ablService', function ($http) {
             }).then(function (resp) {
                     return resp.data.result.players;
             });
+        },
+
+        getDougStats: function () {
+            return $http.get("data/20170619.csv").then(function (resp) {
+                return resp.data
+            });
         }
         
     };

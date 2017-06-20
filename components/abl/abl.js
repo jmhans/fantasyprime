@@ -14,7 +14,18 @@ app.config(function ($stateProvider) {
 
             }
         }*/
-    }, 
+    },
+    {
+        name: 'abl.dougstats',
+        url: '/dougstats',
+        component: 'abldougstats',
+        requiresParams: true,
+        resolve: {
+            dougstats: function ($stateParams, ablService) {
+                return ablService.getDougStats();
+            }
+        }
+    },
     {
         name: 'abl.stats',
         
@@ -82,6 +93,34 @@ function ablCtrl1() {
     vm1.advance = function (effDate) {
         
         $state.go('abl.stats', { effDate: effDate });
+    }
+
+
+
+}
+
+app.component('abldougstats', {
+    bindings: { dougstats: '<' },
+    templateUrl: 'components/abl/abl_stats.html',
+    controller: ablDSCtrl
+});
+
+
+function ablDSCtrl() {
+
+    var vm = this;
+
+    //test comment
+
+    vm.treeOptions = {
+        accept: function (sourceNodeScope, destNodesScope, destIndex) {
+            return true;
+        },
+    };
+
+    vm.advance = function (effDate) {
+
+        $state.go('abl.dougstats', { effDate: effDate });
     }
 
 
