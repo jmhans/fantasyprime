@@ -1,8 +1,60 @@
 ﻿
 
 <h5>ABL Stats</h5>
-﻿<div>
-    {{$ctrl.dougstats}}
+<div>
+
+    <table class="table table-bordered no-footer" ui-tree="treeOptions">
+        <thead>
+            <tr>
+                <th> Player </th>
+                <th> Team </th>
+                <th> pos </th>
+                <th> g </th>
+                <th> ab </th>
+                <th> hit </th>
+                <th> 2b </th>
+                <th> 3b </th>
+                <th> hr </th>
+                <th> run </th>
+                <th> rbi </th>
+                <th> bb </th>
+                <th> so </th>
+                <th> sb </th>
+                <th> cs </th>
+                <th> gidp </th>
+                <th> e </th>
+                <th> hbp </th>
+                <th> sf </th>
+                <th> sh </th>
+            </tr>
+        </thead>
+        <tbody ui-tree-nodes="" ng-model="$ctrl.dougstats">
+            <tr ng-repeat="item in $ctrl.dougstats"  ui-tree-node>
+                <td > {{ item.Player }}</td>
+                <td>{{ item.Team }}</td>
+                <td>{{ item.pos }}</td>
+                <td>{{ item.g }}</td>
+                <td>{{ item.ab }}</td>
+                <td>{{ item.hit }}</td>
+                <td>{{ item['2b'] }}</td>
+                <td>{{ item['3b'] }}</td>
+                <td>{{ item.hr }}</td>
+                <td>{{ item.run }}</td>
+                <td>{{ item.rbi }}</td>
+                <td>{{ item.bb }}</td>
+                <td>{{ item.so }}</td>
+                <td>{{ item.sb }}</td>
+                <td>{{ item.cs }}</td>
+                <td>{{ item.gidp }}</td>
+                <td>{{ item.e }}</td>
+                <td>{{ item.hbp }}</td>
+                <td>{{ item.sf }}</td>
+                <td>{{ item.sh }}</td>
+                
+            </tr>
+        </tbody>
+    </table>
+
 </div>
 
 
