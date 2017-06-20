@@ -44,7 +44,7 @@ angular.module('fantasyfantasy').service('ablService', function ($http) {
 
                 var jsonData = Papa.parse(csvData, config);
 
-                return jsonData.data;
+                return jsonData.data.filter(function (itm) { return (itm.Player != '');});
             });
         }
         
