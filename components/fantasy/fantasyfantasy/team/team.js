@@ -71,12 +71,12 @@ app.config(function ($stateProvider) {
 
 app.component('team', {
     bindings: { team: '<' },
-    templateUrl: 'components/fantasyfantasy/team/team.html'
+    templateUrl: 'components/fantasy/fantasyfantasy/team/team.html'
 })
 
 
 app.component('info', {
     bindings: { team: '<' },
 
-    templateUrl: 'components/fantasyfantasy/team/info.html'
+    templateUrl: 'components/fantasy/fantasyfantasy/team/info.html'
 })

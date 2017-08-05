@@ -94,7 +94,7 @@ app.config(function ($stateProvider) {
 
 app.component('scoreboard', {
     bindings: { scores: '<', teams: '<', games: '<' },
-    templateUrl: 'components/fantasyfantasy/scoreboard/scoreboard.html',
+    templateUrl: 'components/fantasy/fantasyfantasy/scoreboard/scoreboard.html',
     controller: function ($scope, $log, $state, $http) {
         $scope.weeks = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16];
         $scope.totalItems = $scope.weeks.length;
@@ -129,7 +129,7 @@ app.component('scoreboard', {
 
 app.component('scoreboard.details', {
     bindings: { scores: '<', teams: '<', games: '<' },
-    templateUrl: 'components/fantasyfantasy/scoreboard/scoreboardDetails.html',
+    templateUrl: 'components/fantasy/fantasyfantasy/scoreboard/scoreboardDetails.html',
     controller: function ($scope) {
         $scope.isCollapsed = false;
     }

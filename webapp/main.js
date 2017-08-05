@@ -30,6 +30,13 @@ myApp.run(['$http', '$rootScope', 'TeamsService', '$state', '$stateParams', func
             $rootScope.teams = tms;
         })
     }
+    $rootScope.$on('$stateChangeStart', function (evt, to, params) {
+        if (to.redirectTo) {
+            evt.preventDefault();
+            $state.go(to.redirectTo, params, { location: 'replace' })
+        }
+    });
+
 
 }
 

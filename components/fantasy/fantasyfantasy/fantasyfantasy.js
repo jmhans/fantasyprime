@@ -4,10 +4,11 @@ app.config(function ($stateProvider) {
 
     var state = {
         name: 'ff',
-        url: '/ff',
+        parent: 'fantasyfootball',
+        url: '/fantasyfantasy',
         component: 'fantasyfantasy',
         menu: {
-            name: 'Fantasy Fantasy', priority: 10000, tag: 'topmenu'
+            name: 'Fantasy Fantasy', tag: 'submenu'
         },
         requiresParams: false
     };
@@ -19,7 +20,7 @@ app.config(function ($stateProvider) {
 
 app.component('fantasyfantasy', {
     bindings: { leaders: '<', picks: '<' },
-    templateUrl: 'components/fantasyfantasy/fantasyfantasy.html',
+    templateUrl: 'components/fantasy/fantasyfantasy/fantasyfantasy.html',
     controller: ffCtrl,
     controllerAs: 'vm'
 })

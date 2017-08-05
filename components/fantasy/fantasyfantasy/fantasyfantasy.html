@@ -5,7 +5,6 @@
     <ul class="nav navbar-nav" menus="menuItems" include="ff.*">
         <li ng-repeat="menu in menuItems | orderBy:'-priority'">
             <a ng-if="menu.state.requiresParams == true" ui-sref="{{menu.state.name}}({teamId : selectedTeam.id})">{{menu.name}}</a>
-
             <a ng-if="menu.state.requiresParams == false" ui-sref="{{menu.state.name}}">{{menu.name}}</a>
 
         </li>

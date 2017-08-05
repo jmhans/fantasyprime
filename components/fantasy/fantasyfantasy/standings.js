@@ -3,7 +3,7 @@
 
 app.config(function ($stateProvider) {
     var st = {
-        name: 'ff.standings',
+        name: 'fantasyfootball.ff.standings',
         url: '/standings',
         menu: { name: 'Standings', priority: 300 },
         requiresParams: false,
@@ -23,7 +23,7 @@ app.config(function ($stateProvider) {
 app.component('standings', {
     bindings: { standings: '<' },
     controller: StandingsCtrl,
-    templateUrl: 'components/fantasyfantasy/standings.html'
+    templateUrl: 'components/fantasy/fantasyfantasy/standings.html'
 });
 
 function StandingsCtrl($http, DTOptionsBuilder, DTColumnDefBuilder, GoogleSheetsService) {

@@ -1,5 +1,5 @@
 ﻿
 angular.module('fantasyfantasy').component('teams', {
     bindings: { teams: '<', activeTeam: '<' },
-    templateUrl: 'components/fantasyfantasy/teams.html'
+    templateUrl: 'components/fantasy/fantasyfantasy/teams.html'
 })  

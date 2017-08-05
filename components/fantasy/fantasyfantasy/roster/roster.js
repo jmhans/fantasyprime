@@ -26,7 +26,7 @@ app.config(function ($stateProvider) {
 app.component('roster', {
     bindings: { roster: '<'},
     controller: RosterTableCtrl, 
-    templateUrl: 'components/fantasyfantasy/roster/roster.html'
+    templateUrl: 'components/fantasy/fantasyfantasy/roster/roster.html'
 })
 
 

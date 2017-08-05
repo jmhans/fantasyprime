@@ -1,7 +1,7 @@
 ﻿angular.module('fantasyfantasy').component('allteams', {
     bindings: { fantasy_teams: '@' },
     controller: FATableCtrl, 
-    templateUrl: 'components/fantasyfantasy/freeagents/freeagents.html'
+    templateUrl: 'components/fantasy/fantasyfantasy/freeagents/freeagents.html'
 })
 
 function FATableCtrl($http, $scope, DTOptionsBuilder, DTColumnDefBuilder) {

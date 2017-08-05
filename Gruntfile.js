@@ -94,7 +94,14 @@ module.exports = function (grunt) {
             main: {
                 files: [
                   // includes files within path
-                  { expand: true, src: ['lib/*', 'data/*', 'css/*', 'index.html', 'main.js', 'components/**/*.html'], dest: 'webapp/' }
+                  { expand: true, src: ['lib/*',  'css/*', 'index.html', 'main.js', 'components/**/*.html', 'server/*'], dest: 'webapp/' }
+
+                ],
+            },
+            data: {
+                files: [
+                  // includes files within path
+                  { expand: true, src: ['data/*'], dest: 'webapp/' }
 
                 ],
             },
@@ -114,7 +121,7 @@ module.exports = function (grunt) {
     // Default task(s).
     grunt.registerTask('default', ['concat', 'uglify', 'concat_css']);
     grunt.registerTask('pkg_and_deploy', ['default', 'copy', 'ftp-deploy']);
-
+    grunt.registerTask('deploy_data', [ 'copy:data', 'ftp-deploy']);
 };
 
 
