@@ -55,7 +55,7 @@ function footballdexCtrl($http, DTOptionsBuilder, DTColumnDefBuilder, footballde
         }
         if (newItem.rfa != '') {
             // Valid entry. Insert into DB. Else, do nothing.  
-            $http.post('http://actuarialgames.x10hosting.com/includes/api.php/footballdex', newItem).then(vm.refreshPlayers);
+            $http.post('../includes/api.php/footballdex', newItem).then(vm.refreshPlayers);
         }
     }
 
