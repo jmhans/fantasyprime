@@ -51,7 +51,7 @@ function footballdexCtrl($http, DTOptionsBuilder, DTColumnDefBuilder, footballde
         var newItem = {
             team: itemToAdd.team,
             rfa: itemToAdd.rfa,
-            year: (new Date).getFullYear()
+            season: (new Date).getFullYear()
         }
         if (newItem.rfa != '') {
             // Valid entry. Insert into DB. Else, do nothing.  
