@@ -1,4 +1,4 @@
-﻿angular.module('fantasyfantasy').service('RostersService', ['GoogleSheetsService', function (GoogleSheetsService) {
+﻿fantasyFantasyModule.service('RostersService', ['GoogleSheetsService', function (GoogleSheetsService) {
 
     var service = {
         getAllRosterRecords: function () {

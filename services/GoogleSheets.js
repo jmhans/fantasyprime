@@ -36,7 +36,7 @@ function convertSSArraytoJSON(arr, headerIndex) {
 
 
 
-angular.module('fantasyfantasy').service('GoogleSheetsService', ['$rootScope', '$q', function ($rootScope, $q) {
+actuarialGamesModule.service('GoogleSheetsService', ['$rootScope', '$q', function ($rootScope, $q) {
     var CLIENT_ID = '1005055514218-blfai4g2nid0s7bvvdgc1ekltvfnk591.apps.googleusercontent.com';
     var SCOPES = ["https://www.googleapis.com/auth/spreadsheets"];
     var domain = '';

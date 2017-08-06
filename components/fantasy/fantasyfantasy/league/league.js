@@ -1,7 +1,4 @@
-﻿var myApp = angular.module('fantasyfantasy')
-
-
-myApp.config(function ($stateProvider) {
+﻿fantasyFantasyModule.config(function ($stateProvider) {
     // An array of state definitions
     var state = 
         {
@@ -16,7 +13,7 @@ myApp.config(function ($stateProvider) {
 });
 
 
-myApp.component('league', {
+fantasyFantasyModule.component('league', {
     bindings: { league: '<' },
     templateUrl: 'components/blank.html'
 })

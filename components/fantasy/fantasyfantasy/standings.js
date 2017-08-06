@@ -1,7 +1,5 @@
-﻿var app = angular.module('fantasyfantasy')
-
-
-app.config(function ($stateProvider) {
+﻿
+fantasyFantasyModule.config(function ($stateProvider) {
     var st = {
         name: 'fantasyfootball.ff.standings',
         url: '/standings',
@@ -20,7 +18,7 @@ app.config(function ($stateProvider) {
 
 
 
-app.component('standings', {
+fantasyFantasyModule.component('standings', {
     bindings: { standings: '<' },
     controller: StandingsCtrl,
     templateUrl: 'components/fantasy/fantasyfantasy/standings.html'

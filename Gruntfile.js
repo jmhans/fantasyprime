@@ -29,9 +29,10 @@ module.exports = function (grunt) {
                         'node_modules/angular-ui-tree/dist/angular-ui-tree.js',
                         'node_modules/angular-google-chart/ng-google-chart.js',
                         'node_modules/papaparse/papaparse.js',
-                        'main.js',
-                        'services/*.js',
-                        'components/**/*.js'
+                        'main.js',                        
+                        'components/**/*.js',
+                        'services/*.js'
+
                         
                 ],
                 dest: 'lib/<%= pkg.name %>.js'

@@ -1,6 +1,5 @@
-﻿var app = angular.module('fantasyfantasy')
-
-app.config(function ($stateProvider) {
+﻿
+fantasyFantasyModule.config(function ($stateProvider) {
     var states = [
         {
             name: 'ff.teams.team.detail',
@@ -69,13 +68,13 @@ app.config(function ($stateProvider) {
 });
 
 
-app.component('team', {
+fantasyFantasyModule.component('team', {
     bindings: { team: '<' },
     templateUrl: 'components/fantasy/fantasyfantasy/team/team.html'
 })
 
 
-app.component('info', {
+fantasyFantasyModule.component('info', {
     bindings: { team: '<' },
 
     templateUrl: 'components/fantasy/fantasyfantasy/team/info.html'

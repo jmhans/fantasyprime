@@ -1,5 +1,5 @@
 ﻿
-var app = angular.module('fantasyfantasy').controller('DatepickerCtrl', function ($scope, $rootScope, $state, $stateParams) {
+fantasyFantasyModule.controller('DatepickerCtrl', function ($scope, $rootScope, $state, $stateParams) {
     if (typeof $state.params.dt !== 'undefined') {
         // the variable is defined
         $scope.dt = new Date($state.params.dt);

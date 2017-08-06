@@ -1,7 +1,7 @@
 ﻿
-var app = angular.module('fantasyfantasy')
+var footballDexModule = angular.module('footballDex', [])
 
-app.component('rfa', {
+footballDexModule.component('rfa', {
     bindings: {keepers : '<'},
     templateUrl: 'components/fantasy/rfa.html',
     controller: footballdexCtrl,

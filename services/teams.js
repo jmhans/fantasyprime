@@ -1,4 +1,4 @@
-﻿angular.module('fantasyfantasy').service('TeamsService', function ($http) {
+﻿fantasyFantasyModule.service('TeamsService', function ($http) {
     var service = {
         getAllTeams: function () {
             return $http.get('data/data.json', { cache: true }).then(function (resp) {

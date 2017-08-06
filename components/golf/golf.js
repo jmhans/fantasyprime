@@ -1,7 +1,7 @@
 ﻿
-var app = angular.module('fantasyfantasy')
+var fantasyGolfModule = angular.module('fantasyGolf', [])
 
-app.config(function ($stateProvider) {
+fantasyGolfModule.config(function ($stateProvider) {
     var state = {
         name: 'golf',
         url: '/golf',
@@ -23,7 +23,7 @@ app.config(function ($stateProvider) {
 });
 
 
-app.component('golf', {
+fantasyGolfModule.component('golf', {
     bindings: { leaders: '<', picks: '<' },
     templateUrl: 'components/golf/golf.html',
     controller: golfCtrl,

@@ -1,5 +1,4 @@
-﻿
-angular.module('fantasyfantasy').service('propBetService', function ($http) {
+﻿propBetModule.service('propBetService', function ($http) {
     var service = {
         
         getBBDataJSON: function () {

@@ -1,7 +1,7 @@
 ﻿
-var app = angular.module('fantasyfantasy')
+var propBetModule = angular.module('propBets', [])
 
-app.config(function ($stateProvider) {
+propBetModule.config(function ($stateProvider) {
     var state = {
         name: 'propbets',
         url: '/fun',
@@ -32,7 +32,7 @@ app.config(function ($stateProvider) {
 });
 
 
-app.component('propbets', {
+propBetModule.component('propbets', {
     bindings: { bbRecs: '<', configData: '<'  ,betSummary: '<', updateTime: '<'},
     templateUrl: 'components/fun/fun.html',
     controller: propBetCtrl

@@ -1,5 +1,5 @@
 ﻿
-angular.module('fantasyfantasy').service('golfService', function ($http) {
+fantasyGolfModule.service('golfService', function ($http) {
     var service = {
         getLeaderboard: function () {
             return tournNum = service.getTournamentNum().then(function (resp) {

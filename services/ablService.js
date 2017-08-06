@@ -1,5 +1,5 @@
 ﻿
-angular.module('fantasyfantasy').service('ablService', function ($http) {
+ablModule.service('ablService', function ($http) {
     var service = {
         getPlayers: function (effDate) {
             var qry = 'SELECT * from stats'; // Need to write appropriate query for stat display. And include JOIN into abl_lineups.

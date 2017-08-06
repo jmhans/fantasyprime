@@ -1,6 +1,6 @@
-﻿var app = angular.module('fantasyfantasy')
+﻿var fantasyFantasyModule = angular.module('fantasyfantasy', ['ui.router'])
 
-app.config(function ($stateProvider) {
+fantasyFantasyModule.config(function ($stateProvider) {
 
     var state = {
         name: 'ff',
@@ -18,7 +18,7 @@ app.config(function ($stateProvider) {
 
 
 
-app.component('fantasyfantasy', {
+fantasyFantasyModule.component('fantasyfantasy', {
     bindings: { leaders: '<', picks: '<' },
     templateUrl: 'components/fantasy/fantasyfantasy/fantasyfantasy.html',
     controller: ffCtrl,

@@ -1,7 +1,7 @@
 ﻿
-var app = angular.module('fantasyfantasy')
+var ablModule = angular.module('abl', [])
 
-app.config(function ($stateProvider) {
+ablModule.config(function ($stateProvider) {
     var states = [{
         name: 'abl',
         url: '/abl',
@@ -81,7 +81,7 @@ app.config(function ($stateProvider) {
 });
 
 
-app.component('abl', {
+ablModule.component('abl', {
     bindings: { currDt:'<' },
     templateUrl: 'components/abl/abl.html',
     controller: ablCtrl,
@@ -103,7 +103,7 @@ function ablCtrl($http, $scope) {
 
 }
 
-app.component('abl.stats', {
+ablModule.component('abl.stats', {
     templateUrl: 'components/abl/abl_stats.html',
     controller: ablStatsCtrl
 });
@@ -112,7 +112,7 @@ function ablStatsCtrl() {
 
 }
 
-app.component('ablPlyrs', {
+ablModule.component('ablPlyrs', {
     bindings: { players: '<' },
     templateUrl: 'components/abl/abl_players.html',
     controller: ablPlyrCtrl
@@ -123,7 +123,7 @@ function ablPlyrCtrl($scope) {
 
 }
 
-app.component('ablstatsdetail', {
+ablModule.component('ablstatsdetail', {
     bindings: { games:'<', dt:'<'},
     templateUrl: 'components/abl/abl_stats_detail.html',
     controller: ablDSCtrl

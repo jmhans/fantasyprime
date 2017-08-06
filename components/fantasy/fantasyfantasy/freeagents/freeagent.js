@@ -1,4 +1,4 @@
-﻿angular.module('fantasyfantasy').component('allteams', {
+﻿fantasyFantasyModule.component('allteams', {
     bindings: { fantasy_teams: '@' },
     controller: FATableCtrl, 
     templateUrl: 'components/fantasy/fantasyfantasy/freeagents/freeagents.html'

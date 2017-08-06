@@ -1,5 +1,5 @@
 ﻿
-angular.module('fantasyfantasy').service('mlbDataService', function ($http, $q) {
+actuarialGamesModule.service('mlbDataService', function ($http, $q) {
     var service = {
         getGames: function (dt) {
             var inputDate = new Date(dt)

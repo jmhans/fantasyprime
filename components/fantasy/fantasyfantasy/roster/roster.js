@@ -1,6 +1,5 @@
-﻿var app = angular.module('fantasyfantasy')
-
-app.config(function ($stateProvider) {
+﻿
+fantasyFantasyModule.config(function ($stateProvider) {
     var state = {
         name: 'ff.teams.team.roster',
         url: '/roster',
@@ -23,7 +22,7 @@ app.config(function ($stateProvider) {
     $stateProvider.state(state);
    });
 
-app.component('roster', {
+fantasyFantasyModule.component('roster', {
     bindings: { roster: '<'},
     controller: RosterTableCtrl, 
     templateUrl: 'components/fantasy/fantasyfantasy/roster/roster.html'

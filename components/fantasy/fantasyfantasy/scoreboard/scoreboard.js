@@ -1,6 +1,5 @@
-﻿var app = angular.module('fantasyfantasy')
-
-app.config(function ($stateProvider) {
+﻿
+fantasyFantasyModule.config(function ($stateProvider) {
     var states = [{
         name: 'ff.scoreboard',
         url: '/scoreboard',
@@ -92,7 +91,7 @@ app.config(function ($stateProvider) {
 });
 
 
-app.component('scoreboard', {
+fantasyFantasyModule.component('scoreboard', {
     bindings: { scores: '<', teams: '<', games: '<' },
     templateUrl: 'components/fantasy/fantasyfantasy/scoreboard/scoreboard.html',
     controller: function ($scope, $log, $state, $http) {
@@ -127,7 +126,7 @@ app.component('scoreboard', {
     }
 })
 
-app.component('scoreboard.details', {
+fantasyFantasyModule.component('scoreboard.details', {
     bindings: { scores: '<', teams: '<', games: '<' },
     templateUrl: 'components/fantasy/fantasyfantasy/scoreboard/scoreboardDetails.html',
     controller: function ($scope) {
