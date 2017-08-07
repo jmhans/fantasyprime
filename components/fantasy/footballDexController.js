@@ -2,7 +2,7 @@
 var footballDexModule = angular.module('footballDex', [])
 
 footballDexModule.component('rfa', {
-    bindings: {keepers : '<'},
+    bindings: {keepers : '='},
     templateUrl: 'components/fantasy/rfa.html',
     controller: footballdexCtrl,
     controllerAs: 'bm'
@@ -30,16 +30,6 @@ function footballdexCtrl($http, DTOptionsBuilder, DTColumnDefBuilder, footballde
         DTColumnDefBuilder.newColumnDef(0),
         DTColumnDefBuilder.newColumnDef(1)
     ];
-
-    /*$http.get('../includes/api.php/footballdex?transform=1').then(function (response) {
-        vm.players = response.data.footballdex;
-        vm.players.forEach(function (plyr) {
-
-            
-        });
-
-    });*/
-
 
     vm.itemsToAdd = []
 
@@ -73,11 +63,8 @@ function footballdexCtrl($http, DTOptionsBuilder, DTColumnDefBuilder, footballde
 
     vm.refreshPlayers = function () {
         vm.error = '';
-        vm.keepers = footballdexService.getRFAs();
-
+        vm.keepers =  footballdexService.getRFAs();
     }
-
-//    vm.refreshPlayers();
 
     vm.deleteItem = function (itemToDelete) {
         $http.delete('http://actuarialgames.x10host.com/includes/api.php/footballdex/' + itemToDelete.recNo).then(vm.refreshPlayers);
@@ -105,7 +92,8 @@ function footballdexCtrl($http, DTOptionsBuilder, DTColumnDefBuilder, footballde
         var newItem = {
             bidder: plyr.bidder,
             rfa: plyr.rfa,
-            bid_amount: plyr.bidAmount
+            bid_amount: plyr.bidAmount,
+            season: (new Date).getFullYear()
         }
 
 

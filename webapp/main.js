@@ -1,5 +1,5 @@
 ﻿
-var myApp = angular.module('fantasyfantasy',
+var actuarialGamesModule = angular.module('actuarial.games',
     [
         'ui.router',
         'ui.router.menus',
@@ -8,15 +8,20 @@ var myApp = angular.module('fantasyfantasy',
         'datatables.bootstrap',
         'ui.bootstrap',
         'ui.tree',
-        'googlechart'
+        'googlechart',
+        'fantasyFootball',
+        'abl',
+        'fantasyGolf',
+        'propBets',
+        'state.tree'
     ]);
 
-myApp.config(function ($stateProvider) {
+actuarialGamesModule.config(function ($stateProvider) {
 
 });
 
 // To account for plunker embeds timing out, preload the async data
-myApp.run(['$http', '$rootScope', 'TeamsService', '$state', '$stateParams', function ($http, $rootScope, TeamsService, $state, $stateParams) {
+actuarialGamesModule.run(['$http', '$rootScope', 'TeamsService', '$state', '$stateParams', function ($http, $rootScope, TeamsService, $state, $stateParams) {
     // $http.get('data/data.json', { cache: true });
 
     $rootScope.$state = $state;
