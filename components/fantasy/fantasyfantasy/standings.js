@@ -4,6 +4,7 @@ fantasyFantasyModule.config(function ($stateProvider) {
         name: 'fantasyfootball.ff.standings',
         url: '/standings',
         menu: { name: 'Standings', priority: 300 },
+        tree: { name: 'Standings'}, 
         requiresParams: false,
         component: 'standings',
         resolve: {

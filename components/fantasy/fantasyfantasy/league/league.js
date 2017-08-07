@@ -4,7 +4,8 @@
         {
             name: 'ff.league',
             url: '/league',
-            menu: { name: 'League', priority: 10},
+            menu: { name: 'League', priority: 10 },
+            tree: { name: 'League'}, 
             component: 'league',
             requiresParams: false
         };

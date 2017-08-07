@@ -4,6 +4,7 @@ fantasyFantasyModule.config(function ($stateProvider) {
         name: 'ff.scoreboard',
         url: '/scoreboard',
         menu: { name: 'Scoreboard', priority: 200 },
+        tree: { name: 'Scoreboard'},
         requiresParams: false,
         component: 'scoreboard'
     },

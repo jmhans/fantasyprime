@@ -3,16 +3,15 @@
 
     <ul class="nav navbar-nav">
         <li class="dropdown">
-            <a class="dropdown-toggle navbar-brand" data-toggle="dropdown">{{activeChild.name}}<span class="caret"></span></a>
+            <a class="dropdown-toggle navbar-brand" data-toggle="dropdown">{{activeChild.tree.name}}<span class="caret"></span></a>
             <ul class="dropdown-menu">
                 <li ng-repeat="menu in childStates">
-                    <a ng-if="menu.state.requiresParams == true" ui-sref="{{menu.state.name}}">{{menu.name}}</a>
-                    <a ng-if="menu.state.requiresParams == false" ui-sref="{{menu.state.name}}">{{menu.name}}</a>
+                    <a ui-sref="{{menu.name}}">{{menu.tree.name}}</a>
                 </li>
             </ul>
         </li>
         <li ng-repeat="child in grandChildStates">
-            <a>{{child.name}}</a>
+            <a ui-sref="{{child.name}}">{{child.tree.name}}</a>
         </li>
     </ul>
 

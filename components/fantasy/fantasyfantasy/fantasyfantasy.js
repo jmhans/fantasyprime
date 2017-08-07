@@ -10,6 +10,9 @@ fantasyFantasyModule.config(function ($stateProvider) {
         menu: {
             name: 'Fantasy Fantasy', tag: 'submenu'
         },
+        tree: {
+            name: 'Fantasy Fantasy',
+        },
         requiresParams: false
     };
 

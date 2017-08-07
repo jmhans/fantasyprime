@@ -14,7 +14,8 @@ fantasyFantasyModule.config(function ($stateProvider) {
                 }
             },
             requiresParams: false,
-            menu: { name: "My Team", priority: 1000 }
+            menu: { name: "My Team", priority: 1000 },
+            tree: { name: "My Team"}
         },
 
       {
@@ -58,6 +59,7 @@ fantasyFantasyModule.config(function ($stateProvider) {
           url: '/allteams',
           component: 'allteams',
           menu: { name: 'All Teams', priority: 900 },
+          tree: { name: 'All Teams'},
           requiresParams: false
       }
 
