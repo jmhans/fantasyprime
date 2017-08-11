@@ -18,6 +18,12 @@ footballDexModule.service('footballdexService', function ($http) {
             });
 
         },
+        getFakeProm: function () {
+            var prom = new Promise(function (resolve, reject) {
+                resolve('fakeProm');
+            });
+            return '123';
+        }
         
     };
 

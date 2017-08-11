@@ -8,6 +8,7 @@
     <p> Next, winning bids will then be processed in the order in which they were received. If a bidder does not have enough money to acquire a player on which they bid, that bid will be disqualified, and the original owner will be asked again if he/she wants to match the next highest bid. </p>
 </div>
 
+
     <div ng-show="bm.showError()" class="alert alert-danger"><strong> Error: </strong> {{bm.error}}</div>
     <div ng-show="bm.showSuccess()" class="alert alert-success"><strong> Success: </strong> {{bm.successMessage}}</div>
     <table datatable="ng" dt-options="bm.dtOptions" dt-column-defs="bm.dtColumnDefs" class="row-border hover display compact">

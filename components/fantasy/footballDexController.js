@@ -14,7 +14,7 @@ function testC() {
 
 
         // $scope.params = $routeParams;
-function footballdexCtrl($http, DTOptionsBuilder, DTColumnDefBuilder, footballdexService, $scope) {
+function footballdexCtrl($http, DTOptionsBuilder, DTColumnDefBuilder, footballdexService, $scope , $state) {
     var vm = this;
 
     vm.error = '';
@@ -45,7 +45,7 @@ function footballdexCtrl($http, DTOptionsBuilder, DTColumnDefBuilder, footballde
         }
         if (newItem.rfa != '') {
             // Valid entry. Insert into DB. Else, do nothing.  
-            $http.post('../includes/api.php/footballdex', newItem).then(vm.refreshPlayers);
+            $http.post('http://actuarialgames.x10host.com/includes/api.php/footballdex', newItem).then(vm.refreshPlayers);
         }
     }
 
@@ -63,8 +63,13 @@ function footballdexCtrl($http, DTOptionsBuilder, DTColumnDefBuilder, footballde
 
     vm.refreshPlayers = function () {
         vm.error = '';
-        vm.keepers =  footballdexService.getRFAs();
+
+        footballdexService.getRFAs().then(function (res) {
+            vm.keepers = res;
+        });
+
     }
+
 
     vm.deleteItem = function (itemToDelete) {
         $http.delete('http://actuarialgames.x10host.com/includes/api.php/footballdex/' + itemToDelete.recNo).then(vm.refreshPlayers);

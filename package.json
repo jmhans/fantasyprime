@@ -24,8 +24,9 @@
     "angular-ui-tree": "^2.22.5",
     "angular-google-chart": "^0.1.0",
     "papaparse": "^4.2.0",
-    "grunt-ftp-deploy": "^0.1.10", 
-    "grunt-contrib-copy": "^1.0.0"
+    "grunt-ftp-deploy": "^0.1.10",
+    "grunt-contrib-copy": "^1.0.0", 
+    "font-awesome": "^4.7.0"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
