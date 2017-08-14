@@ -95,7 +95,7 @@ module.exports = function (grunt) {
             main: {
                 files: [
                   // includes files within path
-                  { expand: true, src: ['lib/*',  'css/*', 'index.html', 'main.js', 'components/**/*.htm*', 'server/*'], dest: 'webapp/' }
+                  { expand: true, src: ['lib/*',  'css/*', 'index.html', 'main.js', 'components/**/*.htm','components/**.*.html', 'server/*'], dest: 'webapp/' }
 
                 ],
             },
