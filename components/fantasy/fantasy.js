@@ -166,6 +166,21 @@ function keepersCtrl( DTOptionsBuilder, DTColumnBuilder,$scope, $http, footballd
     vm.dtOptions.withPaginationType('full_numbers').withDisplayLength(17)
         .withOption('lengthMenu', [[17, -1], [17, "All"]])
         .withOption('responsive', true)
+        .withDOM( 'frtip')
+        .withButtons([
+            'columnsToggle',
+            'colvis',
+            'copy',
+            'print',
+            'excel',
+            {
+                text: 'Some button',
+                key: '1',
+                action: function (e, dt, node, config) {
+                    alert('Button activated');
+                }
+            }
+        ])
 ;
     vm.dtColumns = [
         DTColumnBuilder.newColumn('Translated Team').withTitle('Team'),

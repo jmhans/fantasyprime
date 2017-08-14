@@ -23,6 +23,7 @@ module.exports = function (grunt) {
                         'node_modules/angular-google-gapi/dist/angular-google-gapi.js',
                         'node_modules/angular-datatables/dist/angular-datatables.js',
                         'node_modules/angular-datatables/dist/plugins/bootstrap/angular-datatables.bootstrap.js',
+                        'node_modules/angular-datatables/dist/plugins/buttons/angular-datatables.buttons.js',
                         'node_modules/angular-ui-bootstrap/dist/ui-bootstrap-tpls.js',
                         'node_modules/angular-ui-sortable/dist/sortable.js',
                         'node_modules/ng-sortable/dist/ng-sortable.js',
