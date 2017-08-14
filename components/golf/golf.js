@@ -6,7 +6,6 @@ fantasyGolfModule.config(function ($stateProvider) {
         name: 'golf',
         url: '/golf',
         component: 'golf',
-        menu: { name: 'Golf', priority: 1000000 , tag: 'topmenu'},
         resolve: {
             leaders: function (golfService) {
                 return golfService.getLeaderboard();

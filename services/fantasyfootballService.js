@@ -18,11 +18,11 @@ footballDexModule.service('footballdexService', function ($http) {
             });
 
         },
-        getFakeProm: function () {
-            var prom = new Promise(function (resolve, reject) {
-                resolve('fakeProm');
+        getMMQKeepers: function () {
+            return $http.get('data/2017Keepers.JSON').then(function (response) {
+                players = response.data.data;
+                return players;
             });
-            return '123';
         }
         
     };

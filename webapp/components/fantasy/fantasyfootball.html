@@ -1,0 +1,21 @@
+﻿
+<nav class="navbar navbar-default">
+
+    <ul class="nav navbar-nav">
+        <li class="dropdown">
+            <a class="dropdown-toggle navbar-brand" data-toggle="dropdown">{{activeChild.tree.name}}<span class="caret"></span></a>
+            <ul class="dropdown-menu">
+                <li ng-repeat="menu in childStates"  ui-sref-active="active">
+                    <a ui-sref="{{menu.name}}">{{menu.tree.name}}</a>
+                </li>
+            </ul>
+        </li>
+        <li ng-repeat="child in grandChildStates"  ui-sref-active="active">
+            <a ui-sref="{{child.name}}">{{child.tree.name}}</a>
+        </li>
+    </ul>
+
+
+</nav>
+
+<ui-view />
