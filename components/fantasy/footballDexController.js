@@ -17,6 +17,8 @@ function testC() {
 function footballdexCtrl($http, DTOptionsBuilder, DTColumnDefBuilder, footballdexService, $scope , $state) {
     var vm = this;
 
+    vm.actionsAvailable = false;
+
     vm.error = '';
     vm.successMessage = '';
     vm.dtOptions = DTOptionsBuilder.newOptions().withPaginationType('full_numbers').withDisplayLength(10)
@@ -34,18 +36,21 @@ function footballdexCtrl($http, DTOptionsBuilder, DTColumnDefBuilder, footballde
     vm.itemsToAdd = []
 
     vm.add = function (itemToAdd) {
-
-        var index = vm.itemsToAdd.indexOf(itemToAdd);
-        vm.itemsToAdd.splice(index, 1);
+        if (vm.actionsAvailable) {
+            var index = vm.itemsToAdd.indexOf(itemToAdd);
+            vm.itemsToAdd.splice(index, 1);
         
-        var newItem = {
-            team: itemToAdd.team,
-            rfa: itemToAdd.rfa,
-            season: (new Date).getFullYear()
-        }
-        if (newItem.rfa != '') {
-            // Valid entry. Insert into DB. Else, do nothing.  
-            $http.post('http://actuarialgames.x10host.com/includes/api.php/footballdex', newItem).then(vm.refreshPlayers);
+            var newItem = {
+                team: itemToAdd.team,
+                rfa: itemToAdd.rfa,
+                season: (new Date).getFullYear()
+            }
+            if (newItem.rfa != '') {
+                // Valid entry. Insert into DB. Else, do nothing.  
+                $http.post('http://actuarialgames.x10host.com/includes/api.php/footballdex', newItem).then(vm.refreshPlayers);
+            }
+        } else {
+            vm.error = 'Actions currently disabled.'
         }
     }
 
@@ -72,7 +77,9 @@ function footballdexCtrl($http, DTOptionsBuilder, DTColumnDefBuilder, footballde
 
 
     vm.deleteItem = function (itemToDelete) {
-        $http.delete('http://actuarialgames.x10host.com/includes/api.php/footballdex/' + itemToDelete.recNo).then(vm.refreshPlayers);
+        if (vm.actionsAvailable) {
+            $http.delete('http://actuarialgames.x10host.com/includes/api.php/footballdex/' + itemToDelete.recNo).then(vm.refreshPlayers);
+        }
     };
 
     vm.itemsToAddIsEmpty = function () { return (vm.itemsToAdd.length == 0); };
@@ -84,30 +91,34 @@ function footballdexCtrl($http, DTOptionsBuilder, DTColumnDefBuilder, footballde
     vm.deleteOkay = function () { return false; };
 
     vm.submitBid = function (plyr) {
-        vm.error = '';
-        vm.successMessage = '';
+        if (vm.actionsAvailable) {
+            vm.error = '';
+            vm.successMessage = '';
 
-        if (plyr.bidder == '') {
-            vm.error = "Please enter bidder name."
-        }
+            if (plyr.bidder == '') {
+                vm.error = "Please enter bidder name."
+            }
 
-        if (plyr.bidAmount == '') {
-            vm.error = "Please enter bid amount."
-        }
-        var newItem = {
-            bidder: plyr.bidder,
-            rfa: plyr.rfa,
-            bid_amount: plyr.bidAmount,
-            season: (new Date).getFullYear()
-        }
+            if (plyr.bidAmount == '') {
+                vm.error = "Please enter bid amount."
+            }
+            var newItem = {
+                bidder: plyr.bidder,
+                rfa: plyr.rfa,
+                bid_amount: plyr.bidAmount,
+                season: (new Date).getFullYear()
+            }
 
 
-        if (vm.error == '') {
-            // Valid entry. Insert into DB. Else, do nothing.  
-            $http.post('http://actuarialgames.x10host.com/includes/api.php/rfa_bids', newItem).then(function SuccessFunction(response) {
-                vm.successMessage =  plyr.bidder + " bid $" + plyr.bidAmount + " on " + plyr.rfa;
-                vm.refreshPlayers();
-            });
+            if (vm.error == '') {
+                // Valid entry. Insert into DB. Else, do nothing.  
+                $http.post('http://actuarialgames.x10host.com/includes/api.php/rfa_bids', newItem).then(function SuccessFunction(response) {
+                    vm.successMessage =  plyr.bidder + " bid $" + plyr.bidAmount + " on " + plyr.rfa;
+                    vm.refreshPlayers();
+                });
+            }
+        } else {
+            vm.error = 'No actions currently available.'
         }
 
 

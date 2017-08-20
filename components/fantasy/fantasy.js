@@ -99,6 +99,8 @@ function fantasyfootballCtrl($scope, $state, $rootScope, $stateTree) {
 
     $scope.activeChild = $state.$current.self;
 
+    $scope.menuFilter = function (n) { return (n.tree.position == 'right'); };
+
     refreshGrandchildren = function (st) {
 
         $scope.grandChildStates = [];
@@ -126,6 +128,11 @@ function fantasyfootballCtrl($scope, $state, $rootScope, $stateTree) {
         refreshGrandchildren($scope.activeChild);
 
     });
+    $scope.users = [];
+
+    $scope.setUsers = function (usrList) {
+        $scope.users = usrList;
+    };
 
 }
 
@@ -140,61 +147,4 @@ fantasyFootballModule.component('footballdex', {
 function footballDexCtrl($http, $scope) {
 
 }
-fantasyFootballModule.component('mmq', {
-    bindings: {},
-    template: '<ui-view />',
-    controller: mmqCtrl,
-})
-
-
-function mmqCtrl($http, $scope) {
-
-}
-
-
-fantasyFootballModule.component('keepers', {
-    bindings: {keepers: '='},
-    templateUrl: 'components/fantasy/MMQKeepers.htm',
-    controller: keepersCtrl,
-})
-
-
-function keepersCtrl( DTOptionsBuilder, DTColumnBuilder,$scope, $http, footballdexService) {
-    var vm = this;
-
-    vm.dtOptions = DTOptionsBuilder.fromFnPromise(footballdexService.getMMQKeepers);
-    vm.dtOptions.withPaginationType('full_numbers').withDisplayLength(17)
-        .withOption('lengthMenu', [[17, -1], [17, "All"]])
-        .withOption('responsive', true)
-        .withDOM( 'frtip')
-        .withButtons([
-            'columnsToggle',
-            'colvis',
-            'copy',
-            'print',
-            'excel',
-            {
-                text: 'Some button',
-                key: '1',
-                action: function (e, dt, node, config) {
-                    alert('Button activated');
-                }
-            }
-        ])
-;
-    vm.dtColumns = [
-        DTColumnBuilder.newColumn('Translated Team').withTitle('Team'),
-        DTColumnBuilder.newColumn('Translated Name').withTitle('Player'), 
-        DTColumnBuilder.newColumn('Last Year Cost').withTitle('Last Year Cost'), 
-        DTColumnBuilder.newColumn('ADV').withTitle('ESPN ADV'),    
-        DTColumnBuilder.newColumn('2016 Keeper Cost').withTitle('2017 Cost')
-
-    ];
-
-    /*$http.get('data/2017Keepers.JSON').then(function (response) {
-        vm.persons = response.data.data;
-    });*/
-}
-
-
 

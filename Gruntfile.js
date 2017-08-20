@@ -17,6 +17,14 @@ module.exports = function (grunt) {
             lib: {
                 src: [  'node_modules/jquery/dist/jquery.js',
                         'node_modules/datatables/media/js/jquery.dataTables.js',
+                        'node_modules/datatables-buttons/js/dataTables.buttons.js',
+                        'node_modules/datatables-buttons/js/buttons.bootstrap.js',
+                        'node_modules/datatables-buttons/js/buttons.colVis.js',
+                        'node_modules/datatables-buttons/js/buttons.flash.js',
+                        'node_modules/datatables-buttons/js/buttons.foundation.js',
+                        'node_modules/datatables-buttons/js/buttons.html5.js',
+                        'node_modules/datatables-buttons/js/buttons.jqueryui.js',
+                        'node_modules/datatables-buttons/js/buttons.print.js',
                         'node_modules/angular/angular.js',
                         'node_modules/angular-ui-router/release/angular-ui-router.js',
                         'node_modules/angular-ui-router-menus/dist/angular-ui-router-menus.js',
@@ -96,7 +104,7 @@ module.exports = function (grunt) {
             main: {
                 files: [
                   // includes files within path
-                  { expand: true, src: ['lib/*',  'css/*', 'index.html', 'main.js', 'components/**/*.htm','components/**.*.html', 'server/*'], dest: 'webapp/' }
+                  { expand: true, src: ['lib/*',  'css/*', 'index.html', 'main.js', 'components/**/*.htm','components/**/*.html', 'server/*'], dest: 'webapp/' }
 
                 ],
             },

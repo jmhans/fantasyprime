@@ -13,6 +13,12 @@ fantasyFantasyModule.config(function ($stateProvider) {
         tree: {
             name: 'Fantasy Fantasy',
         },
+        resolve: {
+            allTeams: function (TeamsService) {
+                var a = TeamsService.getAllTeams();
+                return a;
+            }
+        },
         requiresParams: false
     };
 
@@ -22,14 +28,17 @@ fantasyFantasyModule.config(function ($stateProvider) {
 
 
 fantasyFantasyModule.component('fantasyfantasy', {
-    bindings: { leaders: '<', picks: '<' },
+    bindings: { users: '<', allTeams: '<' },
     templateUrl: 'components/fantasy/fantasyfantasy/fantasyfantasy.html',
-    controller: ffCtrl,
-    controllerAs: 'vm'
+    controller: ffCtrl
 })
 
 
 function ffCtrl($http, $scope) {
-    var vm = this;
+    //$scope.$parent.myTeams = allTeams;
+
+    /*$scope.updateUsers = function () {
+        $scope.onUserUpdate($scope.allTeams)
+    }*/
 
 }
