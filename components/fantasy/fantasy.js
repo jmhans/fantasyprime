@@ -4,14 +4,14 @@ fantasyFootballModule.config(function ($stateProvider) {
 
     var states = [
         {
-        name: 'fantasyfootball',
-        url: '/ff',
-        component: 'fantasyfootball',
-        menu: {
-            name: 'Fantasy Football', priority: 10000, tag: 'topmenu'
-        },
-        tree: {name: 'Fantasy Football'}, 
-        requiresParams: false
+            name: 'fantasyfootball',
+            url: '/ff',
+            component: 'fantasyfootball',
+            menu: {
+                name: 'Fantasy Football', priority: 10000, tag: 'topmenu'
+            },
+            tree: {name: 'Fantasy Football'}, 
+            requiresParams: false            
         },
         {
             name: 'footballdex',
@@ -128,10 +128,16 @@ function fantasyfootballCtrl($scope, $state, $rootScope, $stateTree) {
         refreshGrandchildren($scope.activeChild);
 
     });
-    $scope.users = [];
+    //$scope.users = [];
 
     $scope.setUsers = function (usrList) {
         $scope.users = usrList;
+    };
+
+    this.users = [];
+
+    this.$onChanges = function (changesObj) {
+        console.log(changesObj);
     };
 
 }

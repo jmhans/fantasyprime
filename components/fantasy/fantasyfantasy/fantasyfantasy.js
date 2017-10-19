@@ -1,8 +1,8 @@
-﻿var fantasyFantasyModule = angular.module('fantasyfantasy', ['ui.router'])
+﻿var fantasyFantasyModule = angular.module('fantasyfantasy', ['ui.router', 'table-admin'])
 
 fantasyFantasyModule.config(function ($stateProvider) {
 
-    var state = {
+    var states = [{
         name: 'ff',
         parent: 'fantasyfootball',
         url: '/fantasyfantasy',
@@ -15,30 +15,43 @@ fantasyFantasyModule.config(function ($stateProvider) {
         },
         resolve: {
             allTeams: function (TeamsService) {
-                var a = TeamsService.getAllTeams();
+                //var a = TeamsService.getAllTeams();
+                var a = TeamsService.getPrimeTeams()
                 return a;
             }
         },
         requiresParams: false
-    };
+    },
 
-    $stateProvider.state(state);
+   
+    ];
+    states.forEach(function (st) {
+        $stateProvider.state(st);
+    });
+
 });
 
 
 
 fantasyFantasyModule.component('fantasyfantasy', {
-    bindings: { users: '<', allTeams: '<' },
+    bindings: { users: '=', allTeams: '<'},
     templateUrl: 'components/fantasy/fantasyfantasy/fantasyfantasy.html',
     controller: ffCtrl
 })
 
 
-function ffCtrl($http, $scope) {
+function ffCtrl($http, $scope, TeamsService, FFDBService) {
     //$scope.$parent.myTeams = allTeams;
 
     /*$scope.updateUsers = function () {
         $scope.onUserUpdate($scope.allTeams)
     }*/
 
+  //  $scope.val = TeamsService.getESPNDraftInfo('5437')
+
+    var a = 1;
+
 }
+
+
+// $scope.params = $routeParams;

@@ -13,36 +13,65 @@
 
         <div>
             <form class="form-inline">
-                <table datatable="ng" dt-options="$ctrl.dtOptions" dt-column-defs="$ctrl.dtColumnDefs" dt-instance="$ctrl.dtInstance"class="row-border hover stripe">
+                <table datatable="ng" dt-options="newThing.dtOptions" dt-columns="newThing.dtColumns" class="row-border hover display compact">
                     <thead>
+
                         <tr>
-                            <th>ID</th>
+                            <th>Team ID</th>
                             <th>Team Name</th>
-                            <th>Team Owner</th>
-                            <th>Position </th>
-                            <th></th>
+                            <th>Owner</th>
+                            <th>Position</th>
+
                         </tr>
                     </thead>
                     <tbody>
-                        <tr ng-repeat="rosterRec in $ctrl.roster">
-                            <td>{{ rosterRec.TeamID }}</td>
-                            <td>{{ rosterRec['TeamName (Ref Only)'] }}</td>
-                            <td>{{ rosterRec.Owner }}</td>
-                            <td><select ng-model="rosterRec.Position" ng-change="$ctrl.changePosition($index)">
+                        <tr ng-repeat="rosterRec in newThing.roster">
+                            <td>
+
+                                {{rosterRec.TeamID}}
+                            </td>
+                            <td>
+                                {{ rosterRec['TeamName (Ref Only)'] }}
+                            </td>
+                            <td>
+                                {{ rosterRec.Owner }}
+                            </td>
+                            <td>
+                                <select ng-model="rosterRec.Position" ng-change="newThing.updateRoster()">
                                     <option>Starter</option>
                                     <option>Bench</option>
-                                </select></td>
-                            <td>
-                               <!-- <button type="button" ng-click="$ctrl.removePerson($index)" class="btn btn-danger">Move to {{rosterRec.Position == 'Starter' ? 'Bench': 'Starter'}}</button>-->
+                                </select>
                             </td>
+
+                            
                         </tr>
+
                     </tbody>
+                    <tfoot>
+                        <tr ng-repeat="itemToAdd in $ctrl.itemsToAdd">
+                            <th>(auto)</th>
+                            <th><input type="text" ng-model="itemToAdd.owner" /></th>
+                            <th><input type="text" ng-model="itemToAdd.teamName" /></th>
+                            <th></th>
+                        
+                        </tr>
+                    </tfoot>
+
+
                 </table>
+
+
+
             </form>
         </div>
 
 
     </div>
 </div>
-<button ng-click="$ctrl.updateTeamRecord()">UpdateRecord</button>
+<select ng-change="newThing.updateRoster()" ng-model="myVar">
+    <option>Option 1</option>
+    <option>Option 2</option>
+    <option>Option 3</option>
+</select>
+<button ng-click="newThing.updateTeamRecord()">UpdateRecord</button>
 <button ui-sref="teams">Close</button>

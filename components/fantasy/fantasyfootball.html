@@ -20,8 +20,12 @@
                 {{selectedTeam.name}}<span class="caret"></span>
             </a>
             <ul class="dropdown-menu">
-                <li ng-repeat="tm in teams"><a ui-sref="teams.team.roster({teamId : {{tm.id}}})">{{tm.name}}</a></li>
+                <li ng-repeat="tm in $ctrl.users">{{tm}}</li>
             </ul>
+            <ul class="dropdown-menu">
+                <li ng-repeat="tm in teams"><a ui-sref="roster({teamId : {{tm.id}}})">{{tm.name}}</a></li>
+            </ul>
+
         </li>
     </ul>
 

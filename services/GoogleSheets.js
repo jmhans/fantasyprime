@@ -1,11 +1,12 @@
-﻿var ssID = '1yLdsc_2T9k6I1PVKManfbO6ZliNC1Auu4cLqqXIB_ns';
+﻿//var ssID = '1yLdsc_2T9k6I1PVKManfbO6ZliNC1Auu4cLqqXIB_ns';
+var ssID = '1Q2e_brKxu3aXer7-T1SUO7HLv9xr9STwNLHCR9YfKNc';
 // Note: All returnRanges will be sent back as a JSON object where the name of the element is the name of the sheet. (Or, technically, the stuff before the ! in the range name). 
 var returnRanges = [
-    'RosterRecords!A:G',
-    'Scores!A:Y',
-    'ScoreFlattener!A:V',
-    'Standings',
-    'Regular Season Standings'
+    'RosterRecords!A:G'
+    ,'Scores!A:Y'
+    //,'ScoreFlattener!A:V'
+    ,'Standings'//,
+    //'Regular Season Standings'
 ]
 
 
@@ -43,7 +44,13 @@ actuarialGamesModule.service('GoogleSheetsService', ['$rootScope', '$q', functio
     var deferred = $q.defer();
     
     var service = {
-
+        getRosters: function() {
+            return service.getData().then(function (data) {
+                return data.RosterRecords;
+            }, function (err) {
+                console.log('Failed: ' + err);
+            });
+        },
         getStandings: function () {
             
             return service.getData().then(function (data) {

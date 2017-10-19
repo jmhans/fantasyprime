@@ -1,0 +1,58 @@
+﻿<h3>Fantasy Fantasy Admin Page</h3>
+
+    <div ng-show="tableCtrl.showError()" class="alert alert-danger"><strong> Error: </strong> {{tableCtrl.error}}</div>
+    <div ng-show="tableCtrl.showSuccess()" class="alert alert-success"><strong> Success: </strong> {{tableCtrl.successMessage}}</div>
+    <div ng-show="tableCtrl.showStatus()" class="alert alert-info"><strong> Status: </strong> {{tableCtrl.statusMessage}}</div>
+    <table datatable="ng" dt-options="tableCtrl.dtOptions" dt-columns="tableCtrl.dtColumns" class="row-border hover display compact">
+        <thead>
+
+            <tr>
+                <th>ID</th>
+                <th>Owner</th>
+                <th>Team Name</th>
+                <th>Season</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr ng-repeat="rowObj in tableCtrl.tableRows">
+                <td>
+                    {{rowObj.id}}
+                </td>
+                <td>
+                    {{ rowObj.TEAM_OWNER }}
+                    <input ng-show="rowObj.editable" type="text" ng-model="rowObj.editTeamOwner" />
+                </td>
+                <td>
+                    {{ rowObj.TEAM_NAME }}
+                    <input ng-show="rowObj.editable" type="text" ng-model="rowObj.editTeamName" />
+                </td>
+                <td>
+                    {{rowObj.SEASON}}
+                    <input ng-show="rowObj.editable" type="text" ng-model="rowObj.editTeamSeason" />
+                </td>
+                <td>
+                    <button ng-show="!rowObj.editable" type="button" ng-click="tableCtrl.modifyItem(rowObj)" class="btn btn-info"><i class="fa fa-edit"></i></button>
+                    <button ng-show="rowObj.editable" ng-click="tableCtrl.updateItem(rowObj)" class="btn btn-success"><i class="fa fa-floppy-o"></i></button>
+                    <button ng-show="rowObj.editable" type="button" ng-click="tableCtrl.discardModifications(rowObj)" class="btn btn-warning"><i class="fa fa-window-close-o"></i></button>
+                    <button type="button" ng-show="tableCtrl.deleteOkay() && !rowObj.editable" ng-click="tableCtrl.deleteItem(rowObj)" class="btn btn-danger"><i class="fa fa-trash-o"></i></button>
+                </td>
+            </tr>
+
+        </tbody>
+        <tfoot>
+            <tr ng-repeat="itemToAdd in tableCtrl.itemsToAdd">
+                <th>(auto)</th>
+                <th><input type="text" ng-model="itemToAdd.owner" /></th>
+                <th><input type="text" ng-model="itemToAdd.teamName" /></th>
+                <th>(auto)</th>
+                <th>
+                    <button ng-click="tableCtrl.add(itemToAdd)" class="btn btn-success"><i class="fa fa-floppy-o"></i></button>
+                    <button type="button" ng-click="tableCtrl.removeNew(itemToAdd)" class="btn btn-warning"><i class="fa fa-window-close-o"></i></button>
+                </th>
+            </tr>
+        </tfoot>
+
+
+    </table>
+    <button ng-click="tableCtrl.addNew()"><i class="fa fa-plus"></i></button>

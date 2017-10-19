@@ -1,4 +1,7 @@
-﻿<a ui-sref="teams.team.roster({teamId : {{ ($ctrl.team.id) || '1' }} })">Roster</a> |
-<a ui-sref="teams.team.detail({teamId : {{ ($ctrl.team.id) || '1' }} })">Team Information</a>
+﻿<!--<a ui-sref="roster">Roster</a> | <a ui-sref="detail">Team Information</a>-->
 
-<ui-view></ui-view>
+
+<info team="$ctrl.team"></info>
+<roster roster="$ctrl.roster"></roster>
+
+

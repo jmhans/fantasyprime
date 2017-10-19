@@ -17,7 +17,7 @@ function testC() {
 function footballdexCtrl($http, DTOptionsBuilder, DTColumnDefBuilder, footballdexService, $scope , $state) {
     var vm = this;
 
-    vm.actionsAvailable = false;
+    vm.actionsAvailable = false; //True for testing only. Should be set back to false.
 
     vm.error = '';
     vm.successMessage = '';
