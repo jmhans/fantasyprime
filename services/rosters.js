@@ -1,4 +1,4 @@
-﻿fantasyFantasyModule.service('RostersService', ['GoogleSheetsService', function (GoogleSheetsService) {
+﻿fantasyFantasyModule.service('RostersService', ['GoogleSheetsService',  function (GoogleSheetsService) {
 
     var service = {
         getAllRosterRecords: function () {
@@ -15,9 +15,9 @@
         getActiveRosters: function () {
             function activeRecForTeam(teamRecs) {
                 return teamRecs.sort(function (a, b) {
-                    if (typeof(a.StartDate) !== 'undefined') {
-                    var aDate = new Date(a.StartDate.replace(/-/g, "/"));
-                    var bDate = new Date(b.StartDate.replace(/-/g, "/"));
+                    if (typeof(a.start_date) !== 'undefined') {
+                    var aDate = new Date(a.start_date.replace(/-/g, "/"));
+                    var bDate = new Date(b.start_date.replace(/-/g, "/"));
                     if (aDate < bDate)
                         return 1;
                     if (aDate > bDate)
@@ -29,15 +29,15 @@
             return service.getAllRosterRecords().then(function (rosterRecords) {
                 var activeRecords = [];
                 var sortedRosterRecords = rosterRecords.sort(function (a, b) {
-                    if (a.TeamID < b.TeamID)
+                    if (a.team_id < b.team_id)
                         return -1;
-                    if (a.TeamID > b.TeamID)
+                    if (a.team_id > b.team_id)
                         return 1;
                     return 0;
                 });
                 for (i = 0; i < sortedRosterRecords.length; i++) {
                     var teamRecords = rosterRecords.filter(function (rec) {
-                        return (rec.TeamID == sortedRosterRecords[i].TeamID);
+                        return (rec.team_id == sortedRosterRecords[i].team_id);
                     });
 
                     activeRecords.push( activeRecForTeam(teamRecords));
@@ -50,13 +50,14 @@
 
         getOwnerRoster: function (owner) {
             function rosterRecMatchesParam(rosterRec) {
-                return rosterRec.Owner === owner;
+                return rosterRec.prime_owner === owner;
             }
 
             return service.getActiveRosters().then(function (rosterRecords) {
                 return rosterRecords.filter(rosterRecMatchesParam)
             });
-        }
+        },
+
     }
 
     return service;

@@ -117,7 +117,7 @@ function tableAdminCtrl($http, DTOptionsBuilder, DTColumnBuilder, FFDBService, $
     vm.deleteItem = function (itemToDelete) {
         if (vm.actionsAvailable) {
             vm.statusMessage = 'Deleting Data'
-            $http.delete('http://actuarialgames.x10host.com/includes/api.php/prime_teams/' + itemToDelete.id).then(reloadData);
+            $http.delete('http://actuarialgames.x10host.com/includes/api.php/prime_owners/' + itemToDelete.id).then(reloadData);
         }
     };
 

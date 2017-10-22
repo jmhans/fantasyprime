@@ -28,9 +28,6 @@ fantasyFantasyModule.config(function ($stateProvider) {
           resolve: {
               teams: function (FFDBService) {
                   return FFDBService.getTeams();
-              },
-              fantasy_teams: function (RostersService) {
-                  return RostersService.getActiveRosters();
               }
 
           }
@@ -54,8 +51,8 @@ fantasyFantasyModule.config(function ($stateProvider) {
                   FFDBService.activeTeam = tm;
                   return tm;
               },
-              roster: function (RostersService, team) {
-                  return RostersService.getOwnerRoster(team.TEAM_NAME);
+              roster: function (FFDBService, team) {
+                  return FFDBService.getOwnerRoster(team.TEAM_NAME);
               }
           },
           params: {

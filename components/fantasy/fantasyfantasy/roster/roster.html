@@ -6,72 +6,45 @@
 
 
 <h4>Team Roster</h4>
-<div class="flex-h">
-    <div>
- 
-        <div class="alert alert-danger">(Note: not 'Position' field not actively connnected -- changing item does nothing...)</div>
+<div>
+    <table class="table table-striped table-sm table-condensed">
+        <thead>
 
-        <div>
-            <form class="form-inline">
-                <table datatable="ng" dt-options="newThing.dtOptions" dt-columns="newThing.dtColumns" class="row-border hover display compact">
-                    <thead>
+            <tr>
+                <th>Team ID</th>
+                <th>Team Name</th>
+                <th>Owner</th>
+                <th>Position</th>
 
-                        <tr>
-                            <th>Team ID</th>
-                            <th>Team Name</th>
-                            <th>Owner</th>
-                            <th>Position</th>
-
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr ng-repeat="rosterRec in newThing.roster">
-                            <td>
-
-                                {{rosterRec.TeamID}}
-                            </td>
-                            <td>
-                                {{ rosterRec['TeamName (Ref Only)'] }}
-                            </td>
-                            <td>
-                                {{ rosterRec.Owner }}
-                            </td>
-                            <td>
-                                <select ng-model="rosterRec.Position" ng-change="newThing.updateRoster()">
-                                    <option>Starter</option>
-                                    <option>Bench</option>
-                                </select>
-                            </td>
-
-                            
-                        </tr>
-
-                    </tbody>
-                    <tfoot>
-                        <tr ng-repeat="itemToAdd in $ctrl.itemsToAdd">
-                            <th>(auto)</th>
-                            <th><input type="text" ng-model="itemToAdd.owner" /></th>
-                            <th><input type="text" ng-model="itemToAdd.teamName" /></th>
-                            <th></th>
-                        
-                        </tr>
-                    </tfoot>
+            </tr>
+        </thead>
+        <tbody>
+            <tr ng-style='(rosterRec.position == "Bench") && {"background-color":"lightgray"}' ng-repeat="rosterRec in newThing.roster | orderBy: 'position': true">
+                <td>
+                    {{rosterRec.team_id}}
+                </td>
+                <td>
+                    {{ rosterRec.team_name }}
+                </td>
+                <td>
+                    {{ rosterRec.prime_owner }}
+                </td>
+                <td>
+                    <select ng-model="rosterRec.position" ng-change="newThing.updateRoster(rosterRec)">
+                        <option>Starter</option>
+                        <option>Bench</option>
+                    </select>
+                    <span ng-show="rosterRec.updating">Saving...</span>
+                </td>
 
 
-                </table>
+            </tr>
+
+        </tbody>
+        <tfoot>
+
+        </tfoot>
 
 
-
-            </form>
-        </div>
-
-
-    </div>
+    </table>
 </div>
-<select ng-change="newThing.updateRoster()" ng-model="myVar">
-    <option>Option 1</option>
-    <option>Option 2</option>
-    <option>Option 3</option>
-</select>
-<button ng-click="newThing.updateTeamRecord()">UpdateRecord</button>
-<button ui-sref="teams">Close</button>

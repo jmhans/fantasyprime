@@ -1,10 +1,9 @@
 <?php
 //var_dump($_SERVER['REQUEST_METHOD'],$_SERVER['PATH_INFO']); die();
-
 interface DatabaseInterface {
 	public function getSql($name);
 	public function connect($hostname,$username,$password,$database,$port,$socket,$charset);
-	public function query($sql,$params);
+	public function query($sql,$params=array());
 	public function fetchAssoc($result);
 	public function fetchRow($result);
 	public function insertId($result);
@@ -13,16 +12,20 @@ interface DatabaseInterface {
 	public function fetchFields($table);
 	public function addLimitToSql($sql,$limit,$offset);
 	public function likeEscape($string);
+	public function isNumericType($field);
 	public function isBinaryType($field);
-	public function base64Encode($string);
+	public function isGeometryType($field);
+	public function isJsonType($field);
 	public function getDefaultCharset();
+	public function beginTransaction();
+	public function commitTransaction();
+	public function rollbackTransaction();
+	public function jsonEncode($object);
+	public function jsonDecode($string);
 }
-
 class MySQL implements DatabaseInterface {
-
 	protected $db;
 	protected $queries;
-
 	public function __construct() {
 		$this->queries = array(
 			'list_tables'=>'SELECT
@@ -81,17 +84,28 @@ class MySQL implements DatabaseInterface {
 					k2."REFERENCED_TABLE_SCHEMA" = ? AND
 					k1."TABLE_NAME" COLLATE \'utf8_bin\' = k2."TABLE_NAME" COLLATE \'utf8_bin\' AND
 					k1."REFERENCED_TABLE_NAME" COLLATE \'utf8_bin\' = ? AND
-					k2."REFERENCED_TABLE_NAME" COLLATE \'utf8_bin\' IN ?'
+					k2."REFERENCED_TABLE_NAME" COLLATE \'utf8_bin\' IN ?',
+			'reflect_columns'=> 'SELECT
+					"COLUMN_NAME", "COLUMN_DEFAULT", "IS_NULLABLE", "DATA_TYPE", "CHARACTER_MAXIMUM_LENGTH"
+				FROM 
+					"INFORMATION_SCHEMA"."COLUMNS" 
+				WHERE 
+					"TABLE_NAME" = ? AND
+					"TABLE_SCHEMA" = ?
+				ORDER BY
+					"ORDINAL_POSITION"'
 		);
 	}
-
 	public function getSql($name) {
 		return isset($this->queries[$name])?$this->queries[$name]:false;
 	}
-
 	public function connect($hostname,$username,$password,$database,$port,$socket,$charset) {
-		$db = mysqli_connect($hostname,$username,$password,$database,$port,$socket);
-		if (mysqli_connect_errno()) {
+		$db = mysqli_init();
+		if (defined('MYSQLI_OPT_INT_AND_FLOAT_NATIVE')) {
+			mysqli_options($db,MYSQLI_OPT_INT_AND_FLOAT_NATIVE,true);
+		}
+		$success = mysqli_real_connect($db,$hostname,$username,$password,$database,$port,$socket,MYSQLI_CLIENT_FOUND_ROWS);
+		if (!$success) {
 			throw new \Exception('Connect failed. '.mysqli_connect_error());
 		}
 		if (!mysqli_set_charset($db,$charset)) {
@@ -102,92 +116,119 @@ class MySQL implements DatabaseInterface {
 		}
 		$this->db = $db;
 	}
-
-	public function query($sql,$params) {
+	public function query($sql,$params=array()) {
 		$db = $this->db;
 		$sql = preg_replace_callback('/\!|\?/', function ($matches) use (&$db,&$params) {
 			$param = array_shift($params);
-			if ($matches[0]=='!') return preg_replace('/[^a-zA-Z0-9\-_=<> ]/','',$param);
-			if (is_array($param)) return '('.implode(',',array_map(function($v) use (&$db) {
-				return "'".mysqli_real_escape_string($db,$v)."'";
-			},$param)).')';
-			if (is_object($param) && $param->type=='base64') {
-				return "x'".bin2hex(base64_decode($param->data))."'";
+			if ($matches[0]=='!') {
+				$key = preg_replace('/[^a-zA-Z0-9\-_=<> ]/','',is_object($param)?$param->key:$param);
+				if (is_object($param) && $param->type=='hex') {
+					return "HEX(\"$key\") as \"$key\"";
+				}
+				if (is_object($param) && $param->type=='wkt') {
+					return "ST_AsText(\"$key\") as \"$key\"";
+				}
+				return '"'.$key.'"';
+			} else {
+				if (is_array($param)) return '('.implode(',',array_map(function($v) use (&$db) {
+					return "'".mysqli_real_escape_string($db,$v)."'";
+				},$param)).')';
+				if (is_object($param) && $param->type=='hex') {
+					return "x'".$param->value."'";
+				}
+				if (is_object($param) && $param->type=='wkt') {
+					return "ST_GeomFromText('".mysqli_real_escape_string($db,$param->value)."')";
+				}
+				if ($param===null) return 'NULL';
+				return "'".mysqli_real_escape_string($db,$param)."'";
 			}
-			if ($param===null) return 'NULL';
-			return "'".mysqli_real_escape_string($db,$param)."'";
 		}, $sql);
-		//if (!strpos($sql,'INFORMATION_SCHEMA'))	echo "\n$sql\n";
+		//if (!strpos($sql,'INFORMATION_SCHEMA')) echo "\n$sql\n";
+		//if (!strpos($sql,'INFORMATION_SCHEMA')) file_put_contents('log.txt',"\n$sql\n",FILE_APPEND);
 		return mysqli_query($db,$sql);
 	}
-
 	public function fetchAssoc($result) {
 		return mysqli_fetch_assoc($result);
 	}
-
 	public function fetchRow($result) {
 		return mysqli_fetch_row($result);
 	}
-
 	public function insertId($result) {
 		return mysqli_insert_id($this->db);
 	}
-
 	public function affectedRows($result) {
 		return mysqli_affected_rows($this->db);
 	}
-
 	public function close($result) {
 		return mysqli_free_result($result);
 	}
-
 	public function fetchFields($table) {
-		$result = $this->query('SELECT * FROM "!" WHERE 1=2;',array($table));
+		$result = $this->query('SELECT * FROM ! WHERE 1=2;',array($table));
 		return mysqli_fetch_fields($result);
 	}
-
 	public function addLimitToSql($sql,$limit,$offset) {
 		return "$sql LIMIT $limit OFFSET $offset";
 	}
-
 	public function likeEscape($string) {
 		return addcslashes($string,'%_');
 	}
-
+	public function convertFilter($field, $comparator, $value) {
+		return false;
+	}
+	public function isNumericType($field) {
+		return in_array($field->type,array(1,2,3,4,5,6,8,9));
+	}
 	public function isBinaryType($field) {
 		//echo "$field->name: $field->type ($field->flags)\n";
-		return (($field->flags & 128) && ($field->type>=249) && ($field->type<=252));
+		return (($field->flags & 128) && (($field->type>=249 && $field->type<=252) || ($field->type>=253 && $field->type<=254 && $field->charsetnr==63)));
 	}
-
-	public function base64Encode($string) {
-		return base64_encode($string);
+	public function isGeometryType($field) {
+		return ($field->type==255);
 	}
-
+	public function isJsonType($field) {
+		return ($field->type==245);
+	}
 	public function getDefaultCharset() {
 		return 'utf8';
 	}
-
+	public function beginTransaction() {
+		mysqli_query($this->db,'BEGIN');
+		//return mysqli_begin_transaction($this->db);
+	}
+	public function commitTransaction() {
+		mysqli_query($this->db,'COMMIT');
+		//return mysqli_commit($this->db);
+	}
+	public function rollbackTransaction() {
+		mysqli_query($this->db,'ROLLBACK');
+		//return mysqli_rollback($this->db);
+	}
+	public function jsonEncode($object) {
+		return json_encode($object);
+	}
+	public function jsonDecode($string) {
+		return json_decode($string);
+	}
 }
-
 class PostgreSQL implements DatabaseInterface {
-
 	protected $db;
 	protected $queries;
-
 	public function __construct() {
 		$this->queries = array(
 			'list_tables'=>'select
-					"table_name","table_comment"
+					"table_name",\'\' as "table_comment"
 				from
 					"information_schema"."tables"
 				where
+					"table_schema" = \'public\' and
 					"table_catalog" = ?',
 			'reflect_table'=>'select
 					"table_name"
 				from
 					"information_schema"."tables"
 				where
-					"table_name" like ? and
+					"table_name" = ? and
+					"table_schema" = \'public\' and
 					"table_catalog" = ?',
 			'reflect_pk'=>'select
 					"column_name"
@@ -198,6 +239,7 @@ class PostgreSQL implements DatabaseInterface {
 					tc."constraint_type" = \'PRIMARY KEY\' and
 					tc."constraint_name" = ku."constraint_name" and
 					ku."table_name" = ? and
+					ku."table_schema" = \'public\' and
 					ku."table_catalog" = ?',
 			'reflect_belongs_to'=>'select
 					cu1."table_name",cu1."column_name",
@@ -211,6 +253,8 @@ class PostgreSQL implements DatabaseInterface {
 					cu2."constraint_name" = rc."unique_constraint_name" and
 					cu1."table_name" = ? and
 					cu2."table_name" in ? and
+					cu1."table_schema" = \'public\' and
+					cu2."table_schema" = \'public\' and
 					cu1."table_catalog" = ? and
 					cu2."table_catalog" = ?',
 			'reflect_has_many'=>'select
@@ -225,6 +269,8 @@ class PostgreSQL implements DatabaseInterface {
 					cu2."constraint_name" = rc."unique_constraint_name" and
 					cu1."table_name" in ? and
 					cu2."table_name" = ? and
+					cu1."table_schema" = \'public\' and
+					cu2."table_schema" = \'public\' and
 					cu1."table_catalog" = ? and
 					cu2."table_catalog" = ?',
 			'reflect_habtm'=>'select
@@ -248,16 +294,28 @@ class PostgreSQL implements DatabaseInterface {
 					cub1."table_catalog" = ? and
 					cua2."table_catalog" = ? and
 					cub2."table_catalog" = ? and
+					cua1."table_schema" = \'public\' and
+					cub1."table_schema" = \'public\' and
+					cua2."table_schema" = \'public\' and
+					cub2."table_schema" = \'public\' and
 					cua1."table_name" = cub1."table_name" and
 					cua2."table_name" = ? and
-					cub2."table_name" in ?'
+					cub2."table_name" in ?',
+			'reflect_columns'=> 'select
+					"column_name", "column_default", "is_nullable", "data_type", "character_maximum_length"
+				from 
+					"information_schema"."columns" 
+				where
+					"table_name" = ? and
+					"table_schema" = \'public\' and
+					"table_catalog" = ?
+				order by
+					"ordinal_position"'
 		);
 	}
-
 	public function getSql($name) {
 		return isset($this->queries[$name])?$this->queries[$name]:false;
 	}
-
 	public function connect($hostname,$username,$password,$database,$port,$socket,$charset) {
 		$e = function ($v) { return str_replace(array('\'','\\'),array('\\\'','\\\\'),$v); };
 		$conn_string = '';
@@ -289,20 +347,32 @@ class PostgreSQL implements DatabaseInterface {
 		$db = pg_connect($conn_string);
 		$this->db = $db;
 	}
-
-	public function query($sql,$params) {
+	public function query($sql,$params=array()) {
 		$db = $this->db;
 		$sql = preg_replace_callback('/\!|\?/', function ($matches) use (&$db,&$params) {
 			$param = array_shift($params);
-			if ($matches[0]=='!') return preg_replace('/[^a-zA-Z0-9\-_=<> ]/','',$param);
-			if (is_array($param)) return '('.implode(',',array_map(function($v) use (&$db) {
-				return "'".pg_escape_string($db,$v)."'";
-			},$param)).')';
-			if (is_object($param) && $param->type=='base64') {
-				return "'\x".bin2hex(base64_decode($param->data))."'";
+			if ($matches[0]=='!') {
+				$key = preg_replace('/[^a-zA-Z0-9\-_=<> ]/','',is_object($param)?$param->key:$param);
+				if (is_object($param) && $param->type=='hex') {
+					return "encode(\"$key\",'hex') as \"$key\"";
+				}
+				if (is_object($param) && $param->type=='wkt') {
+					return "ST_AsText(\"$key\") as \"$key\"";
+				}
+				return '"'.$key.'"';
+			} else {
+				if (is_array($param)) return '('.implode(',',array_map(function($v) use (&$db) {
+					return "'".pg_escape_string($db,$v)."'";
+				},$param)).')';
+				if (is_object($param) && $param->type=='hex') {
+					return "'\x".$param->value."'";
+				}
+				if (is_object($param) && $param->type=='wkt') {
+					return "ST_GeomFromText('".pg_escape_string($db,$param->value)."')";
+				}
+				if ($param===null) return 'NULL';
+				return "'".pg_escape_string($db,$param)."'";
 			}
-			if ($param===null) return 'NULL';
-			return "'".pg_escape_string($db,$param)."'";
 		}, $sql);
 		if (strtoupper(substr($sql,0,6))=='INSERT') {
 			$sql .= ' RETURNING id;';
@@ -310,30 +380,24 @@ class PostgreSQL implements DatabaseInterface {
 		//echo "\n$sql\n";
 		return @pg_query($db,$sql);
 	}
-
 	public function fetchAssoc($result) {
 		return pg_fetch_assoc($result);
 	}
-
 	public function fetchRow($result) {
 		return pg_fetch_row($result);
 	}
-
 	public function insertId($result) {
 		list($id) = pg_fetch_row($result);
 		return (int)$id;
 	}
-
 	public function affectedRows($result) {
 		return pg_affected_rows($result);
 	}
-
 	public function close($result) {
 		return pg_free_result($result);
 	}
-
 	public function fetchFields($table) {
-		$result = $this->query('SELECT * FROM "!" WHERE 1=2;',array($table));
+		$result = $this->query('SELECT * FROM ! WHERE 1=2;',array($table));
 		$keys = array();
 		for($i=0;$i<pg_num_fields($result);$i++) {
 			$field = array();
@@ -343,34 +407,49 @@ class PostgreSQL implements DatabaseInterface {
 		}
 		return $keys;
 	}
-
 	public function addLimitToSql($sql,$limit,$offset) {
 		return "$sql LIMIT $limit OFFSET $offset";
 	}
-
 	public function likeEscape($string) {
 		return addcslashes($string,'%_');
 	}
-
+	public function convertFilter($field, $comparator, $value) {
+		return false;
+	}
+	public function isNumericType($field) {
+		return in_array($field->type, array('int2', 'int4', 'int8', 'float4', 'float8'));
+	}
 	public function isBinaryType($field) {
 		return $field->type == 'bytea';
 	}
-
-	public function base64Encode($string) {
-		return base64_encode(hex2bin(substr($string,2)));
+	public function isGeometryType($field) {
+		return $field->type == 'geometry';
 	}
-
+	public function isJsonType($field) {
+		return in_array($field->type,array('json','jsonb'));
+	}
 	public function getDefaultCharset() {
 		return 'UTF8';
 	}
-
+	public function beginTransaction() {
+		return $this->query('BEGIN');
+	}
+	public function commitTransaction() {
+		return $this->query('COMMIT');
+	}
+	public function rollbackTransaction() {
+		return $this->query('ROLLBACK');
+	}
+	public function jsonEncode($object) {
+		return json_encode($object);
+	}
+	public function jsonDecode($string) {
+		return json_decode($string);
+	}
 }
-
 class SQLServer implements DatabaseInterface {
-
 	protected $db;
 	protected $queries;
-
 	public function __construct() {
 		$this->queries = array(
 			'list_tables'=>'SELECT
@@ -384,7 +463,7 @@ class SQLServer implements DatabaseInterface {
 				FROM
 					"INFORMATION_SCHEMA"."TABLES"
 				WHERE
-					"TABLE_NAME" LIKE ? AND
+					"TABLE_NAME" = ? AND
 					"TABLE_CATALOG" = ?',
 			'reflect_pk'=>'SELECT
 					"COLUMN_NAME"
@@ -447,14 +526,21 @@ class SQLServer implements DatabaseInterface {
 					cub2."TABLE_CATALOG" = ? AND
 					cua1."TABLE_NAME" = cub1."TABLE_NAME" AND
 					cua2."TABLE_NAME" = ? AND
-					cub2."TABLE_NAME" IN ?'
+					cub2."TABLE_NAME" IN ?',
+			'reflect_columns'=> 'SELECT
+					"COLUMN_NAME", "COLUMN_DEFAULT", "IS_NULLABLE", "DATA_TYPE", "CHARACTER_MAXIMUM_LENGTH"
+				FROM 
+					"INFORMATION_SCHEMA"."COLUMNS" 
+				WHERE 
+					"TABLE_NAME" LIKE ? AND
+					"TABLE_CATALOG" = ?
+				ORDER BY
+					"ORDINAL_POSITION"'
 		);
 	}
-
 	public function getSql($name) {
 		return isset($this->queries[$name])?$this->queries[$name]:false;
 	}
-
 	public function connect($hostname,$username,$password,$database,$port,$socket,$charset) {
 		$connectionInfo = array();
 		if ($port) $hostname.=','.$port;
@@ -464,7 +550,6 @@ class SQLServer implements DatabaseInterface {
 		if ($charset) $connectionInfo['CharacterSet']=$charset;
 		$connectionInfo['QuotedId']=1;
 		$connectionInfo['ReturnDatesAsStrings']=1;
-
 		$db = sqlsrv_connect($hostname, $connectionInfo);
 		if (!$db) {
 			throw new \Exception('Connect failed. '.print_r( sqlsrv_errors(), true));
@@ -474,8 +559,7 @@ class SQLServer implements DatabaseInterface {
 		}
 		$this->db = $db;
 	}
-
-	public function query($sql,$params) {
+	public function query($sql,$params=array()) {
 		$args = array();
 		$db = $this->db;
 		$sql = preg_replace_callback('/\!|\?/', function ($matches) use (&$db,&$params,&$args) {
@@ -483,25 +567,34 @@ class SQLServer implements DatabaseInterface {
 			$i++;
 			$param = $params[$i];
 			if ($matches[0]=='!') {
-				return preg_replace('/[^a-zA-Z0-9\-_=<> ]/','',$param);
-			}
-			// This is workaround because SQLSRV cannot accept NULL in a param
-			if ($matches[0]=='?' && is_null($param)) {
-				return 'NULL';
-			}
-			if (is_array($param)) {
-				$args = array_merge($args,$param);
-				return '('.implode(',',str_split(str_repeat('?',count($param)))).')';
-			}
-			if (is_object($param)) {
-				switch($param->type) {
-					case 'base64':
-						$args[] = bin2hex(base64_decode($param->data));
-						return 'CONVERT(VARBINARY(MAX),?,2)';
+				$key = preg_replace('/[^a-zA-Z0-9\-_=<> ]/','',is_object($param)?$param->key:$param);
+				if (is_object($param) && $param->type=='hex') {
+					return "CONVERT(varchar(max), \"$key\", 2) as \"$key\"";
 				}
+				if (is_object($param) && $param->type=='wkt') {
+					return "\"$key\".STAsText() as \"$key\"";
+				}
+				return '"'.$key.'"';
+			} else {
+				// This is workaround because SQLSRV cannot accept NULL in a param
+				if ($matches[0]=='?' && is_null($param)) {
+					return 'NULL';
+				}
+				if (is_array($param)) {
+					$args = array_merge($args,$param);
+					return '('.implode(',',str_split(str_repeat('?',count($param)))).')';
+				}
+				if (is_object($param) && $param->type=='hex') {
+					$args[] = $param->value;
+					return 'CONVERT(VARBINARY(MAX),?,2)';
+				}
+				if (is_object($param) && $param->type=='wkt') {
+					$args[] = $param->value;
+					return 'geometry::STGeomFromText(?,0)';
+				}
+				$args[] = $param;
+				return '?';
 			}
-			$args[] = $param;
-			return '?';
 		}, $sql);
 		//var_dump($params);
 		//echo "\n$sql\n";
@@ -512,35 +605,25 @@ class SQLServer implements DatabaseInterface {
 		}
 		return sqlsrv_query($db,$sql,$args)?:null;
 	}
-
 	public function fetchAssoc($result) {
-		$values = sqlsrv_fetch_array($result, SQLSRV_FETCH_ASSOC);
-		if ($values) $values = array_map(function($v){ return is_null($v)?null:(string)$v; },$values);
-		return $values;
+		return sqlsrv_fetch_array($result, SQLSRV_FETCH_ASSOC);
 	}
-
 	public function fetchRow($result) {
-		$values = sqlsrv_fetch_array($result, SQLSRV_FETCH_NUMERIC);
-		if ($values) $values = array_map(function($v){ return is_null($v)?null:(string)$v; },$values);
-		return $values;
+		return sqlsrv_fetch_array($result, SQLSRV_FETCH_NUMERIC);
 	}
-
 	public function insertId($result) {
 		sqlsrv_next_result($result);
 		sqlsrv_fetch($result);
 		return (int)sqlsrv_get_field($result, 0);
 	}
-
 	public function affectedRows($result) {
 		return sqlsrv_rows_affected($result);
 	}
-
 	public function close($result) {
 		return sqlsrv_free_stmt($result);
 	}
-
 	public function fetchFields($table) {
-		$result = $this->query('SELECT * FROM "!" WHERE 1=2;',array($table));
+		$result = $this->query('SELECT * FROM ! WHERE 1=2;',array($table));
 		//var_dump(sqlsrv_field_metadata($result));
 		return array_map(function($a){
 			$p = array();
@@ -550,33 +633,160 @@ class SQLServer implements DatabaseInterface {
 			return (object)$p;
 		},sqlsrv_field_metadata($result));
 	}
-
 	public function addLimitToSql($sql,$limit,$offset) {
 		return "$sql OFFSET $offset ROWS FETCH NEXT $limit ROWS ONLY";
 	}
-
 	public function likeEscape($string) {
 		return str_replace(array('%','_'),array('[%]','[_]'),$string);
 	}
-
+	public function convertFilter($field, $comparator, $value) {
+		$comparator = strtolower($comparator);
+		if ($comparator[0]!='n') {
+			switch ($comparator) {
+				case 'sco': return array('!.STContains(geometry::STGeomFromText(?,0))=1',$field,$value);
+				case 'scr': return array('!.STCrosses(geometry::STGeomFromText(?,0))=1',$field,$value);
+				case 'sdi': return array('!.STDisjoint(geometry::STGeomFromText(?,0))=1',$field,$value);
+				case 'seq': return array('!.STEquals(geometry::STGeomFromText(?,0))=1',$field,$value);
+				case 'sin': return array('!.STIntersects(geometry::STGeomFromText(?,0))=1',$field,$value);
+				case 'sov': return array('!.STOverlaps(geometry::STGeomFromText(?,0))=1',$field,$value);
+				case 'sto': return array('!.STTouches(geometry::STGeomFromText(?,0))=1',$field,$value);
+				case 'swi': return array('!.STWithin(geometry::STGeomFromText(?,0))=1',$field,$value);
+				case 'sic': return array('!.STIsClosed()=1',$field);
+				case 'sis': return array('!.STIsSimple()=1',$field);
+				case 'siv': return array('!.STIsValid()=1',$field);
+			}
+		} else {
+			switch ($comparator) {
+				case 'nsco': return array('!.STContains(geometry::STGeomFromText(?,0))=0',$field,$value);
+				case 'nscr': return array('!.STCrosses(geometry::STGeomFromText(?,0))=0',$field,$value);
+				case 'nsdi': return array('!.STDisjoint(geometry::STGeomFromText(?,0))=0',$field,$value);
+				case 'nseq': return array('!.STEquals(geometry::STGeomFromText(?,0))=0',$field,$value);
+				case 'nsin': return array('!.STIntersects(geometry::STGeomFromText(?,0))=0',$field,$value);
+				case 'nsov': return array('!.STOverlaps(geometry::STGeomFromText(?,0))=0',$field,$value);
+				case 'nsto': return array('!.STTouches(geometry::STGeomFromText(?,0))=0',$field,$value);
+				case 'nswi': return array('!.STWithin(geometry::STGeomFromText(?,0))=0',$field,$value);
+				case 'nsic': return array('!.STIsClosed()=0',$field);
+				case 'nsis': return array('!.STIsSimple()=0',$field);
+				case 'nsiv': return array('!.STIsValid()=0',$field);
+			}
+		}
+		return false;
+	}
+	public function isNumericType($field) {
+		return in_array($field->type,array(-6,-5,4,5,2,6,7));
+	}
 	public function isBinaryType($field) {
 		return ($field->type>=-4 && $field->type<=-2);
 	}
-
-	public function base64Encode($string) {
-		return base64_encode($string);
+	public function isGeometryType($field) {
+		return ($field->type==-151);
 	}
-
+	public function isJsonType($field) {
+		return ($field->type==-152);
+	}
 	public function getDefaultCharset() {
 		return 'UTF-8';
 	}
+	public function beginTransaction() {
+		return sqlsrv_begin_transaction($this->db);
+	}
+	public function commitTransaction() {
+		return sqlsrv_commit($this->db);
+	}
+	public function rollbackTransaction() {
+		return sqlsrv_rollback($this->db);
+	}
+	public function jsonEncode($object) {
+		$a = $object;
+		$d = new DOMDocument();
+		$c = $d->createElement("root");
+		$d->appendChild($c);
+		$t = function($v) {
+			$type = gettype($v);
+			switch($type) {
+				case 'integer': return 'number';
+				case 'double':  return 'number';
+				default: return strtolower($type);
+			}
+		};
+		$f = function($f,$c,$a,$s=false) use ($t,$d) {
+			$c->setAttribute('type', $t($a));
+			if ($t($a) != 'array' && $t($a) != 'object') {
+				if ($t($a) == 'boolean') {
+					$c->appendChild($d->createTextNode($a?'true':'false'));
+				} else {
+					$c->appendChild($d->createTextNode($a));
+				}
+			} else {
+				foreach($a as $k=>$v) {
+					if ($k == '__type' && $t($a) == 'object') {
+						$c->setAttribute('__type', $v);
+					} else {
+						if ($t($v) == 'object') {
+							$ch = $c->appendChild($d->createElementNS(null, $s ? 'item' : $k));
+							$f($f, $ch, $v);
+						} else if ($t($v) == 'array') {
+							$ch = $c->appendChild($d->createElementNS(null, $s ? 'item' : $k));
+							$f($f, $ch, $v, true);
+						} else {
+							$va = $d->createElementNS(null, $s ? 'item' : $k);
+							if ($t($v) == 'boolean') {
+								$va->appendChild($d->createTextNode($v?'true':'false'));
+							} else {
+								$va->appendChild($d->createTextNode($v));
+							}
+							$ch = $c->appendChild($va);
+							$ch->setAttribute('type', $t($v));
+						}
+					}
+				}
+			}
+		};
+		$f($f,$c,$a,$t($a)=='array');
+		return $d->saveXML($d->documentElement);
+	}
+	public function jsonDecode($string) {
+		$a = dom_import_simplexml(simplexml_load_string($string));
+		$t = function($v) {
+			return $v->getAttribute('type');
+		};
+		$f = function($f,$a) use ($t) {
+			$c = null;
+			if ($t($a)=='null') {
+				$c = null; 
+			} else if ($t($a)=='boolean') {
+				$b = substr(strtolower($a->textContent),0,1);
+				$c = in_array($b,array('1','t'));
+			} else if ($t($a)=='number') {
+				$c = $a->textContent+0; 
+			} else if ($t($a)=='string') {
+				$c = $a->textContent;
+			} else if ($t($a)=='object') {
+				$c = array();
+				if ($a->getAttribute('__type')) {
+					$c['__type'] = $a->getAttribute('__type');
+				}
+				for ($i=0;$i<$a->childNodes->length;$i++) {
+					$v = $a->childNodes[$i];
+					$c[$v->nodeName] = $f($f,$v);
+				}
+				$c = (object)$c;
+			} else if ($t($a)=='array') {
+				$c = array();
+				for ($i=0;$i<$a->childNodes->length;$i++) {
+					$v = $a->childNodes[$i];
+					$c[$i] = $f($f,$v);
+				}
+			}
+			return $c;
+		};
+		$c = $f($f,$a);
+		return $c;
+	}
 }
-
 class SQLite implements DatabaseInterface {
-
 	protected $db;
 	protected $queries;
-
 	public function __construct() {
 		$this->queries = array(
 			'list_tables'=>'SELECT
@@ -631,14 +841,20 @@ class SQLite implements DatabaseInterface {
 					? like "%" AND
 					k1."self" = k2."self" AND
 					k1."table" = ? AND
-					k2."table" IN ?'
+					k2."table" IN ?',
+			'reflect_columns'=> 'SELECT
+					"name", "dflt_value", case when "notnull"==1 then \'no\' else \'yes\' end as "nullable", "type", 2147483647
+				FROM 
+					"sys/columns"
+				WHERE 
+					"self"=?
+				ORDER BY
+					"cid"'
 		);
 	}
-
 	public function getSql($name) {
 		return isset($this->queries[$name])?$this->queries[$name]:false;
 	}
-
 	public function connect($hostname,$username,$password,$database,$port,$socket,$charset) {
 		$this->db = new SQLite3($database);
 		// optimizations
@@ -661,7 +877,7 @@ class SQLite implements DatabaseInterface {
 			$this->query('INSERT into "sys/version" ("version") VALUES (?)',array($version));
 			// update tables data
 			$this->query('DELETE FROM "sys/tables"');
-			$result = $this->query('SELECT * FROM sqlite_master WHERE type = "table" and name not like "sys/%" and name<>"sqlite_sequence"');
+			$result = $this->query('SELECT * FROM sqlite_master WHERE (type = "table" or type = "view") and name not like "sys/%" and name<>"sqlite_sequence"');
 			$tables = array();
 			while ($row = $this->fetchAssoc($result)) {
 				$tables[] = $row['name'];
@@ -684,50 +900,46 @@ class SQLite implements DatabaseInterface {
 			}
 		}
 	}
-
 	public function query($sql,$params=array()) {
 		$db = $this->db;
 		$sql = preg_replace_callback('/\!|\?/', function ($matches) use (&$db,&$params) {
 			$param = array_shift($params);
-			if ($matches[0]=='!') return preg_replace('/[^a-zA-Z0-9\-_=<> ]/','',$param);
-			if (is_array($param)) return '('.implode(',',array_map(function($v) use (&$db) {
-				return "'".$db->escapeString($v)."'";
-			},$param)).')';
-			if (is_object($param) && $param->type=='base64') {
-				return "x'".bin2hex(base64_decode($param->data))."'";
+			if ($matches[0]=='!') {
+				$key = preg_replace('/[^a-zA-Z0-9\-_=<> ]/','',is_object($param)?$param->key:$param);
+				return '"'.$key.'"';
+			} else {
+				if (is_array($param)) return '('.implode(',',array_map(function($v) use (&$db) {
+					return "'".$db->escapeString($v)."'";
+				},$param)).')';
+				if (is_object($param) && $param->type=='hex') {
+					return "'".$db->escapeString($param->value)."'";
+				}
+				if (is_object($param) && $param->type=='wkt') {
+					return "'".$db->escapeString($param->value)."'";
+				}
+				if ($param===null) return 'NULL';
+				return "'".$db->escapeString($param)."'";
 			}
-			if ($param===null) return 'NULL';
-			return "'".$db->escapeString($param)."'";
 		}, $sql);
 		//echo "\n$sql\n";
 		try {	$result=$db->query($sql); } catch(\Exception $e) { $result=null; }
 		return $result;
 	}
-
 	public function fetchAssoc($result) {
-		$values = $result->fetchArray(SQLITE3_ASSOC);
-		if ($values) $values = array_map(function($v){ return is_null($v)?null:(string)$v; },$values);
-		return $values;
+		return $result->fetchArray(SQLITE3_ASSOC);
 	}
-
 	public function fetchRow($result) {
-		$values = $result->fetchArray(SQLITE3_NUM);
-		if ($values) $values = array_map(function($v){ return is_null($v)?null:(string)$v; },$values);
-		return $values;
+		return $result->fetchArray(SQLITE3_NUM);
 	}
-
 	public function insertId($result) {
 		return $this->db->lastInsertRowID();
 	}
-
 	public function affectedRows($result) {
 		return $this->db->changes();
 	}
-
 	public function close($result) {
 		return $result->finalize();
 	}
-
 	public function fetchFields($table) {
 		$result = $this->query('SELECT * FROM "sys/columns" WHERE "self"=?;',array($table));
 		$fields = array();
@@ -736,60 +948,73 @@ class SQLite implements DatabaseInterface {
 		}
 		return $fields;
 	}
-
 	public function addLimitToSql($sql,$limit,$offset) {
 		return "$sql LIMIT $limit OFFSET $offset";
 	}
-
 	public function likeEscape($string) {
 		return addcslashes($string,'%_');
 	}
-
+	public function convertFilter($field, $comparator, $value) {
+		return false;
+	}
+	public function isNumericType($field) {
+		return in_array($field->type,array('integer','real'));
+	}
 	public function isBinaryType($field) {
-		return (substr($field->type,0,4)=='blob');
+		return (substr($field->type,0,4)=='data');
 	}
-
-	public function base64Encode($string) {
-		return base64_encode($string);
+	public function isGeometryType($field) {
+		return in_array($field->type,array('geometry'));
 	}
-
+	public function isJsonType($field) {
+		return in_array($field->type,array('json','jsonb'));
+	}
 	public function getDefaultCharset() {
 		return 'utf8';
 	}
-
+	public function beginTransaction() {
+		return $this->query('BEGIN');
+	}
+	public function commitTransaction() {
+		return $this->query('COMMIT');
+	}
+	public function rollbackTransaction() {
+		return $this->query('ROLLBACK');
+	}
+	public function jsonEncode($object) {
+		return json_encode($object);
+	}
+	public function jsonDecode($string) {
+		return json_decode($string);
+	}
 }
-
 class PHP_CRUD_API {
-
 	protected $db;
 	protected $settings;
-
 	protected function mapMethodToAction($method,$key) {
 		switch ($method) {
 			case 'OPTIONS': return 'headers';
-			case 'GET': return $key?'read':'list';
+			case 'GET': return ($key===false)?'list':'read';
 			case 'PUT': return 'update';
 			case 'POST': return 'create';
 			case 'DELETE': return 'delete';
+			case 'PATCH': return 'increment';
 			default: $this->exitWith404('method');
 		}
 		return false;
 	}
-
 	protected function parseRequestParameter(&$request,$characters) {
-		if (!$request) return false;
+		if ($request==='') return false;
 		$pos = strpos($request,'/');
 		$value = $pos?substr($request,0,$pos):$request;
 		$request = $pos?substr($request,$pos+1):'';
 		if (!$characters) return $value;
 		return preg_replace("/[^$characters]/",'',$value);
 	}
-
 	protected function parseGetParameter($get,$name,$characters) {
 		$value = isset($get[$name])?$get[$name]:false;
 		return $characters?preg_replace("/[^$characters]/",'',$value):$value;
 	}
-
 	protected function parseGetParameterArray($get,$name,$characters) {
 		$values = isset($get[$name])?$get[$name]:false;
 		if (!is_array($values)) $values = array($values);
@@ -800,7 +1025,37 @@ class PHP_CRUD_API {
 		}
 		return $values;
 	}
-
+	protected function applyBeforeHandler(&$action,&$database,&$table,&$ids,&$callback,&$inputs) {
+		if (is_callable($callback,true)) {
+			$max = count($ids)?:count($inputs);
+			$values = array('action'=>$action,'database'=>$database,'table'=>$table);
+			for ($i=0;$i<$max;$i++) {
+				$action = $values['action'];
+				$database = $values['database'];
+				$table = $values['table'];
+				if (!isset($ids[$i])) $ids[$i] = false;
+				if (!isset($inputs[$i])) $inputs[$i] = false;
+				$callback($action,$database,$table,$ids[$i],$inputs[$i]);
+			}
+		}
+	}
+	protected function applyAfterHandler($parameters,$outputs) {
+		$callback = $parameters['after'];
+		if (is_callable($callback,true)) {
+			$action = $parameters['action'];
+			$database = $parameters['database'];
+			$table = $parameters['tables'][0];
+			$ids = $parameters['key'][0];
+			$inputs = $parameters['inputs'];
+			$max = max(count($ids),count($inputs));
+			for ($i=0;$i<$max;$i++) {
+				$id = isset($ids[$i])?$ids[$i]:false;
+				$input = isset($inputs[$i])?$inputs[$i]:false;
+				$output = is_array($outputs)?$outputs[$i]:$outputs;
+				$callback($action,$database,$table,$id,$input,$output);
+			}
+		}
+	}
 	protected function applyTableAuthorizer($callback,$action,$database,&$tables) {
 		if (is_callable($callback,true)) foreach ($tables as $i=>$table) {
 			if (!$callback($action,$database,$table)) {
@@ -808,31 +1063,22 @@ class PHP_CRUD_API {
 			}
 		}
 	}
-
 	protected function applyRecordFilter($callback,$action,$database,$tables,&$filters) {
 		if (is_callable($callback,true)) foreach ($tables as $i=>$table) {
-			$f = $this->convertFilters($callback($action,$database,$table));
-			if ($f) {
-				if (!isset($filters[$table])) $filters[$table] = array();
-				if (!isset($filters[$table]['and'])) $filters[$table]['and'] = array();
-				$filters[$table]['and'] = array_merge($filters[$table]['and'],$f);
-			}
+			$this->addFilters($filters,$table,array($table=>'and'),$callback($action,$database,$table));
 		}
 	}
-
 	protected function applyTenancyFunction($callback,$action,$database,$fields,&$filters) {
 		if (is_callable($callback,true)) foreach ($fields as $table=>$keys) {
 			foreach ($keys as $field) {
 				$v = $callback($action,$database,$table,$field->name);
 				if ($v!==null) {
-					if (!isset($filters[$table])) $filters[$table] = array();
-					if (!isset($filters[$table]['and'])) $filters[$table]['and'] = array();
-					$filters[$table]['and'][] = array($field->name,is_array($v)?'IN':'=',$v);
+					if (is_array($v)) $this->addFilter($filters,$table,'and',$field->name,'in',implode(',',$v));
+					else $this->addFilter($filters,$table,'and',$field->name,'eq',$v);
 				}
 			}
 		}
 	}
-
 	protected function applyColumnAuthorizer($callback,$action,$database,&$fields) {
 		if (is_callable($callback,true)) foreach ($fields as $table=>$keys) {
 			foreach ($keys as $field) {
@@ -842,11 +1088,10 @@ class PHP_CRUD_API {
 			}
 		}
 	}
-
 	protected function applyInputTenancy($callback,$action,$database,$table,&$input,$keys) {
 		if (is_callable($callback,true)) foreach ($keys as $key=>$field) {
 			$v = $callback($action,$database,$table,$key);
-			if ($v!==null) {
+			if ($v!==null && (isset($input->$key) || $action=='create')) {
 				if (is_array($v)) {
 					if (!count($v)) {
 						$input->$key = null;
@@ -861,7 +1106,6 @@ class PHP_CRUD_API {
 			}
 		}
 	}
-
 	protected function applyInputSanitizer($callback,$action,$database,$table,&$input,$keys) {
 		if (is_callable($callback,true)) foreach ((array)$input as $key=>$value) {
 			if (isset($keys[$key])) {
@@ -869,7 +1113,6 @@ class PHP_CRUD_API {
 			}
 		}
 	}
-
 	protected function applyInputValidator($callback,$action,$database,$table,$input,$keys,$context) {
 		$errors = array();
 		if (is_callable($callback,true)) foreach ((array)$input as $key=>$value) {
@@ -880,7 +1123,6 @@ class PHP_CRUD_API {
 		}
 		if (!empty($errors)) $this->exitWith422($errors);
 	}
-
 	protected function processTableAndIncludeParameters($database,$table,$include,$action) {
 		$blacklist = array('information_schema','mysql','sys','pg_catalog');
 		if (in_array(strtolower($database), $blacklist)) return array();
@@ -900,7 +1142,6 @@ class PHP_CRUD_API {
 		}
 		return $table_list;
 	}
-
 	protected function exitWith404($type) {
 		if (isset($_SERVER['REQUEST_METHOD'])) {
 			header('Content-Type:',true,404);
@@ -909,7 +1150,6 @@ class PHP_CRUD_API {
 			throw new \Exception("Not found ($type)");
 		}
 	}
-
 	protected function exitWith422($object) {
 		if (isset($_SERVER['REQUEST_METHOD'])) {
 			header('Content-Type:',true,422);
@@ -918,11 +1158,10 @@ class PHP_CRUD_API {
 			throw new \Exception(json_encode($object));
 		}
 	}
-
 	protected function headersCommand($parameters) {
 		$headers = array();
-		$headers[]='Access-Control-Allow-Headers: Content-Type';
-		$headers[]='Access-Control-Allow-Methods: OPTIONS, GET, PUT, POST, DELETE';
+		$headers[]='Access-Control-Allow-Headers: Content-Type, X-XSRF-TOKEN';
+		$headers[]='Access-Control-Allow-Methods: OPTIONS, GET, PUT, POST, DELETE, PATCH';
 		$headers[]='Access-Control-Allow-Credentials: true';
 		$headers[]='Access-Control-Max-Age: 1728000';
 		if (isset($_SERVER['REQUEST_METHOD'])) {
@@ -930,27 +1169,13 @@ class PHP_CRUD_API {
 		} else {
 			echo json_encode($headers);
 		}
+		return false;
 	}
-
-	protected function startOutput($callback) {
-		if ($callback) {
-			if (isset($_SERVER['REQUEST_METHOD'])) {
-				header('Content-Type: application/javascript; charset=utf-8');
-			}
-			echo $callback.'(';
-		} else {
-			if (isset($_SERVER['REQUEST_METHOD'])) {
-				header('Content-Type: application/json; charset=utf-8');
-			}
+	protected function startOutput() {
+		if (isset($_SERVER['REQUEST_METHOD'])) {
+			header('Content-Type: application/json; charset=utf-8');
 		}
 	}
-
-	protected function endOutput($callback) {
-		if ($callback) {
-			echo ');';
-		}
-	}
-
 	protected function findPrimaryKeys($table,$database) {
 		$fields = array();
 		if ($result = $this->db->query($this->db->getSql('reflect_pk'),array($table,$database))) {
@@ -961,64 +1186,141 @@ class PHP_CRUD_API {
 		}
 		return $fields;
 	}
-
 	protected function processKeyParameter($key,$tables,$database) {
-		if (!$key) return false;
+		if ($key===false) return false;
 		$fields = $this->findPrimaryKeys($tables[0],$database);
 		if (count($fields)!=1) $this->exitWith404('1pk');
-		return array($key,$fields[0]);
+		return array(explode(',',$key),$fields[0]);
 	}
-
-	protected function processOrderParameter($order) {
-		if (!$order) return false;
-		$order = explode(',',$order,2);
-		if (count($order)<2) $order[1]='ASC';
-		if (!strlen($order[0])) return false;
-		$order[1] = strtoupper($order[1])=='DESC'?'DESC':'ASC';
-		return $order;
-	}
-
-	protected function convertFilter($field, $comparator, $value) {
-		switch (strtolower($comparator)) {
-			case 'cs': $comparator = 'LIKE'; $value = '%'.$this->db->likeEscape($value).'%'; break;
-			case 'sw': $comparator = 'LIKE'; $value = $this->db->likeEscape($value).'%'; break;
-			case 'ew': $comparator = 'LIKE'; $value = '%'.$this->db->likeEscape($value); break;
-			case 'eq': $comparator = '='; break;
-			case 'ne': $comparator = '<>'; break;
-			case 'lt': $comparator = '<'; break;
-			case 'le': $comparator = '<='; break;
-			case 'ge': $comparator = '>='; break;
-			case 'gt': $comparator = '>'; break;
-			case 'in': $comparator = 'IN'; $value = explode(',',$value); break;
-			case 'ni': $comparator = 'NOT IN'; $value = explode(',',$value); break;
-			case 'is': $comparator = 'IS'; $value = null; break;
-			case 'no': $comparator = 'IS NOT'; $value = null; break;
+	protected function processOrderingsParameter($orderings) {
+		if (!$orderings) return false;
+		foreach ($orderings as &$order) {
+			$order = explode(',',$order,2);
+			if (count($order)<2) $order[1]='ASC';
+			if (!strlen($order[0])) return false;
+			$direction = strtoupper($order[1]);
+			if (in_array($direction,array('ASC','DESC'))) {
+				$order[1] = $direction;
+			}
 		}
-		return array($field, $comparator, $value);
+		return $orderings;
 	}
-
-	protected function convertFilters($filters) {
-		$result = array();
-		if ($filters) {
-			for ($i=0;$i<count($filters);$i++) {
-				$filter = explode(',',$filters[$i],3);
-				if (count($filter)==3) {
-					$result[] = $this->convertFilter($filter[0],$filter[1],$filter[2]);
-				} elseif (count($filter)==2) {
-					$result[] = $this->convertFilter($filter[0],$filter[1],null);
+	protected function convertFilter($field, $comparator, $value) {
+		$result = $this->db->convertFilter($field,$comparator,$value);
+		if ($result) return $result;
+		// default behavior
+		$comparator = strtolower($comparator);
+		if ($comparator[0]!='n') {
+			if (strlen($comparator)==2) {
+				switch ($comparator) {
+					case 'cs': return array('! LIKE ?',$field,'%'.$this->db->likeEscape($value).'%');
+					case 'sw': return array('! LIKE ?',$field,$this->db->likeEscape($value).'%');
+					case 'ew': return array('! LIKE ?',$field,'%'.$this->db->likeEscape($value));
+					case 'eq': return array('! = ?',$field,$value);
+					case 'lt': return array('! < ?',$field,$value);
+					case 'le': return array('! <= ?',$field,$value);
+					case 'ge': return array('! >= ?',$field,$value);
+					case 'gt': return array('! > ?',$field,$value);
+					case 'bt':
+						$v = explode(',',$value);
+						if (count($v)<2) return false;
+						return array('! BETWEEN ? AND ?',$field,$v[0],$v[1]);
+					case 'in': return array('! IN ?',$field,explode(',',$value));
+					case 'is': return array('! IS NULL',$field);
+				}
+			} else {
+				switch ($comparator) {
+					case 'sco': return array('ST_Contains(!,ST_GeomFromText(?))=TRUE',$field,$value);
+					case 'scr': return array('ST_Crosses(!,ST_GeomFromText(?))=TRUE',$field,$value);
+					case 'sdi': return array('ST_Disjoint(!,ST_GeomFromText(?))=TRUE',$field,$value);
+					case 'seq': return array('ST_Equals(!,ST_GeomFromText(?))=TRUE',$field,$value);
+					case 'sin': return array('ST_Intersects(!,ST_GeomFromText(?))=TRUE',$field,$value);
+					case 'sov': return array('ST_Overlaps(!,ST_GeomFromText(?))=TRUE',$field,$value);
+					case 'sto': return array('ST_Touches(!,ST_GeomFromText(?))=TRUE',$field,$value);
+					case 'swi': return array('ST_Within(!,ST_GeomFromText(?))=TRUE',$field,$value);
+					case 'sic': return array('ST_IsClosed(!)=TRUE',$field);
+					case 'sis': return array('ST_IsSimple(!)=TRUE',$field);
+					case 'siv': return array('ST_IsValid(!)=TRUE',$field);
+				}
+			}
+		} else {
+			if (strlen($comparator)==2) {
+				switch ($comparator) {
+					case 'ne': return $this->convertFilter($field, 'neq', $value); // deprecated
+					case 'ni': return $this->convertFilter($field, 'nin', $value); // deprecated
+					case 'no': return $this->convertFilter($field, 'nis', $value); // deprecated
+				}
+			} elseif (strlen($comparator)==3) {
+				switch ($comparator) {
+					case 'ncs': return array('! NOT LIKE ?',$field,'%'.$this->db->likeEscape($value).'%');
+					case 'nsw': return array('! NOT LIKE ?',$field,$this->db->likeEscape($value).'%');
+					case 'new': return array('! NOT LIKE ?',$field,'%'.$this->db->likeEscape($value));
+					case 'neq': return array('! <> ?',$field,$value);
+					case 'nlt': return array('! >= ?',$field,$value);
+					case 'nle': return array('! > ?',$field,$value);
+					case 'nge': return array('! < ?',$field,$value);
+					case 'ngt': return array('! <= ?',$field,$value);
+					case 'nbt':
+						$v = explode(',',$value);
+						if (count($v)<2) return false;
+						return array('! NOT BETWEEN ? AND ?',$field,$v[0],$v[1]);
+					case 'nin': return array('! NOT IN ?',$field,explode(',',$value));
+					case 'nis': return array('! IS NOT NULL',$field);
+				}
+			} else {
+				switch ($comparator) {
+					case 'nsco': return array('ST_Contains(!,ST_GeomFromText(?))=FALSE',$field,$value);
+					case 'nscr': return array('ST_Crosses(!,ST_GeomFromText(?))=FALSE',$field,$value);
+					case 'nsdi': return array('ST_Disjoint(!,ST_GeomFromText(?))=FALSE',$field,$value);
+					case 'nseq': return array('ST_Equals(!,ST_GeomFromText(?))=FALSE',$field,$value);
+					case 'nsin': return array('ST_Intersects(!,ST_GeomFromText(?))=FALSE',$field,$value);
+					case 'nsov': return array('ST_Overlaps(!,ST_GeomFromText(?))=FALSE',$field,$value);
+					case 'nsto': return array('ST_Touches(!,ST_GeomFromText(?))=FALSE',$field,$value);
+					case 'nswi': return array('ST_Within(!,ST_GeomFromText(?))=FALSE',$field,$value);
+					case 'nsic': return array('ST_IsClosed(!)=FALSE',$field);
+					case 'nsis': return array('ST_IsSimple(!)=FALSE',$field);
+					case 'nsiv': return array('ST_IsValid(!)=FALSE',$field);
 				}
 			}
 		}
-		return $result;
+		return false;
 	}
-
-	protected function processFiltersParameter($tables,$satisfy,$filters) {
-		$result = $this->convertFilters($filters);
-		if (!$result) return array();
-		$and = ($satisfy && strtolower($satisfy)=='any')?'or':'and';
-		return array($tables[0]=>array($and=>$result));
+	public function addFilter(&$filters,$table,$and,$field,$comparator,$value) {
+		if (!isset($filters[$table])) $filters[$table] = array();
+		if (!isset($filters[$table][$and])) $filters[$table][$and] = array();
+		$filter = $this->convertFilter($field,$comparator,$value);
+		if ($filter) $filters[$table][$and][] = $filter;
 	}
-
+	public function addFilters(&$filters,$table,$satisfy,$filterStrings) {
+		if ($filterStrings) {
+			for ($i=0;$i<count($filterStrings);$i++) {
+				$parts = explode(',',$filterStrings[$i],3);
+				if (count($parts)>=2) {
+					if (strpos($parts[0],'.')) list($t,$f) = explode('.',$parts[0],2);
+					else list($t,$f) = array($table,$parts[0]);
+					$comparator = $parts[1];
+					$value = isset($parts[2])?$parts[2]:null;
+					$and = isset($satisfy[$t])?$satisfy[$t]:'and';
+					$this->addFilter($filters,$t,$and,$f,$comparator,$value);
+				}
+			}
+		}
+	}
+	protected function processSatisfyParameter($tables,$satisfyString) {
+		$satisfy = array();
+		foreach (explode(',',$satisfyString) as $str) {
+			if (strpos($str,'.')) list($t,$s) = explode('.',$str,2);
+			else list($t,$s) = array($tables[0],$str);
+			$and = ($s && strtolower($s)=='any')?'or':'and';
+			$satisfy[$t] = $and;
+		}
+		return $satisfy;
+	}
+	protected function processFiltersParameter($tables,$satisfy,$filterStrings) {
+		$filters = array();
+		$this->addFilters($filters,$tables[0],$satisfy,$filterStrings);
+		return $filters;
+	}
 	protected function processPageParameter($page) {
 		if (!$page) return false;
 		$page = explode(',',$page,2);
@@ -1026,87 +1328,181 @@ class PHP_CRUD_API {
 		$page[0] = ($page[0]-1)*$page[1];
 		return $page;
 	}
-
 	protected function retrieveObject($key,$fields,$filters,$tables) {
 		if (!$key) return false;
 		$table = $tables[0];
+		$params = array();
 		$sql = 'SELECT ';
-		$sql .= '"'.implode('","',array_keys($fields[$table])).'"';
-		$sql .= ' FROM "!"';
-		$params = array($table);
-		if (!isset($filters[$table])) $filters[$table] = array();
-		if (!isset($filters[$table]['or'])) $filters[$table]['or'] = array();
-		$filters[$table]['or'][] = array($key[1],'=',$key[0]);
+		$this->convertOutputs($sql,$params,$fields[$table]);
+		$sql .= ' FROM !';
+		$params[] = $table;
+		$this->addFilter($filters,$table,'and',$key[1],'eq',$key[0][0]);
 		$this->addWhereFromFilters($filters[$table],$sql,$params);
 		$object = null;
 		if ($result = $this->db->query($sql,$params)) {
-			$object = $this->db->fetchAssoc($result);
-			foreach ($fields[$table] as $field) {
-				if ($this->db->isBinaryType($field) && $object[$field->name]) {
-					$object[$field->name] = $this->db->base64Encode($object[$field->name]);
-				}
-			}
+			$object = $this->fetchAssoc($result,$fields[$table]);
 			$this->db->close($result);
 		}
 		return $object;
 	}
-
+	protected function retrieveObjects($key,$fields,$filters,$tables) {
+		$keyField = $key[1];
+		$keys = $key[0];
+		$rows = array();
+		foreach ($keys as $key) {
+			$result = $this->retrieveObject(array(array($key),$keyField),$fields,$filters,$tables);
+			if ($result===null) {
+				return null;
+			}
+			$rows[] = $result;
+		}
+		return $rows;
+	}
 	protected function createObject($input,$tables) {
 		if (!$input) return false;
 		$input = (array)$input;
-		$keys = implode('","',str_split(str_repeat('!', count($input))));
+		$keys = implode(',',str_split(str_repeat('!', count($input))));
 		$values = implode(',',str_split(str_repeat('?', count($input))));
 		$params = array_merge(array_keys($input),array_values($input));
 		array_unshift($params, $tables[0]);
-		$result = $this->db->query('INSERT INTO "!" ("'.$keys.'") VALUES ('.$values.')',$params);
+		$result = $this->db->query('INSERT INTO ! ('.$keys.') VALUES ('.$values.')',$params);
 		if (!$result) return null;
-		return $this->db->insertId($result);
+		$insertId = $this->db->insertId($result);
+		return $insertId;
 	}
-
+	protected function createObjects($inputs,$tables) {
+		if (!$inputs) return false;
+		$ids = array();
+		$this->db->beginTransaction();
+		foreach ($inputs as $input) {
+			$result = $this->createObject($input,$tables);
+			if ($result===null) {
+				$this->db->rollbackTransaction();
+				return null;
+			}
+			$ids[] = $result;
+		}
+		$this->db->commitTransaction();
+		return $ids;
+	}
 	protected function updateObject($key,$input,$filters,$tables) {
-		if (!$input) return false;
+		if (!$input) return null;
 		$input = (array)$input;
 		$table = $tables[0];
-		$sql = 'UPDATE "!" SET ';
+		$sql = 'UPDATE ! SET ';
 		$params = array($table);
-		foreach (array_keys($input) as $i=>$k) {
-			if ($i) $sql .= ',';
+		foreach (array_keys($input) as $j=>$k) {
+			if ($j) $sql .= ',';
 			$v = $input[$k];
-			$sql .= '"!"=?';
+			$sql .= '!=?';
 			$params[] = $k;
 			$params[] = $v;
 		}
-		if (!isset($filters[$table])) $filters[$table] = array();
-		if (!isset($filters[$table]['or'])) $filters[$table]['or'] = array();
-		$filters[$table]['or'][] = array($key[1],'=',$key[0]);
+		$this->addFilter($filters,$table,'and',$key[1],'eq',$key[0][0]);
 		$this->addWhereFromFilters($filters[$table],$sql,$params);
 		$result = $this->db->query($sql,$params);
 		if (!$result) return null;
 		return $this->db->affectedRows($result);
 	}
-
+	protected function updateObjects($key,$inputs,$filters,$tables) {
+		if (!$inputs) return null;
+		$keyField = $key[1];
+		$keys = $key[0];
+		if (count(array_filter($inputs))!=count(array_filter($keys))) {
+			$this->exitWith404('subject');
+		}
+		$rows = array();
+		$this->db->beginTransaction();
+		foreach ($inputs as $i=>$input) {
+			$result = $this->updateObject(array(array($keys[$i]),$keyField),$input,$filters,$tables);
+			if ($result===null) {
+				$this->db->rollbackTransaction();
+				return null;
+			}
+			$rows[] = $result;
+		}
+		$this->db->commitTransaction();
+		return $rows;
+	}
 	protected function deleteObject($key,$filters,$tables) {
 		$table = $tables[0];
-		$sql = 'DELETE FROM "!"';
+		$sql = 'DELETE FROM !';
 		$params = array($table);
-		if (!isset($filters[$table])) $filters[$table] = array();
-		if (!isset($filters[$table]['or'])) $filters[$table]['or'] = array();
-		$filters[$table]['or'][] = array($key[1],'=',$key[0]);
+		$this->addFilter($filters,$table,'and',$key[1],'eq',$key[0][0]);
 		$this->addWhereFromFilters($filters[$table],$sql,$params);
 		$result = $this->db->query($sql,$params);
 		if (!$result) return null;
 		return $this->db->affectedRows($result);
 	}
-
+	protected function deleteObjects($key,$filters,$tables) {
+		$keyField = $key[1];
+		$keys = $key[0];
+		$rows = array();
+		$this->db->beginTransaction();
+		foreach ($keys as $key) {
+			$result = $this->deleteObject(array(array($key),$keyField),$filters,$tables);
+			if ($result===null) {
+				$this->db->rollbackTransaction();
+				return null;
+			}
+			$rows[] = $result;
+		}
+		$this->db->commitTransaction();
+		return $rows;
+	}
+	protected function incrementObject($key,$input,$filters,$tables,$fields) {
+		if (!$input) return null;
+		$input = (array)$input;
+		$table = $tables[0];
+		$sql = 'UPDATE ! SET ';
+		$params = array($table);
+		foreach (array_keys($input) as $j=>$k) {
+			if ($j) $sql .= ',';
+			$v = $input[$k];
+			if ($this->db->isNumericType($fields[$table][$k])) {
+				$sql .= '!=!+?';
+				$params[] = $k;
+				$params[] = $k;
+				$params[] = $v;
+			} else {
+				$sql .= '!=!';
+				$params[] = $k;
+				$params[] = $k;
+			}
+		}
+		$this->addFilter($filters,$table,'and',$key[1],'eq',$key[0][0]);
+		$this->addWhereFromFilters($filters[$table],$sql,$params);
+		$result = $this->db->query($sql,$params);
+		if (!$result) return null;
+		return $this->db->affectedRows($result);
+	}
+	protected function incrementObjects($key,$inputs,$filters,$tables,$fields) {
+		if (!$inputs) return null;
+		$keyField = $key[1];
+		$keys = $key[0];
+		if (count(array_filter($inputs))!=count(array_filter($keys))) {
+			$this->exitWith404('subject');
+		}
+		$rows = array();
+		$this->db->beginTransaction();
+		foreach ($inputs as $i=>$input) {
+			$result = $this->incrementObject(array(array($keys[$i]),$keyField),$input,$filters,$tables,$fields);
+			if ($result===null) {
+				$this->db->rollbackTransaction();
+				return null;
+			}
+			$rows[] = $result;
+		}
+		$this->db->commitTransaction();
+		return $rows;
+	}
 	protected function findRelations($tables,$database,$auto_include) {
 		$tableset = array();
 		$collect = array();
 		$select = array();
-
 		while (count($tables)>1) {
 			$table0 = array_shift($tables);
 			$tableset[] = $table0;
-
 			$result = $this->db->query($this->db->getSql('reflect_belongs_to'),array($table0,$tables,$database,$database));
 			while ($row = $this->db->fetchRow($result)) {
 				if (!$auto_include && !in_array($row[0],array_merge($tables,$tableset))) continue;
@@ -1137,48 +1533,51 @@ class PHP_CRUD_API {
 		$tableset = array_unique($tableset);
 		return array($tableset,$collect,$select);
 	}
-
-	protected function retrieveInput($post) {
-		$input = (object)array();
-		$data = trim(file_get_contents($post));
-		if (strlen($data)>0) {
-			if ($data[0]=='{') {
-				$input = json_decode($data);
-			} else {
-				parse_str($data, $input);
-				foreach ($input as $key => $value) {
-					if (substr($key,-9)=='__is_null') {
-						$input[substr($key,0,-9)] = null;
-						unset($input[$key]);
-					}
+	protected function retrieveInputs($data) {
+		if (strlen($data)==0) {
+			$input = false;
+		} else if ($data[0]=='{' || $data[0]=='[') {
+			$input = json_decode($data);
+		} else {
+			parse_str($data, $input);
+			foreach ($input as $key => $value) {
+				if (substr($key,-9)=='__is_null') {
+					$input[substr($key,0,-9)] = null;
+					unset($input[$key]);
 				}
-				$input = (object)$input;
+			}
+			$input = (object)$input;
+		}
+		return is_array($input)?$input:array($input);
+	}
+	protected function getRelationShipColumns($select) {
+		$keep = array();
+		foreach ($select as $table=>$keys) {
+			foreach ($keys as $key=>$other) {
+				if (!isset($keep[$table])) $keep[$table] = array();
+				$keep[$table][$key]=true;
+				list($table2,$key2) = $other;
+				if (!isset($keep[$table2])) $keep[$table2] = array();
+				$keep[$table2][$key2]=true;
 			}
 		}
-		return $input;
+		return $keep;
 	}
-
-	protected function addRelationColumns($columns,$select) {
-		if ($columns) {
-			foreach ($select as $table=>$keys) {
-				foreach ($keys as $key=>$other) {
-					$columns.=",$table.$key,".implode('.',$other);
-				}
-		  }
-		}
-		return $columns;
-	}
-
-	protected function findFields($tables,$columns,$database) {
+	protected function findFields($tables,$columns,$exclude,$select,$database) {
 		$fields = array();
+		if ($select && ($columns || $exclude)) {
+			$keep = $this->getRelationShipColumns($select);
+		} else {
+			$keep = false;
+		}
 		foreach ($tables as $i=>$table) {
 			$fields[$table] = $this->findTableFields($table,$database);
-			$fields[$table] = $this->filterFieldsByColumns($fields[$table],$columns,$i==0,$table);
+			$fields[$table] = $this->filterFieldsByColumns($fields[$table],$columns,$keep,$i==0,$table);
+			$fields[$table] = $this->filterFieldsByExclude($fields[$table],$exclude,$keep,$i==0,$table);
 		}
 		return $fields;
 	}
-
-	protected function filterFieldsByColumns($fields,$columns,$first,$table) {
+	protected function filterFieldsByColumns($fields,$columns,$keep,$first,$table) {
 		if ($columns) {
 			$columns = explode(',',$columns);
 			foreach (array_keys($fields) as $key) {
@@ -1194,12 +1593,36 @@ class PHP_CRUD_API {
 						}
 					}
 				}
-				if ($delete) unset($fields[$key]);
+				if ($delete && !isset($keep[$table][$key])) {
+					unset($fields[$key]);
+				}
 			}
 		}
 		return $fields;
 	}
-
+	protected function filterFieldsByExclude($fields,$exclude,$keep,$first,$table) {
+		if ($exclude) {
+			$columns = explode(',',$exclude);
+			foreach (array_keys($fields) as $key) {
+				$delete = false;
+				foreach ($columns as $column) {
+					if (strpos($column,'.')) {
+						if ($column=="$table.$key" || $column=="$table.*") {
+							$delete = true;
+						}
+					} elseif ($first) {
+						if ($column==$key || $column=="*") {
+							$delete = true;
+						}
+					}
+				}
+				if ($delete && !isset($keep[$table][$key])) {
+					unset($fields[$key]);
+				}
+			}
+		}
+		return $fields;
+	}
 	protected function findTableFields($table,$database) {
 		$fields = array();
 		foreach ($this->db->fetchFields($table) as $field) {
@@ -1207,7 +1630,6 @@ class PHP_CRUD_API {
 		}
 		return $fields;
 	}
-
 	protected function filterInputByFields($input,$fields) {
 		if ($fields) foreach (array_keys((array)$input) as $key) {
 			if (!isset($fields[$key])) {
@@ -1216,65 +1638,108 @@ class PHP_CRUD_API {
 		}
 		return $input;
 	}
-
-	protected function convertBinary(&$input,$keys) {
-		foreach ($keys as $key=>$field) {
+	protected function convertInputs(&$input,$fields) {
+		foreach ($fields as $key=>$field) {
 			if (isset($input->$key) && $input->$key && $this->db->isBinaryType($field)) {
-				$data = $input->$key;
-				$data = str_pad(strtr($data, '-_', '+/'), strlen($data) % 4, '=', STR_PAD_RIGHT);
-				$input->$key = (object)array('type'=>'base64','data'=>$data);
+				$value = $input->$key;
+				$value = str_pad(strtr($value, '-_', '+/'), ceil(strlen($value) / 4) * 4, '=', STR_PAD_RIGHT);
+				$input->$key = (object)array('type'=>'hex','value'=>bin2hex(base64_decode($value)));
+			}
+			if (isset($input->$key) && $input->$key && $this->db->isGeometryType($field)) {
+				$input->$key = (object)array('type'=>'wkt','value'=>$input->$key);
+			}
+			if (isset($input->$key) && $input->$key && $this->db->isJsonType($field)) {
+				$input->$key = $this->db->jsonEncode($input->$key);
 			}
 		}
 	}
-
+	protected function convertOutputs(&$sql, &$params, $fields) {
+		$sql .= implode(',',str_split(str_repeat('!',count($fields))));
+		foreach ($fields as $key=>$field) {
+			if ($this->db->isBinaryType($field)) {
+				$params[] = (object)array('type'=>'hex','key'=>$key);
+			}
+			else if ($this->db->isGeometryType($field)) {
+				$params[] = (object)array('type'=>'wkt','key'=>$key);
+			}
+			else {
+				$params[] = $key;
+			}
+		}
+	}
+	protected function convertTypes($result,&$values,&$fields) {
+		foreach ($values as $i=>$v) {
+			if (is_string($v)) {
+				if ($this->db->isNumericType($fields[$i])) {
+					$values[$i] = $v + 0;
+				}
+				else if ($this->db->isBinaryType($fields[$i])) {
+					$values[$i] = base64_encode(pack("H*",$v));
+				}
+				else if ($this->db->isJsonType($fields[$i])) {
+					$values[$i] = $this->db->jsonDecode($v);
+				}
+			}
+		}
+	}
+	protected function fetchAssoc($result,$fields=false) {
+		$values = $this->db->fetchAssoc($result);
+		if ($values && $fields) {
+			$this->convertTypes($result,$values,$fields);
+		}
+		return $values;
+	}
+	protected function fetchRow($result,$fields=false) {
+		$values = $this->db->fetchRow($result,$fields);
+		if ($values && $fields) {
+			$fields = array_values($fields);
+			$this->convertTypes($result,$values,$fields);
+		}
+		return $values;
+	}
 	protected function getParameters($settings) {
 		extract($settings);
-
 		$table     = $this->parseRequestParameter($request, 'a-zA-Z0-9\-_');
-		$key       = $this->parseRequestParameter($request, 'a-zA-Z0-9\-_'); // auto-increment or uuid
+		$key       = $this->parseRequestParameter($request, 'a-zA-Z0-9\-_,'); // auto-increment or uuid
 		$action    = $this->mapMethodToAction($method,$key);
 		$include   = $this->parseGetParameter($get, 'include', 'a-zA-Z0-9\-_,');
-		$callback  = $this->parseGetParameter($get, 'callback', 'a-zA-Z0-9\-_');
 		$page      = $this->parseGetParameter($get, 'page', '0-9,');
 		$filters   = $this->parseGetParameterArray($get, 'filter', false);
-		$satisfy   = $this->parseGetParameter($get, 'satisfy', 'a-zA-Z');
+		$satisfy   = $this->parseGetParameter($get, 'satisfy', 'a-zA-Z0-9\-_,.');
 		$columns   = $this->parseGetParameter($get, 'columns', 'a-zA-Z0-9\-_,.*');
-		$order     = $this->parseGetParameter($get, 'order', 'a-zA-Z0-9\-_,');
+		$exclude   = $this->parseGetParameter($get, 'exclude', 'a-zA-Z0-9\-_,.*');
+		$orderings = $this->parseGetParameterArray($get, 'order', 'a-zA-Z0-9\-_,');
 		$transform = $this->parseGetParameter($get, 'transform', 't1');
-
 		$tables    = $this->processTableAndIncludeParameters($database,$table,$include,$action);
 		$key       = $this->processKeyParameter($key,$tables,$database);
+		$satisfy   = $this->processSatisfyParameter($tables,$satisfy);
 		$filters   = $this->processFiltersParameter($tables,$satisfy,$filters);
 		$page      = $this->processPageParameter($page);
-		$order     = $this->processOrderParameter($order);
-
+		$orderings = $this->processOrderingsParameter($orderings);
 		// reflection
 		list($tables,$collect,$select) = $this->findRelations($tables,$database,$auto_include);
-		$columns = $this->addRelationColumns($columns,$select);
-		$fields = $this->findFields($tables,$columns,$database);
-
+		$fields = $this->findFields($tables,$columns,$exclude,$select,$database);
 		// permissions
 		if ($table_authorizer) $this->applyTableAuthorizer($table_authorizer,$action,$database,$tables);
 		if (!isset($tables[0])) $this->exitWith404('entity');
 		if ($record_filter) $this->applyRecordFilter($record_filter,$action,$database,$tables,$filters);
 		if ($tenancy_function) $this->applyTenancyFunction($tenancy_function,$action,$database,$fields,$filters);
 		if ($column_authorizer) $this->applyColumnAuthorizer($column_authorizer,$action,$database,$fields);
-
-		if ($post) {
-			// input
-			$context = $this->retrieveInput($post);
+		// input
+		$inputs = $this->retrieveInputs($post);
+		foreach ($inputs as $k=>$context) {
 			$input = $this->filterInputByFields($context,$fields[$tables[0]]);
-
 			if ($tenancy_function) $this->applyInputTenancy($tenancy_function,$action,$database,$tables[0],$input,$fields[$tables[0]]);
 			if ($input_sanitizer) $this->applyInputSanitizer($input_sanitizer,$action,$database,$tables[0],$input,$fields[$tables[0]]);
 			if ($input_validator) $this->applyInputValidator($input_validator,$action,$database,$tables[0],$input,$fields[$tables[0]],$context);
-
-			$this->convertBinary($input,$fields[$tables[0]]);
+			$this->convertInputs($input,$fields[$tables[0]]);
+			$inputs[$k] = $input;
 		}
-
-		return compact('action','database','tables','key','callback','page','filters','fields','order','transform','input','collect','select');
+		if ($before) {
+			$this->applyBeforeHandler($action,$database,$tables[0],$key[0],$before,$inputs);
+		}
+		return compact('action','database','tables','key','page','filters','fields','orderings','transform','inputs','collect','select','before','after');
 	}
-
 	protected function addWhereFromFilters($filters,&$sql,&$params) {
 		$first = true;
 		if (isset($filters['or'])) {
@@ -1282,25 +1747,31 @@ class PHP_CRUD_API {
 			$sql .= ' WHERE (';
 			foreach ($filters['or'] as $i=>$filter) {
 				$sql .= $i==0?'':' OR ';
-				$sql .= '"!" ! ?';
-				$params[] = $filter[0];
-				$params[] = $filter[1];
-				$params[] = $filter[2];
+				$sql .= $filter[0];
+				for ($i=1;$i<count($filter);$i++) {
+					$params[] = $filter[$i];
+				}
 			}
 			$sql .= ')';
 		}
 		if (isset($filters['and'])) {
 			foreach ($filters['and'] as $i=>$filter) {
 				$sql .= $first?' WHERE ':' AND ';
-				$sql .= '"!" ! ?';
-				$params[] = $filter[0];
-				$params[] = $filter[1];
-				$params[] = $filter[2];
+				$sql .= $filter[0];
+				for ($i=1;$i<count($filter);$i++) {
+					$params[] = $filter[$i];
+				}
 				$first = false;
 			}
 		}
 	}
-
+	protected function addOrderByFromOrderings($orderings,&$sql,&$params) {
+		foreach ($orderings as $i=>$ordering) {
+			$sql .= $i==0?' ORDER BY ':', ';
+			$sql .= '! '.$ordering[1];
+			$params[] = $ordering[0];
+		}
+	}
 	protected function listCommandInternal($parameters) {
 		extract($parameters);
 		echo '{';
@@ -1308,58 +1779,46 @@ class PHP_CRUD_API {
 		// first table
 		$count = false;
 		echo '"'.$table.'":{';
-		if (is_array($order) && is_array($page)) {
+		if (is_array($orderings) && is_array($page)) {
 			$params = array();
-			$sql = 'SELECT COUNT(*) FROM "!"';
+			$sql = 'SELECT COUNT(*) FROM !';
 			$params[] = $table;
 			if (isset($filters[$table])) {
 					$this->addWhereFromFilters($filters[$table],$sql,$params);
 			}
 			if ($result = $this->db->query($sql,$params)) {
 				while ($pages = $this->db->fetchRow($result)) {
-					$count = $pages[0];
+					$count = (int)$pages[0];
 				}
 			}
 		}
 		$params = array();
 		$sql = 'SELECT ';
-		$sql .= '"'.implode('","',array_keys($fields[$table])).'"';
-		$sql .= ' FROM "!"';
+		$this->convertOutputs($sql,$params,$fields[$table]);
+		$sql .= ' FROM !';
 		$params[] = $table;
 		if (isset($filters[$table])) {
-				$this->addWhereFromFilters($filters[$table],$sql,$params);
+			$this->addWhereFromFilters($filters[$table],$sql,$params);
 		}
-		if (is_array($order)) {
-			$sql .= ' ORDER BY "!" !';
-			$params[] = $order[0];
-			$params[] = $order[1];
+		if (is_array($orderings)) {
+			$this->addOrderByFromOrderings($orderings,$sql,$params);
 		}
-		if (is_array($order) && is_array($page)) {
+		if (is_array($orderings) && is_array($page)) {
 			$sql = $this->db->addLimitToSql($sql,$page[1],$page[0]);
 		}
 		if ($result = $this->db->query($sql,$params)) {
 			echo '"columns":';
-			$keys = array();
-			$base64 = array();
-			foreach ($fields[$table] as $field) {
-				$base64[] = $this->db->isBinaryType($field);
-				$keys[] = $field->name;
-			}
+			$keys = array_keys($fields[$table]);
 			echo json_encode($keys);
 			$keys = array_flip($keys);
 			echo ',"records":[';
 			$first_row = true;
-			while ($row = $this->db->fetchRow($result)) {
+			while ($row = $this->fetchRow($result,$fields[$table])) {
 				if ($first_row) $first_row = false;
 				else echo ',';
 				if (isset($collect[$table])) {
 					foreach (array_keys($collect[$table]) as $field) {
 						$collect[$table][$field][] = $row[$keys[$field]];
-					}
-				}
-				foreach ($base64 as $k=>$v) {
-					if ($v && $row[$k]) {
-						$row[$k] = $this->db->base64Encode($row[$k]);
 					}
 				}
 				echo json_encode($row);
@@ -1376,8 +1835,8 @@ class PHP_CRUD_API {
 			echo '"'.$table.'":{';
 			$params = array();
 			$sql = 'SELECT ';
-			$sql .= '"'.implode('","',array_keys($fields[$table])).'"';
-			$sql .= ' FROM "!"';
+			$this->convertOutputs($sql,$params,$fields[$table]);
+			$sql .= ' FROM !';
 			$params[] = $table;
 			if (isset($select[$table])) {
 				echo '"relations":{';
@@ -1385,43 +1844,31 @@ class PHP_CRUD_API {
 				foreach ($select[$table] as $field => $path) {
 					$values = $collect[$path[0]][$path[1]];
 					if ($values) {
-						if (!isset($filters[$table])) $filters[$table] = array();
-						if (!isset($filters[$table]['or'])) $filters[$table]['or'] = array();
-						$filters[$table]['or'][] = array($field,'IN',$values);
+						$this->addFilter($filters,$table,'and',$field,'in',implode(',',$values));
 					}
 					if ($first_row) $first_row = false;
 					else echo ',';
 					echo '"'.$field.'":"'.implode('.',$path).'"';
 				}
 				echo '}';
-				if (isset($filters[$table])) {
-					$this->addWhereFromFilters($filters[$table],$sql,$params);
-				}
+			}
+			if (isset($filters[$table])) {
+				$this->addWhereFromFilters($filters[$table],$sql,$params);
 			}
 			if ($result = $this->db->query($sql,$params)) {
 				if (isset($select[$table])) echo ',';
 				echo '"columns":';
-				$keys = array();
-				$base64 = array();
-				foreach ($fields[$table] as $field) {
-					$base64[] = $this->db->isBinaryType($field);
-					$keys[] = $field->name;
-				}
+				$keys = array_keys($fields[$table]);
 				echo json_encode($keys);
 				$keys = array_flip($keys);
 				echo ',"records":[';
 				$first_row = true;
-				while ($row = $this->db->fetchRow($result)) {
+				while ($row = $this->fetchRow($result,$fields[$table])) {
 					if ($first_row) $first_row = false;
 					else echo ',';
 					if (isset($collect[$table])) {
 						foreach (array_keys($collect[$table]) as $field) {
 							$collect[$table][$field][]=$row[$keys[$field]];
-						}
-					}
-					foreach ($base64 as $k=>$v) {
-						if ($v && $row[$k]) {
-							$row[$k] = $this->db->base64Encode($row[$k]);
 						}
 					}
 					echo json_encode($row);
@@ -1433,42 +1880,41 @@ class PHP_CRUD_API {
 		}
 		echo '}';
 	}
-
 	protected function readCommand($parameters) {
 		extract($parameters);
-		$object = $this->retrieveObject($key,$fields,$filters,$tables);
+		if (count($key[0])>1) $object = $this->retrieveObjects($key,$fields,$filters,$tables);
+		else $object = $this->retrieveObject($key,$fields,$filters,$tables);
 		if (!$object) $this->exitWith404('object');
-		$this->startOutput($callback);
+		$this->startOutput();
 		echo json_encode($object);
-		$this->endOutput($callback);
+		return false;
 	}
-
 	protected function createCommand($parameters) {
 		extract($parameters);
-		if (!$input) $this->exitWith404('input');
-		$this->startOutput($callback);
-		echo json_encode($this->createObject($input,$tables));
-		$this->endOutput($callback);
+		if (!$inputs || !$inputs[0]) $this->exitWith404('input');
+		if (count($inputs)>1) return $this->createObjects($inputs,$tables);
+		return $this->createObject($inputs[0],$tables);
 	}
-
 	protected function updateCommand($parameters) {
 		extract($parameters);
-		if (!$input) $this->exitWith404('subject');
-		$this->startOutput($callback);
-		echo json_encode($this->updateObject($key,$input,$filters,$tables));
-		$this->endOutput($callback);
+		if (!$inputs || !$inputs[0]) $this->exitWith404('subject');
+		if (count($inputs)>1) return $this->updateObjects($key,$inputs,$filters,$tables);
+		return $this->updateObject($key,$inputs[0],$filters,$tables);
 	}
-
 	protected function deleteCommand($parameters) {
 		extract($parameters);
-		$this->startOutput($callback);
-		echo json_encode($this->deleteObject($key,$filters,$tables));
-		$this->endOutput($callback);
+		if (count($key[0])>1) return $this->deleteObjects($key,$filters,$tables);
+		return $this->deleteObject($key,$filters,$tables);
 	}
-
+	protected function incrementCommand($parameters) {
+		extract($parameters);
+		if (!$inputs || !$inputs[0]) $this->exitWith404('subject');
+		if (count($inputs)>1) return $this->incrementObjects($key,$inputs,$filters,$tables,$fields);
+		return $this->incrementObject($key,$inputs[0],$filters,$tables,$fields);
+	}
 	protected function listCommand($parameters) {
 		extract($parameters);
-		$this->startOutput($callback);
+		$this->startOutput();
 		if ($transform) {
 			ob_start();
 		}
@@ -1479,12 +1925,25 @@ class PHP_CRUD_API {
 			$data = json_decode($content,true);
 			echo json_encode(self::php_crud_api_transform($data));
 		}
-		$this->endOutput($callback);
+		return false;
 	}
-
+	protected function retrievePostData() {
+		if ($_FILES) {
+			$files = array();
+			foreach ($_FILES as $name => $file) {
+				foreach ($file as $key => $value) {
+					switch ($key) {
+						case 'tmp_name': $files[$name] = $value?base64_encode(file_get_contents($value)):''; break;
+						default: $files[$name.'_'.$key] = $value;
+					}
+				}
+			}
+			return http_build_query(array_merge($files,$_POST));
+		}
+		return file_get_contents('php://input');
+	}
 	public function __construct($config) {
 		extract($config);
-
 		// initialize
 		$dbengine = isset($dbengine)?$dbengine:null;
 		$hostname = isset($hostname)?$hostname:null;
@@ -1494,22 +1953,22 @@ class PHP_CRUD_API {
 		$port = isset($port)?$port:null;
 		$socket = isset($socket)?$socket:null;
 		$charset = isset($charset)?$charset:null;
-
 		$table_authorizer = isset($table_authorizer)?$table_authorizer:null;
 		$record_filter = isset($record_filter)?$record_filter:null;
 		$column_authorizer = isset($column_authorizer)?$column_authorizer:null;
 		$tenancy_function = isset($tenancy_function)?$tenancy_function:null;
 		$input_sanitizer = isset($input_sanitizer)?$input_sanitizer:null;
 		$input_validator = isset($input_validator)?$input_validator:null;
-		$extensions = isset($extensions)?$extensions:null;
 		$auto_include = isset($auto_include)?$auto_include:null;
-
+		$allow_origin = isset($allow_origin)?$allow_origin:null;
+		$before = isset($before)?$before:null;
+		$after = isset($after)?$after:null;
 		$db = isset($db)?$db:null;
 		$method = isset($method)?$method:null;
 		$request = isset($request)?$request:null;
 		$get = isset($get)?$get:null;
 		$post = isset($post)?$post:null;
-
+		$origin = isset($origin)?$origin:null;
 		// defaults
 		if (!$dbengine) {
 			$dbengine = 'MySQL';
@@ -1521,19 +1980,22 @@ class PHP_CRUD_API {
 			$request = isset($_SERVER['PATH_INFO'])?$_SERVER['PATH_INFO']:'';
 			if (!$request) {
 				$request = isset($_SERVER['ORIG_PATH_INFO'])?$_SERVER['ORIG_PATH_INFO']:'';
+				$request = $request!=$_SERVER['SCRIPT_NAME']?$request:'';
 			}
 		}
 		if (!$get) {
 			$get = $_GET;
 		}
 		if (!$post) {
-			$post = 'php://input';
+			$post = $this->retrievePostData();
 		}
-
+		if (!$origin) {
+			$origin = isset($_SERVER['HTTP_ORIGIN'])?$_SERVER['HTTP_ORIGIN']:'';
+		}
 		// connect
 		$request = trim($request,'/');
 		if (!$database) {
-			$database  = $this->parseRequestParameter($request, 'a-zA-Z0-9\-_');
+			$database = $this->parseRequestParameter($request, 'a-zA-Z0-9\-_');
 		}
 		if (!$db) {
 			$db = new $dbengine();
@@ -1542,17 +2004,15 @@ class PHP_CRUD_API {
 			}
 			$db->connect($hostname,$username,$password,$database,$port,$socket,$charset);
 		}
-		if ($extensions===null) {
-			$extensions = true;
-		}
 		if ($auto_include===null) {
 			$auto_include = true;
 		}
-
+		if ($allow_origin===null) {
+			$allow_origin = '*';
+		}
 		$this->db = $db;
-		$this->settings = compact('method', 'request', 'get', 'post', 'database', 'table_authorizer', 'record_filter', 'column_authorizer', 'tenancy_function', 'input_sanitizer', 'input_validator', 'extensions', 'auto_include');
+		$this->settings = compact('method', 'request', 'get', 'post', 'origin', 'database', 'table_authorizer', 'record_filter', 'column_authorizer', 'tenancy_function', 'input_sanitizer', 'input_validator', 'before', 'after', 'auto_include', 'allow_origin');
 	}
-
 	public static function php_crud_api_transform(&$tables) {
 		$get_objects = function (&$tables,$table_name,$where_index=false,$match_value=false) use (&$get_objects) {
 			$objects = array();
@@ -1590,10 +2050,8 @@ class PHP_CRUD_API {
 		}
 		return $tree;
 	}
-
 	protected function swagger($settings) {
 		extract($settings);
-
 		$tables = array();
 		if ($result = $this->db->query($this->db->getSql('list_tables'),array($database))) {
 			while ($row = $this->db->fetchRow($result)) {
@@ -1608,33 +2066,57 @@ class PHP_CRUD_API {
 						array('name'=>'read','method'=>'get'),
 						array('name'=>'update','method'=>'put'),
 						array('name'=>'delete','method'=>'delete'),
+						array('name'=>'increment','method'=>'patch'),
 					),
 				);
 				$tables[] = $table;
 			}
 			$this->db->close($result);
 		}
-
+		$table_names = array_map(function($v){ return $v['name'];},$tables);
 		foreach ($tables as $t=>$table)	{
 			$table_list = array($table['name']);
-			$table_fields = $this->findFields($table_list,false,$database);
-			$table_names = array_map(function($v){ return $v['name'];},$tables);
+			$table_fields = $this->findFields($table_list,false,false,false,$database);
 			
-			if ($extensions) {
-				$result = $this->db->query($this->db->getSql('reflect_belongs_to'),array($table_list[0],$table_names,$database,$database));
-				while ($row = $this->db->fetchRow($result)) {
-					$table_fields[$table['name']][$row[1]]->references=array($row[2],$row[3]);
-				}
-				$result = $this->db->query($this->db->getSql('reflect_has_many'),array($table_names,$table_list[0],$database,$database));
-				while ($row = $this->db->fetchRow($result)) {
-					$table_fields[$table['name']][$row[3]]->referenced[]=array($row[0],$row[1]);
-				}
-				$primaryKeys = $this->findPrimaryKeys($table_list[0],$database);
-				foreach ($primaryKeys as $primaryKey) {
-					$table_fields[$table['name']][$primaryKey]->primaryKey = true;
+			// extensions
+			$result = $this->db->query($this->db->getSql('reflect_belongs_to'),array($table_list[0],$table_names,$database,$database));
+			while ($row = $this->db->fetchRow($result)) {
+				$table_fields[$table['name']][$row[1]]->references=array($row[2],$row[3]);
+			}
+			$result = $this->db->query($this->db->getSql('reflect_has_many'),array($table_names,$table_list[0],$database,$database));
+			while ($row = $this->db->fetchRow($result)) {
+				$table_fields[$table['name']][$row[3]]->referenced[]=array($row[0],$row[1]);
+			}
+			$primaryKeys = $this->findPrimaryKeys($table_list[0],$database);
+			foreach ($primaryKeys as $primaryKey) {
+				$table_fields[$table['name']][$primaryKey]->primaryKey = true;
+			}
+			$result = $this->db->query($this->db->getSql('reflect_columns'),array($table_list[0],$database));
+			while ($row = $this->db->fetchRow($result)) {
+				$table_fields[$table['name']][$row[0]]->required = strtolower($row[2])=='no' && $row[1]===null;
+				$table_fields[$table['name']][$row[0]]->{'x-nullable'} = strtolower($row[2])=='yes';
+				$table_fields[$table['name']][$row[0]]->{'x-dbtype'} = $row[3];
+				if ($this->db->isNumericType($table_fields[$table['name']][$row[0]])) {
+					if (strpos(strtolower($table_fields[$table['name']][$row[0]]->{'x-dbtype'}),'int')!==false) {
+						$table_fields[$table['name']][$row[0]]->type = 'integer';
+						if ($row[1]!==null) $table_fields[$table['name']][$row[0]]->default = (int)$row[1];
+					} else {
+						$table_fields[$table['name']][$row[0]]->type = 'number';
+						if ($row[1]!==null) $table_fields[$table['name']][$row[0]]->default = (float)$row[1];
+					}
+				} else {
+					if ($this->db->isBinaryType($table_fields[$table['name']][$row[0]])) {
+						$table_fields[$table['name']][$row[0]]->format = 'byte';
+					} else if ($this->db->isGeometryType($table_fields[$table['name']][$row[0]])) {
+						$table_fields[$table['name']][$row[0]]->format = 'wkt';
+					} else if ($this->db->isJsonType($table_fields[$table['name']][$row[0]])) {
+						$table_fields[$table['name']][$row[0]]->format = 'json';
+					}
+					$table_fields[$table['name']][$row[0]]->type = 'string';
+					if ($row[1]!==null) $table_fields[$table['name']][$row[0]]->default = $row[1];
+					if ($row[4]!==null) $table_fields[$table['name']][$row[0]]->maxLength = (int)$row[4];
 				}
 			}
-			
 			foreach (array('root_actions','id_actions') as $path) {
 				foreach ($table[$path] as $i=>$action) {
 					$table_list = array($table['name']);
@@ -1651,7 +2133,6 @@ class PHP_CRUD_API {
 		}
 		$tables = array_merge(array_filter($tables));
 		//var_dump($tables);die();
-
 		header('Content-Type: application/json; charset=utf-8');
 		echo '{"swagger":"2.0",';
 		echo '"info":{';
@@ -1685,6 +2166,13 @@ class PHP_CRUD_API {
 					echo '"summary":"'.ucfirst($action['name']).'",';
 					if ($action['name']=='list') {
 						echo '"parameters":[';
+						echo '{';
+						echo '"name":"exclude",';
+						echo '"in":"query",';
+						echo '"description":"One or more related entities (comma separated).",';
+						echo '"required":false,';
+						echo '"type":"string"';
+						echo '},';
 						echo '{';
 						echo '"name":"include",';
 						echo '"in":"query",';
@@ -1736,19 +2224,15 @@ class PHP_CRUD_API {
 						echo '"required":false,';
 						echo '"type":"string",';
 						echo '"enum":["any"]';
-						echo '},';
-						echo '{';
-						echo '"name":"callback",';
-						echo '"in":"query",';
-						echo '"description":"JSONP callback function name",';
-						echo '"required":false,';
-						echo '"type":"string"';
 						echo '}';
 						echo '],';
 						echo '"responses":{';
 						echo '"200":{';
 						echo '"description":"An array of '.$table['name'].'",';
 						echo '"schema":{';
+						echo '"type": "object",';
+						echo '"properties": {';
+						echo '"'.$table['name'].'": {';
 						echo '"type":"array",';
 						echo '"items":{';
 						echo '"type": "object",';
@@ -1756,7 +2240,18 @@ class PHP_CRUD_API {
 						foreach (array_keys($action['fields']) as $k=>$field) {
 							if ($k>0) echo ',';
 							echo '"'.$field.'": {';
-							echo '"type": "string"';
+							echo '"type": '.json_encode($action['fields'][$field]->type);
+							if (isset($action['fields'][$field]->format)) {
+								echo ',"format": '.json_encode($action['fields'][$field]->format);
+							}
+							echo ',"x-dbtype": '.json_encode($action['fields'][$field]->{'x-dbtype'});
+							echo ',"x-nullable": '.json_encode($action['fields'][$field]->{'x-nullable'});
+							if (isset($action['fields'][$field]->maxLength) && $action['fields'][$field]->maxLength>0) {
+								echo ',"maxLength": '.json_encode($action['fields'][$field]->maxLength);
+							}
+							if (isset($action['fields'][$field]->default)) {
+								echo ',"default": '.json_encode($action['fields'][$field]->default);
+							}
 							if (isset($action['fields'][$field]->referenced)) {
 								echo ',"x-referenced": '.json_encode($action['fields'][$field]->referenced);
 							}
@@ -1770,6 +2265,8 @@ class PHP_CRUD_API {
 						}
 						echo '}'; //properties
 						echo '}'; //items
+						echo '}'; //table
+						echo '}'; //properties
 						echo '}'; //schema
 						echo '}'; //200
 						echo '}'; //responses
@@ -1779,14 +2276,29 @@ class PHP_CRUD_API {
 						echo '"name":"item",';
 						echo '"in":"body",';
 						echo '"description":"Item to create.",';
-						echo '"required":false,';
+						echo '"required":true,';
 						echo '"schema":{';
 						echo '"type": "object",';
+						$required_fields = array_keys(array_filter($action['fields'],function($f){ return $f->required; }));
+						if (count($required_fields) > 0) {
+							echo '"required":'.json_encode($required_fields).',';
+						}
 						echo '"properties": {';
 						foreach (array_keys($action['fields']) as $k=>$field) {
 							if ($k>0) echo ',';
 							echo '"'.$field.'": {';
-							echo '"type": "string"';
+							echo '"type": '.json_encode($action['fields'][$field]->type);
+							if (isset($action['fields'][$field]->format)) {
+								echo ',"format": '.json_encode($action['fields'][$field]->format);
+							}
+							echo ',"x-dbtype": '.json_encode($action['fields'][$field]->{'x-dbtype'});
+							echo ',"x-nullable": '.json_encode($action['fields'][$field]->{'x-nullable'});
+							if (isset($action['fields'][$field]->maxLength)) {
+								echo ',"maxLength": '.json_encode($action['fields'][$field]->maxLength);
+							}
+							if (isset($action['fields'][$field]->default)) {
+								echo ',"default": '.json_encode($action['fields'][$field]->default);
+							}
 							if (isset($action['fields'][$field]->referenced)) {
 								echo ',"x-referenced": '.json_encode($action['fields'][$field]->referenced);
 							}
@@ -1830,19 +2342,34 @@ class PHP_CRUD_API {
 					echo '"required":true,';
 					echo '"type":"string"';
 					echo '}';
-					if ($action['name']=='update') {
+					if ($action['name']=='update' || $action['name']=='increment') {
 						echo ',{';
 						echo '"name":"item",';
 						echo '"in":"body",';
 						echo '"description":"Properties of item to update.",';
-						echo '"required":false,';
+						echo '"required":true,';
 						echo '"schema":{';
 						echo '"type": "object",';
+						$required_fields = array_keys(array_filter($action['fields'],function($f){ return $f->required; }));
+						if (count($required_fields) > 0) {
+							echo '"required":'.json_encode($required_fields).',';
+						}
 						echo '"properties": {';
 						foreach (array_keys($action['fields']) as $k=>$field) {
 							if ($k>0) echo ',';
 							echo '"'.$field.'": {';
-							echo '"type": "string"';
+							echo '"type": '.json_encode($action['fields'][$field]->type);
+							if (isset($action['fields'][$field]->format)) {
+								echo ',"format": '.json_encode($action['fields'][$field]->format);
+							}
+							echo ',"x-dbtype": '.json_encode($action['fields'][$field]->{'x-dbtype'});
+							echo ',"x-nullable": '.json_encode($action['fields'][$field]->{'x-nullable'});
+							if (isset($action['fields'][$field]->maxLength)) {
+								echo ',"maxLength": '.json_encode($action['fields'][$field]->maxLength);
+							}
+							if (isset($action['fields'][$field]->default)) {
+								echo ',"default": '.json_encode($action['fields'][$field]->default);
+							}
 							if (isset($action['fields'][$field]->referenced)) {
 								echo ',"x-referenced": '.json_encode($action['fields'][$field]->referenced);
 							}
@@ -1869,7 +2396,18 @@ class PHP_CRUD_API {
 						foreach (array_keys($action['fields']) as $k=>$field) {
 							if ($k>0) echo ',';
 							echo '"'.$field.'": {';
-							echo '"type": "string"';
+							echo '"type": '.json_encode($action['fields'][$field]->type);
+							if (isset($action['fields'][$field]->format)) {
+								echo ',"format": '.json_encode($action['fields'][$field]->format);
+							}
+							echo ',"x-dbtype": '.json_encode($action['fields'][$field]->{'x-dbtype'});
+							echo ',"x-nullable": '.json_encode($action['fields'][$field]->{'x-nullable'});
+							if (isset($action['fields'][$field]->maxLength)) {
+								echo ',"maxLength": '.json_encode($action['fields'][$field]->maxLength);
+							}
+							if (isset($action['fields'][$field]->default)) {
+								echo ',"default": '.json_encode($action['fields'][$field]->default);
+							}
 							if (isset($action['fields'][$field]->referenced)) {
 								echo ',"x-referenced": '.json_encode($action['fields'][$field]->referenced);
 							}
@@ -1903,202 +2441,100 @@ class PHP_CRUD_API {
 		echo '}';
 			echo '}';
 	}
-
-	public function executeCommand() {
+	protected function allowOrigin($origin,$allowOrigins) {
 		if (isset($_SERVER['REQUEST_METHOD'])) {
-			header('Access-Control-Allow-Origin: *');
+			header('Access-Control-Allow-Credentials: true');
+			foreach (explode(',',$allowOrigins) as $o) {
+				if (preg_match('/^'.str_replace('\*','.*',preg_quote(strtolower(trim($o)))).'$/',$origin)) { 
+					header('Access-Control-Allow-Origin: '.$origin);
+					break;
+				}
+			}
+		}
+	}
+	public function executeCommand() {
+		if ($this->settings['origin']) {
+			$this->allowOrigin($this->settings['origin'],$this->settings['allow_origin']);
 		}
 		if (!$this->settings['request']) {
 			$this->swagger($this->settings);
 		} else {
 			$parameters = $this->getParameters($this->settings);
 			switch($parameters['action']){
-				case 'list': $this->listCommand($parameters); break;
-				case 'read': $this->readCommand($parameters); break;
-				case 'create': $this->createCommand($parameters); break;
-				case 'update': $this->updateCommand($parameters); break;
-				case 'delete': $this->deleteCommand($parameters); break;
-				case 'headers': $this->headersCommand($parameters); break;
+				case 'list': $output = $this->listCommand($parameters); break;
+				case 'read': $output = $this->readCommand($parameters); break;
+				case 'create': $output = $this->createCommand($parameters); break;
+				case 'update': $output = $this->updateCommand($parameters); break;
+				case 'delete': $output = $this->deleteCommand($parameters); break;
+				case 'increment': $output = $this->incrementCommand($parameters); break;
+				case 'headers': $output = $this->headersCommand($parameters); break;
+				default: $output = false;
+			}
+			if ($output!==false) {
+				$this->startOutput();
+				echo json_encode($output);
+			}
+			if ($parameters['after']) {
+				$this->applyAfterHandler($parameters,$output);
 			}
 		}
 	}
 }
-
-class PHP_API_AUTH {
-	
-	public function __construct($config) {
-		extract($config);
-		
-		$verb = isset($verb)?$verb:null;
-		$path = isset($path)?$path:null;
-		$username = isset($username)?$username:null;
-		$password = isset($password)?$password:null;
-		$token = isset($token)?$token:null;
-		$authenticator = isset($authenticator)?$authenticator:null;
-		
-		$method = isset($method)?$method:null;
-		$request = isset($request)?$request:null;
-		$post = isset($post)?$post:null;
-		
-		$time = isset($time)?$time:null;
-		$leeway = isset($leeway)?$leeway:null;
-		$ttl = isset($ttl)?$ttl:null;
-		$algorithm = isset($algorithm)?$algorithm:null;
-		$secret = isset($secret)?$secret:null;
-
-		// defaults
-		if (!$verb) {
-			$verb = 'POST';
-		}
-		if (!$path) {
-			$path = '';
-		}
-		if (!$username) {
-			$username = 'username';
-		}
-		if (!$password) {
-			$password = 'password';
-		}
-		if (!$token) {
-			$token = 'token';
-		}
-		
-		if (!$method) {
-			$method = $_SERVER['REQUEST_METHOD'];
-		}
-		if (!$request) {
-			$request = isset($_SERVER['PATH_INFO'])?$_SERVER['PATH_INFO']:'';
-			if (!$request) {
-				$request = isset($_SERVER['ORIG_PATH_INFO'])?$_SERVER['ORIG_PATH_INFO']:'';
-			}
-		}
-		if (!$post) {
-			$post = 'php://input';
-		}
-		
-		if (!$time) {
-			$time = time();
-		}
-		if (!$leeway) {
-			$leeway = 5;
-		}
-		if (!$ttl) {
-			$ttl = 30;
-		}
-		if (!$algorithm) {
-			$algorithm = 'HS256';
-		}
-
-		$request = trim($request,'/');
-		
-		$this->settings = compact('verb', 'path', 'username', 'password', 'token', 'authenticator', 'method', 'request', 'post', 'time', 'leeway', 'ttl', 'algorithm', 'secret');
-	}
-
-
-	protected function retrieveInput($post) {
-		$input = (object)array();
-		$data = trim(file_get_contents($post));
-		if (strlen($data)>0) {
-			if ($data[0]=='{') {
-				$input = json_decode($data);
-			} else {
-				parse_str($data, $input);
-				$input = (object)$input;
-			}
-		}
-		return $input;
-	}
-
-	protected function generateToken($claims,$time,$ttl,$algorithm,$secret) {
-		$algorithms = array('HS256'=>'sha256','HS384'=>'sha384','HS512'=>'sha512');
-		$header = array();
-		$header['typ']='JWT';
-		$header['alg']=$algorithm;
-		$token = array();
-		$token[0] = rtrim(strtr(base64_encode(json_encode((object)$header)),'+/','-_'),'=');
-		$claims['iat'] = $time;
-		$claims['exp'] = $time + $ttl;
-		$token[1] = rtrim(strtr(base64_encode(json_encode((object)$claims)),'+/','-_'),'=');
-		if (!isset($algorithms[$algorithm])) return false;
-		$hmac = $algorithms[$algorithm];
-		$signature = hash_hmac($hmac,"$token[0].$token[1]",$secret,true);
-		$token[2] = rtrim(strtr(base64_encode($signature),'+/','-_'),'=');
-		return implode('.',$token);
-	}
-
-	protected function getVerifiedClaims($token,$time,$leeway,$ttl,$algorithm,$secret) {
-		$algorithms = array('HS256'=>'sha256','HS384'=>'sha384','HS512'=>'sha512');
-		if (!isset($algorithms[$algorithm])) return false;
-		$hmac = $algorithms[$algorithm];
-		$token = explode('.',$token);
-		if (count($token)<3) return false;
-		$header = json_decode(base64_decode(strtr($token[0],'-_','+/')),true);
-		if (!$secret) return false;
-		if ($header['typ']!='JWT') return false;
-		if ($header['alg']!=$algorithm) return false;
-		$signature = bin2hex(base64_decode(strtr($token[2],'-_','+/')));
-		if ($signature!=hash_hmac($hmac,"$token[0].$token[1]",$secret)) return false;
-		$claims = json_decode(base64_decode(strtr($token[1],'-_','+/')),true);
-		if (!$claims) return false;
-		if (isset($claims['nbf']) && $time+$leeway<$claims['nbf']) return false;
-		if (isset($claims['iat']) && $time+$leeway<$claims['iat']) return false;
-		if (isset($claims['exp']) && $time-$leeway>$claims['exp']) return false;
-		if (isset($claims['iat']) && !isset($claims['exp'])) {
-			if ($time-$leeway>$claims['iat']+$ttl) return false;
-		}
-		return $claims;
-	}
-
-	public function executeCommand() {
-		extract($this->settings);
-		$no_session = $authenticator && $secret; 
-		if (!$no_session) {
-			ini_set('session.cookie_httponly', 1);
-			session_start();
-		}
-		if ($method==$verb && trim($path,'/')==$request) {
-			$input = $this->retrieveInput($post);
-			if ($authenticator && isset($input->$username) && isset($input->$password)) {
-				$authenticator($input->$username,$input->$password);
-				if ($secret) {
-					echo json_encode($this->generateToken($_SESSION,$time,$ttl,$algorithm,$secret));
-				}
-			} elseif ($secret && isset($input->$token)) {
-				$claims = $this->getVerifiedClaims($input->$token,$time,$leeway,$ttl,$algorithm,$secret);
-				if ($claims) {
-					foreach ($claims as $key=>$value) {
-						$_SESSION[$key] = $value;
-					}
-				}
-			} else {
-				if (!$no_session) {
-					session_destroy();
-				}
-			}
-			return true;
-		}
-		return false;
-	}
-}
-
+// require 'auth.php'; // from the PHP-API-AUTH project, see: https://github.com/mevdschee/php-api-auth
 // uncomment the lines below for token+session based authentication (see "login_token.html" + "login_token.php"):
-
-// $auth = PHP_API_AUTH(array(
+// $auth = new PHP_API_AUTH(array(
 // 	'secret'=>'someVeryLongPassPhraseChangeMe',
 // ));
-// $auth->executeCommand();
-// if (empty($_SESSION['user'])) exit(403);
-
+// if ($auth->executeCommand()) exit(0);
+// if (empty($_SESSION['user']) || !$auth->hasValidCsrfToken()) {
+//	header('HTTP/1.0 401 Unauthorized');
+//	exit(0);
+// }
 // uncomment the lines below for form+session based authentication (see "login.html"):
-
-// $auth = PHP_API_AUTH(array(
+// $auth = new PHP_API_AUTH(array(
 // 	'authenticator'=>function($user,$pass){ $_SESSION['user']=($user=='admin' && $pass=='admin'); }
 // ));
-// $auth->executeCommand();
-// if (empty($_SESSION['user'])) exit(403);
-
+// if ($auth->executeCommand()) exit(0);
+// if (empty($_SESSION['user']) || !$auth->hasValidCsrfToken()) {
+//	header('HTTP/1.0 401 Unauthorized');
+//	exit(0);
+// }
 // uncomment the lines below when running in stand-alone mode:
-
+// $api = new PHP_CRUD_API(array(
+// 	'dbengine'=>'MySQL',
+// 	'hostname'=>'localhost',
+// 	'username'=>'',
+// 	'password'=>'',
+// 	'database'=>'',
+// 	'charset'=>'utf8'
+// ));
+// $api->executeCommand();
+// For Microsoft SQL Server 2012 use:
+// $api = new PHP_CRUD_API(array(
+// 	'dbengine'=>'SQLServer',
+// 	'hostname'=>'(local)',
+// 	'username'=>'',
+// 	'password'=>'',
+// 	'database'=>'xxx',
+// 	'charset'=>'UTF-8'
+// ));
+// $api->executeCommand();
+// For PostgreSQL 9 use:
+// $api = new PHP_CRUD_API(array(
+// 	'dbengine'=>'PostgreSQL',
+// 	'hostname'=>'localhost',
+// 	'username'=>'xxx',
+// 	'password'=>'xxx',
+// 	'database'=>'xxx',
+// 	'charset'=>'UTF8'
+// ));
+// $api->executeCommand();
+// For SQLite 3 use:
+// $api = new PHP_CRUD_API(array(
+// 	'dbengine'=>'SQLite',
+// 	'database'=>'data/blog.db',
+// ));
+// $api->executeCommand();
 
 $config = parse_ini_file('../config.ini');
 

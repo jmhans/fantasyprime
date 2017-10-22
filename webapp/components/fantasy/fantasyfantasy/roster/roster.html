@@ -28,16 +28,16 @@
                         <tr ng-repeat="rosterRec in newThing.roster">
                             <td>
 
-                                {{rosterRec.TeamID}}
+                                {{rosterRec.team_id}}
                             </td>
                             <td>
                                 {{ rosterRec['TeamName (Ref Only)'] }}
                             </td>
                             <td>
-                                {{ rosterRec.Owner }}
+                                {{ rosterRec.prime_owner }}
                             </td>
                             <td>
-                                <select ng-model="rosterRec.Position" ng-change="newThing.updateRoster()">
+                                <select ng-model="rosterRec.position" ng-change="newThing.updateRoster(rosterRec)">
                                     <option>Starter</option>
                                     <option>Bench</option>
                                 </select>
