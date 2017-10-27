@@ -32,6 +32,11 @@
                 players = response.data.prime_owners;
                 return players;
             });
+        },
+        getTeamByOwnerName: function () {
+            return service.getPrimeTeams().then(function (resp) {
+                return resp.filter(function (PT) { return (PT.TEAM_NAME == ownerName); })
+            });
         }
 
     }
@@ -39,7 +44,7 @@
     return service;
 })
 
-fantasyFantasyModule.service('FFDBService', [ '$http', function ( $http) {
+fantasyFantasyModule.service('FFDBService', [ '$http', 'TeamsService', '$q', function ( $http, TeamsService, $q) {
     this.activeTeam = {};
 
     var service = {
@@ -130,7 +135,26 @@ fantasyFantasyModule.service('FFDBService', [ '$http', function ( $http) {
                     i += teamRecords.length - 1;
                 }
 
-                return activeRecords;
+                return $q.all([service.getTeams(), service.getAllTeamInfo()]).then(function (respArr) {
+                    OwnersArr = respArr[0];
+                    TeamInfoArr = respArr[1];
+                    activeRecords.forEach(function (activeRosterRec) {
+                        activeRosterRec.OWNER = OwnersArr.find(function (owner) { return (owner.TEAM_NAME == activeRosterRec.prime_owner); })
+                        activeRosterRec.TEAM_INFO = TeamInfoArr.find(function (ti) { return (activeRosterRec.team_id == ti.LEAGUE_ID + '_' + ti.TEAM_ID); })
+                    });
+                    return activeRecords;
+                });
+
+
+                //return service.getTeams().then(function (PTs) {
+                //    activeRecords.forEach(function (activeRosterRec) {
+                //        activeRosterRec.OWNER = PTs.find(function (PT) { return (PT.TEAM_NAME == activeRosterRec.prime_owner); });
+                //    });
+
+                //    return activeRecords;
+                //});
+                    
+
             });
         },
 
@@ -143,9 +167,9 @@ fantasyFantasyModule.service('FFDBService', [ '$http', function ( $http) {
                 return service.getAllTeamInfo().then(function (teamRecords) {
                     var filteredRosterRecords = rosterRecords.filter(rosterRecMatchesParam)
                     filteredRosterRecords.forEach(function (rosterRec) {
-                        rosterRec.team_name = teamRecords.find(function (teamRec) {
+                        rosterRec.TEAM_INFO = teamRecords.find(function (teamRec) {
                             return (rosterRec.team_id == teamRec.LEAGUE_ID + '_' + teamRec.TEAM_ID);
-                        }).TEAM_NAME;
+                        });
                     });
                     return filteredRosterRecords;
                 })
@@ -175,6 +199,55 @@ fantasyFantasyModule.service('FFDBService', [ '$http', function ( $http) {
                     return response.data;
                 });
 
+            });
+        },
+        getScoresForWeek: function (week) {
+            return $http.get('http://actuarialgames.x10host.com/includes/api.php/prime_scores?transform=1').then(function (resp) {
+                var scoreRecs = resp.data.prime_scores.filter(function (ps) { return (ps.WEEK == week) });
+                return service.getActiveRosters().then(function (rosterRecs) {
+                    outputArr = [];
+                    scoreRecs.forEach(function (scoreRec) {
+                        scoreRec.HOME_OWNER = rosterRecs.find(function (rosterRec) { return (rosterRec.team_id == scoreRec.LEAGUE_ID + '_' + scoreRec.HOME_TEAM_ID); }).OWNER;
+                        scoreRec.AWAY_OWNER = rosterRecs.find(function (rosterRec) { return (rosterRec.team_id == scoreRec.LEAGUE_ID + '_' + scoreRec.AWAY_TEAM_ID); }).OWNER;
+                        outputArr.push({
+                            TEAM_ID: scoreRec.LEAGUE_ID + '_' + scoreRec.HOME_TEAM_ID,
+                            LOCATION: 'HOME',
+                            RESULT: (scoreRec.HOME_SCORE > scoreRec.AWAY_SCORE ? 'W' : (scoreRec.HOME_SCORE < scoreRec.AWAY_SCORE ? 'L' : 'T')),
+                            GAME_INFO: scoreRec,
+                            PRIME_ROSTER_ENTRY: rosterRecs.find(function (rosterRec) { return (rosterRec.team_id == scoreRec.LEAGUE_ID + '_' + scoreRec.HOME_TEAM_ID); }),
+                            OPPONENT: scoreRec.LEAGUE_ID + '_' + scoreRec.AWAY_TEAM_ID,
+                            POINTS_FOR: scoreRec.HOME_SCORE, 
+                            POINTS_AGAINST: scoreRec.AWAY_SCORE,
+                            PROJ_POINTS_FOR: scoreRec.HOME_PROJ,
+                            PROJ_POINTS_AGAINST: scoreRec.AWAY_PROJ
+                        });
+                        outputArr.push({
+                            TEAM_ID: scoreRec.LEAGUE_ID + '_' + scoreRec.AWAY_TEAM_ID,
+                            LOCATION: 'AWAY',
+                            RESULT: (scoreRec.HOME_SCORE > scoreRec.AWAY_SCORE ? 'L' : (scoreRec.HOME_SCORE < scoreRec.AWAY_SCORE ? 'W' : 'T')),
+                            GAME_INFO: scoreRec,
+                            PRIME_ROSTER_ENTRY: rosterRecs.find(function (rosterRec) { return (rosterRec.team_id == scoreRec.LEAGUE_ID + '_' + scoreRec.AWAY_TEAM_ID); }),
+                            OPPONENT: scoreRec.LEAGUE_ID + '_' + scoreRec.HOME_TEAM_ID,
+                            POINTS_FOR: scoreRec.AWAY_SCORE,
+                            POINTS_AGAINST: scoreRec.HOME_SCORE,
+                            PROJ_POINTS_FOR: scoreRec.AWAY_PROJ,
+                            PROJ_POINTS_AGAINST: scoreRec.HOME_PROJ
+                        });
+                    });
+                    return outputArr;
+                });
+            })
+        },
+        getEnrichedRosters: function () {
+            return service.getActiveRosters().then(function (activeRosters) {
+                return service.getAllTeamInfo().then(function (teamInfo) {
+                    activeRosters.forEach(function (ar) {
+                        ar.TEAM_INFO = teamInfo.find(function (info_rec) {
+                            return (info_rec.LEAGUE_ID + '_' + info_rec.TEAM_ID == ar.team_id);
+                        })
+                    });
+                    return activeRosters;
+                });
             });
         }
 

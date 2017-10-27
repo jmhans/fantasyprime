@@ -19,18 +19,18 @@
             </tr>
         </thead>
         <tbody>
-            <tr ng-style='(rosterRec.position == "Bench") && {"background-color":"lightgray"}' ng-repeat="rosterRec in newThing.roster | orderBy: 'position': true">
+            <tr ng-style='(rosterRec.position == "Bench") && {"background-color":"lightgray"}' ng-repeat="rosterRec in rosterCtrl.roster | filter : {OWNER : {id : rosterCtrl.team.id}} : true | orderBy: 'position': true">
                 <td>
                     {{rosterRec.team_id}}
                 </td>
                 <td>
-                    {{ rosterRec.team_name }}
+                    {{ rosterRec.TEAM_INFO.TEAM_NAME }}
                 </td>
                 <td>
                     {{ rosterRec.prime_owner }}
                 </td>
                 <td>
-                    <select ng-model="rosterRec.position" ng-change="newThing.updateRoster(rosterRec)">
+                    <select ng-model="rosterRec.position" ng-change="rosterCtrl.updateRoster(rosterRec)">
                         <option>Starter</option>
                         <option>Bench</option>
                     </select>

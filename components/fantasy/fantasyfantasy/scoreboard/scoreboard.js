@@ -4,9 +4,17 @@ fantasyFantasyModule.config(function ($stateProvider) {
         name: 'ff.scoreboard',
         url: '/scoreboard',
         menu: { name: 'Scoreboard', priority: 200 },
-        tree: { name: 'Scoreboard'},
+        tree: { name: 'Scoreboard' },
         requiresParams: false,
-        component: 'scoreboard'
+        component: 'scoreboard',
+        resolve: {
+            scores: function (FFDBService, $stateParams) {
+
+            },
+            ff_matchups: function (TeamsService, scores, $stateParams) {
+                return TeamsService.getFullSchedule();
+            }
+        }
     },
       {
           name: 'ff.scoreboard.details',
@@ -14,69 +22,49 @@ fantasyFantasyModule.config(function ($stateProvider) {
           requiresParams: false,
           component: 'scoreboard.details',
           resolve: {
-              scores: function (GoogleSheetsService, $stateParams) {
-                  var rawData = GoogleSheetsService.getScoresforWeek($stateParams.weekId);
+              scores: function (FFDBService, $stateParams) {
+                  var rawData = FFDBService.getScoresForWeek($stateParams.weekId);
                   return rawData;
               },
               teams: function (TeamsService) {
                   return TeamsService.getAllTeams();
               },
-              games: function (TeamsService, scores, $stateParams) {
-                  var ret = TeamsService.getGamesforWeek($stateParams.weekId).then(function (data) {
-                      Array.prototype.sumif = function (sumProp, critProp, crit) {
-                          var total = 0;
-                          for (var i = 0; i < this.length; i++) {
-                              if (this[i][critProp] == crit) {
-                                  total += parseFloat(this[i][sumProp]);
-                              }
-                          }
-                          return total;
-                      }
-                      Array.prototype.countif = function (prop, crit) {
-                          return this.filter(function (itm) { return (itm.prop == crit); }).length;
-                      }
+              weeklymatchups: function ($stateParams, ff_matchups, scores) {
 
-                      function determineResult(gameRec) {
+                  determineResult = function (gameRec) {
+                      if (gameRec['Team W'] + 0.5 * gameRec['Team T'] > gameRec['Opp W'] + 0.5 * gameRec['Opp T']) return 'W'
+                      if (gameRec['Pts (Starters)'] > gameRec['Opp Pts (Starters)']) return 'W';
 
+                      if (gameRec['Pts (Bench)'] > gameRec['Opp Pts (Bench)']) return 'W';
+                      if ((gameRec['Team W'] + 0.5 * gameRec['Team T'] > 0) || (gameRec['Pts (Starters)'] > 0) || (gameRec['Pts (Bench)'] > 0)) return 'L';
+                      return '';
+                  }
 
-                          if (gameRec['Team W'] + 0.5 * gameRec['Team T'] > gameRec['Opp W'] + 0.5 * gameRec['Opp T']) return 'W'
-                          if (gameRec['Pts (Starters)'] > gameRec['Opp Pts (Starters)']) return 'W';
-                          if (gameRec['Pts (Bench)'] > gameRec['Opp Pts (Bench)']) return 'W';
-                          if ((gameRec['Team W'] + 0.5 * gameRec['Team T'] > 0) || (gameRec['Pts (Starters)'] > 0) || (gameRec['Pts (Bench)'] > 0)) return 'L';
-                          return '';
-                      }
+                  var newArr = ff_matchups.filter(function (matchup) { return (parseInt(matchup.Week) == parseInt($stateParams.weekId)); });
+                  newArr.forEach(function (gameRec) {
+                      var scoresForTeam = scores.filterWithCriteria({ PRIME_ROSTER_ENTRY: { OWNER: { TEAM_NAME: gameRec['Team Name'] } } });
+                      var scoresForOpp = scores.filterWithCriteria({ PRIME_ROSTER_ENTRY: { OWNER: { TEAM_NAME: gameRec['Opp Name'] } } });
 
-                      data.forEach(function (gameRec) {
-                          var scoresForTeam = scores.filter(function (scoreRec) { return (scoreRec.Owner == gameRec['Team Name']); });
-                          var scoresForOpp = scores.filter(function (scoreRec) { return (scoreRec.Owner == gameRec['Opp Name']); });
-                          gameRec['Team W'] = scoresForTeam.sumif('W', 'Position', 'Starter');
-                          gameRec['Team L'] = scoresForTeam.sumif('L', 'Position', 'Starter');
-                          gameRec['Team T'] = scoresForTeam.sumif('T', 'Position', 'Starter');
+                      gameRec['Team W'] = scoresForTeam.filterWithCriteria({ PRIME_ROSTER_ENTRY: { position: 'Starter' }, RESULT: 'W' }).length;
+                      gameRec['Team L'] = scoresForTeam.filterWithCriteria({ PRIME_ROSTER_ENTRY: { position: 'Starter' }, RESULT: 'L' }).length;
+                      gameRec['Team T'] = scoresForTeam.filterWithCriteria({ PRIME_ROSTER_ENTRY: { position: 'Starter' }, RESULT: 'T' }).length;
 
-                          gameRec['Opp W'] = scoresForOpp.sumif('W', 'Position', 'Starter');
-                          gameRec['Opp L'] = scoresForOpp.sumif('L', 'Position', 'Starter');
-                          gameRec['Opp T'] = scoresForOpp.sumif('T', 'Position', 'Starter');
+                      gameRec['Opp W'] = scoresForOpp.filterWithCriteria({ PRIME_ROSTER_ENTRY: { position: 'Starter' }, RESULT: 'W' }).length;
+                      gameRec['Opp L'] = scoresForOpp.filterWithCriteria({ PRIME_ROSTER_ENTRY: { position: 'Starter' }, RESULT: 'L' }).length;
+                      gameRec['Opp T'] = scoresForOpp.filterWithCriteria({ PRIME_ROSTER_ENTRY: { position: 'Starter' }, RESULT: 'T' }).length;
 
-                          gameRec['Pts (Starters)'] = scoresForTeam.sumif('Score', 'Position', 'Starter');
-                          gameRec['Pts (Bench)'] = scoresForTeam.sumif('Score', 'Position', 'Bench');;
+                      gameRec['Pts (Starters)'] = scoresForTeam.SUMIFS('POINTS_FOR', { PRIME_ROSTER_ENTRY: { position: 'Starter' } });
+                      gameRec['Pts (Bench)'] = scoresForTeam.SUMIFS('POINTS_FOR', { PRIME_ROSTER_ENTRY: { position: 'Bench' } });
+                      gameRec['Opp Pts (Starters)'] = scoresForOpp.SUMIFS('POINTS_FOR', { PRIME_ROSTER_ENTRY: { position: 'Starter' } });
+                      gameRec['Opp Pts (Bench)'] = scoresForOpp.SUMIFS('POINTS_FOR', { PRIME_ROSTER_ENTRY: { position: 'Bench' } });
 
-                          gameRec['Opp Pts (Starters)'] = scoresForOpp.sumif('Score', 'Position', 'Starter');
-                          gameRec['Opp Pts (Bench)'] = scoresForOpp.sumif('Score', 'Position', 'Bench');;
+                      gameRec['Team Result'] = determineResult(gameRec);
+                      gameRec['Subgame Details'] = scoresForTeam;
+                      gameRec['Subgame Opp Details'] = scoresForOpp;
+                      gameRec['isCollapsed'] = true;
 
-                          gameRec['Team Result'] = determineResult(gameRec);
-                          gameRec['Subgame Details'] = scoresForTeam;
-                          gameRec['Subgame Opp Details'] = scoresForOpp;
-
-                          gameRec['isCollapsed'] = true;
-
-
-
-                      });
-                      return data;
                   });
-                  return ret;
-
-
+                  return newArr;
               }
 
           },
@@ -93,17 +81,17 @@ fantasyFantasyModule.config(function ($stateProvider) {
 
 
 fantasyFantasyModule.component('scoreboard', {
-    bindings: { scores: '<', teams: '<', games: '<' },
+    bindings: { scores: '<', teams: '<', games: '<', ff_matchups: '<' },
     templateUrl: 'components/fantasy/fantasyfantasy/scoreboard/scoreboard.html',
     controller: function ($scope, $log, $state, $http) {
-        $scope.weeks = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16];
-        $scope.totalItems = $scope.weeks.length;
+
         // $scope.currentWeek = 14;
 
         $scope.goToWeek = function (wk) {
             $scope.selectedWeek = wk;
             $state.go('ff.scoreboard.details', { weekId: $scope.selectedWeek });
         }
+
 
         $scope.currentWeek = $http.get('data/weekDetails.json').then(function (resp) {
             for (var i = 0; i < resp.data.weeks.length; i++) {
@@ -121,16 +109,15 @@ fantasyFantasyModule.component('scoreboard', {
 
         });
 
-        
-
-
     }
-})
+});
 
 fantasyFantasyModule.component('scoreboard.details', {
-    bindings: { scores: '<', teams: '<', games: '<' },
+    bindings: { weeklymatchups: '<' },
     templateUrl: 'components/fantasy/fantasyfantasy/scoreboard/scoreboardDetails.html',
-    controller: function ($scope) {
-        $scope.isCollapsed = false;
+    controller: function ($scope, $state) {
+        //$scope.isCollapsed = false;
+
+        this.selectedWeek = $state.params.weekId
     }
 })

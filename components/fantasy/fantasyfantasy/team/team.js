@@ -1,24 +1,6 @@
 ﻿
 fantasyFantasyModule.config(function ($stateProvider) {
     var states = [
-        //{
-        //    name: 'detail',
-        //    url: '/info',
-        //    parent: 'team',
-        //    component: 'info',
-        //    resolve: {
-        //        team: function (teams, $rootScope, $stateParams, FFDBService) {
-        //            return FFDBService.getTeam($stateParams.teamId).then(function (tm) {
-        //                $rootScope.selectedTeam = tm;
-        //                return $rootScope.selectedTeam;
-        //            });
-        //        }
-        //    },
-        //    requiresParams: false,
-        //    menu: { name: "My Team", priority: 1000 },
-        //    tree: { name: "My Team"}
-        //},
-
       {
           name: 'teams',
           parent: 'ff',
@@ -28,6 +10,11 @@ fantasyFantasyModule.config(function ($stateProvider) {
           resolve: {
               teams: function (FFDBService) {
                   return FFDBService.getTeams();
+              },
+              fantasyTeams: function (FFDBService) {
+                  return FFDBService.getEnrichedRosters().then(function (response) {
+                      return response;
+                  });
               }
 
           }
@@ -52,7 +39,7 @@ fantasyFantasyModule.config(function ($stateProvider) {
                   return tm;
               },
               roster: function (FFDBService, team) {
-                  return FFDBService.getOwnerRoster(team.TEAM_NAME);
+                  return FFDBService.getActiveRosters();
               }
           },
           params: {
@@ -68,7 +55,7 @@ fantasyFantasyModule.config(function ($stateProvider) {
           url: '/allteams',
           component: 'allteams',
           menu: { name: 'All Teams', priority: 900 },
-          tree: { name: 'All Teams'},
+          tree: { name: 'All Teams' },
           requiresParams: false
       }
 
@@ -80,13 +67,13 @@ fantasyFantasyModule.config(function ($stateProvider) {
 
 
 fantasyFantasyModule.component('team', {
-    bindings: { team: '<', roster:'<'},
+    bindings: { team: '<', roster: '<' },
     templateUrl: 'components/fantasy/fantasyfantasy/team/team.html'
 })
 
 
 fantasyFantasyModule.component('info', {
-    bindings: { team: '<'},
+    bindings: { team: '<' },
     templateUrl: 'components/fantasy/fantasyfantasy/team/info.html',
     controller: teamDetailController
 })
@@ -119,8 +106,7 @@ function teamDetailController(FFDBService, $scope) {
         console.log(changes);
         if (changes.team.isFirstChange()) {
             this.originalTeamDetail = changes.team.currentValue
-        } else
-        {
+        } else {
             if (this.originalTeamDetail !== changes.team.currentValue) {
                 console.log('team was changed from ' + changes.team.previousValue + ' to ' + changes.team.currentValue);
             }

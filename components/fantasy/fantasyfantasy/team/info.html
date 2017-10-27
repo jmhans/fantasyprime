@@ -2,8 +2,21 @@
     <strong> Changes have been made to team information. </strong><button ng-if="$ctrl.edited" ng-click="$ctrl.saveDataChanges()" class="btn btn-success"><i class="fa fa-floppy-o"></i> Save Changes</button>
 </div>
 
-<div id="TeamID">ID: {{$ctrl.team.id}}</div>
-<div id="OwnerDiv">Owner: <span id="TEAM_OWNER" ng-model="$ctrl.team.TEAM_OWNER" edit-callback="$ctrl.editHandler(text, elem)" content-editable></span><span>{{$ctrl.nameUpdatedMessage}}</span></div>
-<div id="TeamNameDiv">Team Name: <span myProp="testProp" id="TEAM_NAME" ng-model="$ctrl.team.TEAM_NAME" edit-callback="$ctrl.editHandler(text, elem)" content-editable></span></div>
-
+<span id="TeamNameDiv">
+    Team Name:
+    <strong>
+        <span myProp="testProp" id="TEAM_NAME" ng-model="$ctrl.team.TEAM_NAME" edit-callback="$ctrl.editHandler(text, elem)" content-editable></span>
+    </strong>
+</span>
+<div>
+    <small>
+        <span id="TeamID">
+            ID: {{$ctrl.team.id}}
+        </span> |
+        <span id="OwnerDiv">
+            Owner: <span id="TEAM_OWNER" ng-model="$ctrl.team.TEAM_OWNER" edit-callback="$ctrl.editHandler(text, elem)" content-editable></span>
+            <span>{{$ctrl.nameUpdatedMessage}}</span>
+        </span>
+    </small>
+</div>
 

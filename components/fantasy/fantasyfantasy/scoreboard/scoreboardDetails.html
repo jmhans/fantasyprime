@@ -1,7 +1,11 @@
 ﻿
-    <div class="container" ng-repeat="gm in $ctrl.games">
+<!--<ul uib-pagination total-items="$ctrl.totalItems" items-per-page="1" ng-model="$ctrl.selectedWeek" ng-change="$ctrl.pageChanged()"></ul>-->
+<a ui-sref="ff.scoreboard.details({weekId: $ctrl.selectedWeek - 1})"><i class="fa fa-backward"></i> Previous Week </a>
+| Week {{$ctrl.selectedWeek}} |
+<a ui-sref="ff.scoreboard.details({weekId: $ctrl.selectedWeek + 1})"> Next Week <i class="fa fa-forward"></i></a>
 
-        
+
+    <div class="container" ng-repeat="gm in $ctrl.weeklymatchups">
 
         <table class="table table-condensed text-center">
             <thead>
@@ -21,57 +25,13 @@
                     </td>
                     <td>
                         <div uib-collapse="gm.isCollapsed">
-                            <table class="table table-condensed  text-center">
-                                <thead>
-                                    <tr>
-                                        <th class="text-center">Position</th>
-                                        <th class="text-center">Team</th>
-                                        <th class="text-center">Score <small>(Proj)</small></th>
-                                        <th class="text-center">Score <small>(Proj)</small></th>
-                                        <th class="text-center">Opposing Team</th>
-
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr ng-repeat="gmRec in gm['Subgame Details']">
-                                        <td>{{gmRec['Position']}}</td>
-                                        <td>{{gmRec['Team Name']}}</td>
-                                        <td>{{gmRec['Score']}} <small>({{gmRec['Proj']}})</small></td>
-                                        <td>{{gmRec['Opp Score']}} <small>({{gmRec['Opp Proj']}})</small></td>
-                                        <td>{{gmRec['Opp Name']}}</td>
-
-                                    </tr>
-                                </tbody>
-
-                            </table>
+                            <detailed-game-results games="gm['Subgame Details']"></detailed-game-results>
                         </div>
                     </td>
                     <td></td>
                     <td>
                         <div uib-collapse="gm.isCollapsed">
-                            <table class="table table-condensed  text-center">
-                                <thead>
-                                    <tr>
-                                        <th class="text-center">Position</th>
-                                        <th class="text-center">Team</th>
-                                        <th class="text-center">Score <small>(Proj)</small></th>
-                                        <th class="text-center">Score <small>(Proj)</small></th>
-                                        <th class="text-center">Opposing Team</th>
-
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr ng-repeat="gmRec in gm['Subgame Opp Details']">
-                                        <td>{{gmRec['Position']}}</td>
-                                        <td>{{gmRec['Team Name']}}</td>
-                                        <td>{{gmRec['Score']}} <small>({{gmRec['Proj']}})</small></td>
-                                        <td>{{gmRec['Opp Score']}} <small>({{gmRec['Opp Proj']}})</small></td>
-                                        <td>{{gmRec['Opp Name']}}</td>
-
-                                    </tr>
-                                </tbody>
-
-                            </table>
+                            <detailed-game-results games="gm['Subgame Opp Details']"></detailed-game-results>
                         </div>
                     </td>
                 </tr>
@@ -84,9 +44,15 @@
                 </tr>
                 <tr>
                     <td>Points (Bench)</td>
-                    <td>{{gm['Pts (Starters)']}} ({{gm['Pts (Bench)']}})</td>
+                    <td>
+                        {{gm['Pts (Starters)'] | number: 2}}
+                        <small>({{gm['Pts (Bench)']| number: 2}})</small>
+                    </td>
                     <td></td>
-                    <td>{{gm['Opp Pts (Starters)']}} ({{gm['Opp Pts (Bench)']}})</td>
+                    <td>
+                        {{gm['Opp Pts (Starters)'] | number: 2}}
+                        <small>({{gm['Opp Pts (Bench)'] | number: 2}})</small>
+                    </td>
                 </tr>
                 
             </tbody>
