@@ -1,0 +1,21 @@
+﻿
+<div class="container">
+    
+    <!--<td>{{sr}}</td>-->
+    <!--<table ng-repeat="sr in $ctrl.scorerecords | filter : {'WEEK' : 9, 'SEASON' : 2017} : true" class="table-bordered">
+        <tbody>
+            <tr>
+                <td colspan="2">Opponent: {{sr.OPPONENT_ID}}</td>
+            </tr>
+            <tr>
+                <td>Current: {{sr.POINTS_FOR}} - {{sr.POINTS_AGAINST}} </td>
+                <td><small>Projected: {{sr.PROJ_POINTS_AGAINST}} - {{sr.PROJ_POINTS_FOR}}</small></td>
+            </tr>
+        </tbody>
+    </table>-->
+    <p>
+        Current: <span ng-style="({{$ctrl.scorerecords.POINTS_FOR}} >= {{$ctrl.scorerecords.POINTS_AGAINST}}) && {'color':'green'} || {'color':'red'} ">{{$ctrl.scorerecords.POINTS_FOR}} - {{$ctrl.scorerecords.POINTS_AGAINST}} </span> | 
+        <small>Projected: <span ng-style="({{$ctrl.scorerecords.PROJ_POINTS_FOR}} >= {{$ctrl.scorerecords.PROJ_POINTS_AGAINST}}) && {'color':'green'} || {'color':'red'} ">{{$ctrl.scorerecords.PROJ_POINTS_FOR}} - {{$ctrl.scorerecords.PROJ_POINTS_AGAINST}} </span></small> | 
+        <a target="_blank" ng-href="http://games.espn.com/ffl/boxscorequick?leagueId={{$ctrl.ft.TEAM_INFO.LEAGUE_ID}}&teamId={{$ctrl.ft.TEAM_INFO.TEAM_ID}}&scoringPeriodId={{$ctrl.scorerecords.WEEK}}&seasonId={{$ctrl.scorerecords.SEASON}}&view=scoringperiod&version=quick" )>View on ESPN</a>
+    </p>
+</div>

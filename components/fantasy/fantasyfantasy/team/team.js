@@ -23,7 +23,7 @@ fantasyFantasyModule.config(function ($stateProvider) {
           name: 'team',
           // This state takes a URL parameter called teamId
           parent: 'teams',
-          url: '/{teamId:int}',
+          url: '/team?teamId&weekId',
           component: 'team',
           // This state defines a 'person' resolve
           // It delegates to the PeopleService, passing the personId parameter
@@ -40,23 +40,78 @@ fantasyFantasyModule.config(function ($stateProvider) {
               },
               roster: function (FFDBService, team) {
                   return FFDBService.getActiveRosters();
+              },
+              week: function ($transition$) {
+                  // datepart: 'y', 'm', 'w', 'd', 'h', 'n', 's'
+                  Date.dateDiff = function (datepart, fromdate, todate) {
+                      datepart = datepart.toLowerCase();
+                      var diff = todate - fromdate;
+                      var divideBy = {
+                          w: 604800000,
+                          d: 86400000,
+                          h: 3600000,
+                          n: 60000,
+                          s: 1000
+                      };
+
+                      return Math.floor(diff / divideBy[datepart]);
+                  }
+                  //Set the two dates
+                  var startDate = new Date("2017-09-05T00:00:00");
+                  var today = new Date();
+
+                  var myWeek = (parseInt($transition$.params().weekId) || Date.dateDiff('w', startDate, today) + 1);
+                  return myWeek;
               }
           },
           params: {
-              teamId: 1
+              teamId: "1",
+              weekId: "10"
           },
           menu: { name: "My Team", priority: 1000 },
-          tree: { name: "My Team" }
+
       },
       {
           name: 'freeagents',
           // This state takes a URL parameter called teamId
-          parent: 'teams',
+          parent: 'team',
           url: '/allteams',
           component: 'allteams',
+          resolve: {
+              thingy: function ($transition$) {
+                  return '1';
+              }
+          },
           menu: { name: 'All Teams', priority: 900 },
           tree: { name: 'All Teams' },
           requiresParams: false
+      },
+      {
+          name: 'detail',
+          // This state takes a URL parameter called teamId
+          parent: 'team',
+          url: '/detail',
+          component: 'team.detail',
+          resolve: {
+              
+          },
+          menu: { name: 'All Teams', priority: 900 },
+          tree: { name: 'My Team' }
+      },
+      {
+          name: 'addteam',
+          parent: 'team',
+          url: '/addteam?addTeamId',
+          component: 'addteam',
+          requiresParams: false,
+          resolve: {
+              addTeam: function (FFDBService, $transition$) {
+                  return FFDBService.getTeamInfo($transition$.params().addTeamId);
+              },
+              roster: function (FFDBService, team) {
+                  return FFDBService.getActiveRosters();
+              }
+          }
       }
 
     ];
@@ -67,8 +122,29 @@ fantasyFantasyModule.config(function ($stateProvider) {
 
 
 fantasyFantasyModule.component('team', {
-    bindings: { team: '<', roster: '<' },
-    templateUrl: 'components/fantasy/fantasyfantasy/team/team.html'
+    bindings: { team: '<', teams: '<'},
+    templateUrl: 'components/fantasy/fantasyfantasy/team/team.html',
+    controller: function ($scope, $state) {
+        this.changeTeam = function () {
+            console.log($scope.$ctrl.activeTeam);
+            $state.go($state.current.name, { teamId: $scope.$ctrl.team.id });
+        }
+
+
+    }
+})
+
+fantasyFantasyModule.component('team.detail', {
+    bindings: { team: '<', roster: '<', week: '<', teams: '<' },
+    templateUrl: 'components/fantasy/fantasyfantasy/team/detail.html',
+    controller: function () {
+        this.action = 'standard'
+
+        this.$onChanges = function(chg) {
+            console.log(chg);
+        }
+        // this.teams = teams
+    }
 })
 
 
@@ -137,3 +213,17 @@ function teamDetailController(FFDBService, $scope) {
 
 
 }
+
+
+fantasyFantasyModule.component('addteam', {
+    bindings: { team: '<', addTeam: '<', roster:'<', week:'<' },
+    templateUrl: 'components/fantasy/fantasyfantasy/team/addteam.html',
+    controller: addTeamController
+})
+
+
+function addTeamController() {
+    this.action = 'add_drop'
+}
+
+

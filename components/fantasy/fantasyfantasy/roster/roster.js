@@ -1,13 +1,13 @@
 ﻿
 fantasyFantasyModule.component('roster', {
-    bindings: { roster: '<', team:'<'},
+    bindings: { roster: '<', team:'<', week: '<', action: '<'},
     controller: RosterTableCtrl, 
     templateUrl: 'components/fantasy/fantasyfantasy/roster/roster.html',
     controllerAs: 'rosterCtrl'
 })
 
 
-function RosterTableCtrl($http, /*DTOptionsBuilder, DTColumnBuilder, DTColumnDefBuilder, GoogleSheetsService, */ FFDBService, $scope, $compile) {
+function RosterTableCtrl($http, FFDBService, $scope, $compile) {
 
     var vm = this;
 

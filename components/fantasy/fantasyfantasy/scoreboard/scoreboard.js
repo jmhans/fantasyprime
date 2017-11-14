@@ -121,3 +121,9 @@ fantasyFantasyModule.component('scoreboard.details', {
         this.selectedWeek = $state.params.weekId
     }
 })
+
+
+fantasyFantasyModule.component('fantasymatchup', {
+    bindings: { scorerecords: '<', ft: '<' },
+    templateUrl: 'components/fantasy/fantasyfantasy/scoreboard/matchup.html'
+})

@@ -31,3 +31,38 @@ Array.prototype.filterWithCriteria = function (critObj) {
 Array.prototype.SUMIFS = function (sumProp, critObj) {
     return this.filterWithCriteria(critObj).reduce(function (total, curVal) { return total + parseFloat(curVal[sumProp]) }, 0);
 }
+
+contains = function (needle) {
+    // Per spec, the way to identify NaN is that it is not equal to itself
+    var findNaN = needle !== needle;
+    var indexOf;
+
+    if (!findNaN && typeof Array.prototype.indexOf === 'function') {
+        indexOf = Array.prototype.indexOf;
+    } else {
+        indexOf = function (needle) {
+            var i = -1, index = -1;
+
+            for (i = 0; i < this.length; i++) {
+                var item = this[i];
+
+                if ((findNaN && item !== item) || item === needle) {
+                    index = i;
+                    break;
+                }
+            }
+
+            return index;
+        };
+    }
+
+    return indexOf.call(this, needle) > -1;
+};
+
+Array.prototype.sumProp = function (prop) {
+    var total = 0
+    for (var i = 0, _len = this.length; i < _len; i++) {
+        total += this[i][prop]
+    }
+    return total
+}

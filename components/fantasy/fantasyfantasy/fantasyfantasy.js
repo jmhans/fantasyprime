@@ -11,15 +11,14 @@ fantasyFantasyModule.config(function ($stateProvider) {
             name: 'Fantasy Fantasy', tag: 'submenu'
         },
         tree: {
-            name: 'Fantasy Fantasy',
+            name: 'Fantasy Fantasy', users: 'allTeams'
         },
-        resolve: {
-            allTeams: function (TeamsService) {
-                //var a = TeamsService.getAllTeams();
-                var a = TeamsService.getPrimeTeams()
-                return a;
-            }
-        },
+        //resolve: {
+        //    allTeams: function (FFDBService) {
+        //        var a = FFDBService.getTeams();
+        //        return a;
+        //    }
+        //},
         requiresParams: false
     },
 
@@ -34,24 +33,12 @@ fantasyFantasyModule.config(function ($stateProvider) {
 
 
 fantasyFantasyModule.component('fantasyfantasy', {
-    bindings: { users: '=', allTeams: '<'},
+    bindings: {},
     templateUrl: 'components/fantasy/fantasyfantasy/fantasyfantasy.html',
     controller: ffCtrl
 })
 
 
 function ffCtrl($http, $scope, TeamsService, FFDBService) {
-    //$scope.$parent.myTeams = allTeams;
-
-    /*$scope.updateUsers = function () {
-        $scope.onUserUpdate($scope.allTeams)
-    }*/
-
-  //  $scope.val = TeamsService.getESPNDraftInfo('5437')
-
     var a = 1;
-
 }
-
-
-// $scope.params = $routeParams;

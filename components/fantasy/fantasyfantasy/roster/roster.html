@@ -6,36 +6,52 @@
 
 
 <h4>Team Roster</h4>
+
 <div>
     <table class="table table-striped table-sm table-condensed">
         <thead>
 
             <tr>
+                <th>Position</th>
                 <th>Team ID</th>
                 <th>Team Name</th>
-                <th>Owner</th>
-                <th>Position</th>
-
+                <th>Record</th>
+                <th>Points For</th>
+                <th>Points Against</th>
+                <th>This Week</th>
             </tr>
         </thead>
         <tbody>
             <tr ng-style='(rosterRec.position == "Bench") && {"background-color":"lightgray"}' ng-repeat="rosterRec in rosterCtrl.roster | filter : {OWNER : {id : rosterCtrl.team.id}} : true | orderBy: 'position': true">
-                <td>
-                    {{rosterRec.team_id}}
-                </td>
-                <td>
-                    {{ rosterRec.TEAM_INFO.TEAM_NAME }}
-                </td>
-                <td>
-                    {{ rosterRec.prime_owner }}
-                </td>
-                <td>
+                <td ng-if="(rosterCtrl.action == 'standard')">
                     <select ng-model="rosterRec.position" ng-change="rosterCtrl.updateRoster(rosterRec)">
                         <option>Starter</option>
                         <option>Bench</option>
                     </select>
                     <span ng-show="rosterRec.updating">Saving...</span>
                 </td>
+                <td ng-if="(rosterCtrl.action == 'add_drop')">
+                    <button>Drop Team</button>
+                </td>
+                <td>
+                    {{rosterRec.team_id}}
+                </td>
+                <td>
+                    <a target="_blank" ng-href="http://games.espn.com/ffl/clubhouse?leagueId={{rosterRec.TEAM_INFO.LEAGUE_ID}}&teamId={{rosterRec.TEAM_INFO.TEAM_ID}}&seasonId={{rosterRec.TEAM_INFO.SEASON}}">
+                        {{ rosterRec.TEAM_INFO.TEAM_NAME }}
+                    </a>
+                </td>
+                <td>
+                    {{ rosterRec.TEAM_INFO.wins }} - {{ rosterRec.TEAM_INFO.losses }} - {{ rosterRec.TEAM_INFO.ties }}
+                </td>
+                <td>
+                    {{ rosterRec.TEAM_INFO.TOTAL_POINTS_FOR | number : 2 }}
+                </td>
+                <td>
+                    {{ rosterRec.TEAM_INFO.TOTAL_POINTS_AGAINST | number : 2 }}
+                </td>
+                <td ng-repeat="score in rosterRec.TEAM_INFO.scores | filter : {WEEK: rosterCtrl.week, SEASON: 2017} : true"><fantasymatchup ft="rosterRec" scorerecords='score'></fantasymatchup></td>
+
 
 
             </tr>

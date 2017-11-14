@@ -12,18 +12,30 @@
                 <table class="table table-striped table-sm table-condensed">
                     <thead>
                         <tr>
+                            <th>Action</th>
                             <th>ID</th>
                             <th>Team Name</th>
-                            <th>Team Owner</th>
-                            <th>Position</th>
+                            <th>W</th>
+                            <th>L</th>
+                            <th>T</th>
+                            <th>Pts For</th>
+                            <th>Pts Against</th>
+                            <th>This Week's Matchup</th>
                         </tr>
                     </thead>
                     <tbody>
                         <tr ng-repeat="ft in $ctrl.fantasyTeams | filter : {prime_owner: '' } : true">
+                            <td>
+                                <button class="btn btn-info btn-sm" ui-sref="addteam({teamId : $ctrl.team.id, addTeamId: ft.team_id})"><i class="fa fa-plus"></i></button>
+                            </td>
                             <td>{{ ft.team_id }}</td>
                             <td>{{ ft.TEAM_INFO.TEAM_NAME }}</td>
-                            <td>{{ ft.prime_owner }}</td>
-                            <td></td>
+                            <td>{{ ft.TEAM_INFO.wins }}</td>
+                            <td>{{ ft.TEAM_INFO.losses }}</td>
+                            <td>{{ ft.TEAM_INFO.ties }}</td>
+                            <td>{{ ft.TEAM_INFO.TOTAL_POINTS_FOR | number : 2}}</td>
+                            <td>{{ ft.TEAM_INFO.TOTAL_POINTS_AGAINST | number : 2}}</td>
+                            <td ng-repeat="score in ft.TEAM_INFO.scores | filter : {WEEK: 10, SEASON: 2017} : true"><fantasymatchup ft="ft" scorerecords='score'></fantasymatchup></td>
                         </tr>
                     </tbody>
                 </table>
@@ -33,5 +45,3 @@
 
     </div>
 </div>
-
-<button ui-sref="teams">Close</button>

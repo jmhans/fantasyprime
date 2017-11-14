@@ -44,7 +44,7 @@
     return service;
 })
 
-fantasyFantasyModule.service('FFDBService', [ '$http', 'TeamsService', '$q', function ( $http, TeamsService, $q) {
+fantasyFantasyModule.service('FFDBService', [ '$http', 'TeamsService', '$q', 'ScoresService', function ( $http, TeamsService, $q, ScoresService) {
     this.activeTeam = {};
 
     var service = {
@@ -178,20 +178,40 @@ fantasyFantasyModule.service('FFDBService', [ '$http', 'TeamsService', '$q', fun
         },
 
         getAllTeamInfo: function () {
-            return $http.get('http://actuarialgames.x10host.com/includes/api.php/prime_teams?transform=1').then(function (resp) {
-                return resp.data.prime_teams;
+            return $http.get('http://actuarialgames.x10host.com/includes/api.php/prime_teams?transform=1').then(function (teams) {
+                return ScoresService.getScoreRecords().then(function (scores) {
+                    teams.data.prime_teams.forEach(function (tm) {
+                        tm.scores = scores.filter(function (score) {
+                            return (score.TEAM_ID == tm.LEAGUE_ID + '_' + tm.TEAM_ID);
+                        });
+                        tm.wins = tm.scores.filter(function (ts) { return (ts.POINTS_FOR > ts.POINTS_AGAINST); }).length;
+                        tm.losses = tm.scores.filter(function (ts) { return (ts.POINTS_FOR < ts.POINTS_AGAINST); }).length;
+                        tm.ties = tm.scores.filter(function (ts) { return (ts.POINTS_FOR == ts.POINTS_AGAINST); }).length;
+                        tm.TOTAL_POINTS_FOR = tm.scores.sumProp('POINTS_FOR');
+                        tm.TOTAL_POINTS_AGAINST = tm.scores.sumProp('POINTS_AGAINST');
+
+                    });
+                    return teams.data.prime_teams;
+                });
+
+                
             });
         },
+        getTeamInfo: function(teamId) {
+            return service.getAllTeamInfo().then(function (tms) {
+                return tms.find(function (tm) { return ((tm.LEAGUE_ID + '_' +  tm.TEAM_ID) == teamId); })
+            });
+        } ,
         updateRosterRecord: function (updateRecord) {
             expireRecord = {
                 recno: updateRecord.recno,
                 end_date: new Date()
             }
             newRecord = {
-                team_id: updateRecord.team_id, 
-                start_date: new Date(), 
+                team_id: updateRecord.team_id,
+                start_date: new Date(),
                 position: updateRecord.position,
-                prime_owner: updateRecord.prime_owner, 
+                prime_owner: updateRecord.prime_owner,
 
             }
             return $http.put('http://actuarialgames.x10host.com/includes/api.php/prime_rosters/' + expireRecord.recno, expireRecord).then(function (response) {
@@ -256,3 +276,14 @@ fantasyFantasyModule.service('FFDBService', [ '$http', 'TeamsService', '$q', fun
 
     return service;
 }]);
+fantasyFantasyModule.service('FantasyFantasyService', function ($http) {
+    var service = {
+        getConfig: function () {
+            return $http.get('data/ffconfig.json', { cache: true }).then(function (resp) {
+                return resp.data;
+            });
+        }
+    }
+
+    return service;
+})
