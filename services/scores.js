@@ -1,7 +1,7 @@
 ﻿fantasyFantasyModule.service('ScoresService', function ($http) {
     var service = {
         getScoreRecords: function () {
-            return $http.get('data/ResultsStore.json', { cache: true }).then(function (resp) {
+            return $http.get('data/ResultsStore.json', { cache: false }).then(function (resp) {
                 var outputArr = [];
                 resp.data.data.forEach(function (gm) {
                     outputArr.push({

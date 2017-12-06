@@ -201,7 +201,12 @@ fantasyFantasyModule.service('FFDBService', [ '$http', 'TeamsService', '$q', 'Sc
             return service.getAllTeamInfo().then(function (tms) {
                 return tms.find(function (tm) { return ((tm.LEAGUE_ID + '_' +  tm.TEAM_ID) == teamId); })
             });
-        } ,
+        },
+        getRosterRecord: function(teamId) {
+            return service.getActiveRosters().then(function (rrs) {
+                return rrs.find(function (rr) { return (rr.team_id == teamId);})
+            })
+        },
         updateRosterRecord: function (updateRecord) {
             expireRecord = {
                 recno: updateRecord.recno,
@@ -276,14 +281,3 @@ fantasyFantasyModule.service('FFDBService', [ '$http', 'TeamsService', '$q', 'Sc
 
     return service;
 }]);
-fantasyFantasyModule.service('FantasyFantasyService', function ($http) {
-    var service = {
-        getConfig: function () {
-            return $http.get('data/ffconfig.json', { cache: true }).then(function (resp) {
-                return resp.data;
-            });
-        }
-    }
-
-    return service;
-})

@@ -39,6 +39,8 @@ module.exports = function (grunt) {
                         'node_modules/angular-google-chart/ng-google-chart.js',
                         'node_modules/papaparse/papaparse.js',
                         'node_modules/angular-content-editable/dist/angular-content-editable.min.js',
+                        'node_modules/moment/min/moment.min.js',
+                        'node_modules/moment-timezone/builds/moment-timezone-with-data.min.js',
                         'main.js',                        
                         'components/**/*.js',
                         'services/*.js'

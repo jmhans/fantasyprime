@@ -28,8 +28,10 @@
     "grunt-contrib-copy": "^1.0.0",
     "font-awesome": "^4.7.0",
     "datatables.net-buttons": "^1.4.0",
-    "datatables-buttons": "^1.0.3", 
-    "angular-content-editable": "^1.2.1"
+    "datatables-buttons": "^1.0.3",
+    "angular-content-editable": "^1.2.1",
+    "moment": "^2.19.2",
+    "moment-timezone": "^0.5.14"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"

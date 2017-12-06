@@ -39,34 +39,20 @@ fantasyFantasyModule.config(function ($stateProvider) {
                   return tm;
               },
               roster: function (FFDBService, team) {
-                  return FFDBService.getActiveRosters();
+                  return FFDBService.getActiveRosters().then(function (allrosters) {
+                      return allrosters.filter(function (rosterRec) {
+                          return (rosterRec.prime_owner == team.TEAM_NAME);
+                      });
+                  });
               },
-              week: function ($transition$) {
-                  // datepart: 'y', 'm', 'w', 'd', 'h', 'n', 's'
-                  Date.dateDiff = function (datepart, fromdate, todate) {
-                      datepart = datepart.toLowerCase();
-                      var diff = todate - fromdate;
-                      var divideBy = {
-                          w: 604800000,
-                          d: 86400000,
-                          h: 3600000,
-                          n: 60000,
-                          s: 1000
-                      };
-
-                      return Math.floor(diff / divideBy[datepart]);
-                  }
-                  //Set the two dates
-                  var startDate = new Date("2017-09-05T00:00:00");
-                  var today = new Date();
-
-                  var myWeek = (parseInt($transition$.params().weekId) || Date.dateDiff('w', startDate, today) + 1);
-                  return myWeek;
+              week: function ($transition$, FantasyFantasyService) {
+                 
+                  var myWeek = FantasyFantasyService.getWeek((parseInt($transition$.params().weekId) || '')).then(function (resp) { return resp });
+                  return myWeek;   
               }
           },
           params: {
-              teamId: "1",
-              weekId: "10"
+              teamId: "1"
           },
           menu: { name: "My Team", priority: 1000 },
 
@@ -77,11 +63,6 @@ fantasyFantasyModule.config(function ($stateProvider) {
           parent: 'team',
           url: '/allteams',
           component: 'allteams',
-          resolve: {
-              thingy: function ($transition$) {
-                  return '1';
-              }
-          },
           menu: { name: 'All Teams', priority: 900 },
           tree: { name: 'All Teams' },
           requiresParams: false
@@ -105,11 +86,12 @@ fantasyFantasyModule.config(function ($stateProvider) {
           component: 'addteam',
           requiresParams: false,
           resolve: {
-              addTeam: function (FFDBService, $transition$) {
-                  return FFDBService.getTeamInfo($transition$.params().addTeamId);
-              },
-              roster: function (FFDBService, team) {
-                  return FFDBService.getActiveRosters();
+              addTeam: function (FFDBService, $transition$, roster) {
+                  return FFDBService.getRosterRecord($transition$.params().addTeamId).then(function (tm) {
+                      tm.action = 'Add'
+                      // roster.push(tm);
+                      return tm;
+                  });
               }
           }
       }
@@ -126,7 +108,7 @@ fantasyFantasyModule.component('team', {
     templateUrl: 'components/fantasy/fantasyfantasy/team/team.html',
     controller: function ($scope, $state) {
         this.changeTeam = function () {
-            console.log($scope.$ctrl.activeTeam);
+            // console.log($scope.$ctrl.activeTeam);
             $state.go($state.current.name, { teamId: $scope.$ctrl.team.id });
         }
 
@@ -135,7 +117,7 @@ fantasyFantasyModule.component('team', {
 })
 
 fantasyFantasyModule.component('team.detail', {
-    bindings: { team: '<', roster: '<', week: '<', teams: '<' },
+    bindings: { team: '<', roster: '<', week: '<', teams: '<'},
     templateUrl: 'components/fantasy/fantasyfantasy/team/detail.html',
     controller: function () {
         this.action = 'standard'
@@ -224,6 +206,16 @@ fantasyFantasyModule.component('addteam', {
 
 function addTeamController() {
     this.action = 'add_drop'
+    this.actionsAllowed = function () {
+        curDate = new Date();
+        cutoffDate = new Date("2017-09-07T14:46:30.510Z");
+
+
+        return
+        (this.roster ? (this.roster.length - this.roster.filter(function (r) { return (r.action == 'Drop'); }).length + 1 <= 8) : false) &&
+        (curDate <= cutoffDate);
+    }
+
 }
 
 

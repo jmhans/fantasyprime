@@ -1,10 +1,12 @@
 ﻿<h4>Add Team</h4>
 <div>
+    <div class="alert alert-warning" ng-if="!rosterCtrl.actionsAllowed()"><strong>Warning!</strong> You have too many players on your roster. Choose a player to drop.
+    </div>
     <table class="table table-striped table-sm table-condensed">
         <thead>
-
             <tr>
                 <th>Action</th>
+                <th></th>
                 <th>Team ID</th>
                 <th>Team Name</th>
                 <th>Record</th>
@@ -12,17 +14,32 @@
                 <th>Points Against</th>
                 <th>This Week</th>
             </tr>
+
         </thead>
         <tbody>
-            <tr>
-                <td>Add</td>
-                <td>{{$ctrl.addTeam.LEAGUE_ID}}_{{$ctrl.addTeam.Team_ID}}</td>
-                <td>{{$ctrl.addTeam.TEAM_NAME}}</td>
-                <td>{{$ctrl.addTeam.wins}} - {{$ctrl.addTeam.losses}} - {{$ctrl.addTeam.ties}}</td>
-                <td>{{$ctrl.addTeam.TOTAL_POINTS_FOR | number : 2 }}</td>
-                <td>{{$ctrl.addTeam.TOTAL_POINTS_AGAINST | number : 2 }}</td>
-                <td ng-repeat="score in $ctrl.addTeam.scores | filter: {WEEK: 10, SEASON: 2017} : true"><fantasymatchup ft="$ctrl.addTeam" scorerecords="score"></fantasymatchup></td>
-
+            <tr ng-style='{"background-color":"lightgreen"}'>
+                <td>
+                    Add Team
+                </td>
+                <td></td>
+                <td>
+                    {{$ctrl.addTeam.team_id}}
+                </td>
+                <td>
+                    <a target="_blank" ng-href="http://games.espn.com/ffl/clubhouse?leagueId={{$ctrl.addTeam.TEAM_INFO.LEAGUE_ID}}&teamId={{$ctrl.addTeam.TEAM_INFO.TEAM_ID}}&seasonId={{$ctrl.addTeam.TEAM_INFO.SEASON}}">
+                        {{ $ctrl.addTeam.TEAM_INFO.TEAM_NAME }}
+                    </a>
+                </td>
+                <td>
+                    {{ $ctrl.addTeam.TEAM_INFO.wins }} - {{ $ctrl.addTeam.TEAM_INFO.losses }} - {{ $ctrl.addTeam.TEAM_INFO.ties }}
+                </td>
+                <td>
+                    {{ $ctrl.addTeam.TEAM_INFO.TOTAL_POINTS_FOR | number : 2 }}
+                </td>
+                <td>
+                    {{ $ctrl.addTeam.TEAM_INFO.TOTAL_POINTS_AGAINST | number : 2 }}
+                </td>
+                <td ng-repeat="score in $ctrl.addTeam.TEAM_INFO.scores | filter : {WEEK: $ctrl.week.WeekId, SEASON: 2017} : true"><fantasymatchup ft="$ctrl.addTeam" scorerecords='score'></fantasymatchup></td>
             </tr>
         </tbody>
         <tfoot>

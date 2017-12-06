@@ -1,6 +1,6 @@
 ﻿fantasyFantasyModule.component('teams', {
     bindings: { teams: '<'},
-    templateUrl: 'components/fantasy/fantasyfantasy/teams.html',
+    template: '<ui-view />',
     controller: teamsController,
     controllerAs: 'teamsCtrl'
     //template: '<ui-view />'
@@ -8,22 +8,7 @@
 
 function teamsController($scope, $state, FFDBService) {
     this.teamChange = function () {
-        console.log($scope.$ctrl.activeTeam);
         $state.go('team', { teamId: $scope.$ctrl.activeTeam.id });
     }
-
-    //this.setActiveTeam = function (tmObj) {
-    //    this.activeTeam = tmObj;
-    //}
-
-    //var ctrl = this
-    //ctrl.FFDBService = FFDBService;
-
-    //this.$onInit = function () {
-    //    ctrl.activeTeam = ctrl.FFDBService.activeTeam;
-    //}
-    //this.$onChanges = function (changes) {
-    //    console.log(changes)
-    //}
 
 }
