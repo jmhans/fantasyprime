@@ -93,11 +93,6 @@ fantasyFantasyModule.service('FFDBService', [ '$http', 'TeamsService', '$q', 'Sc
                 return resp.data;
             });
         },
-        addRosterRecord: function (rosterRec) {
-            return service.addItemToTable('prime_rosters', rosterRec).then(function (resp) {
-                return resp.data;
-            });
-        },
         getRosterRecs: function () {
             return $http.get('http://actuarialgames.x10host.com/includes/api.php/prime_rosters?transform=1').then(function (resp) {
                 return resp.data.prime_rosters;

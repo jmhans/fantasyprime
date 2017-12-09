@@ -30,7 +30,7 @@
     "datatables.net-buttons": "^1.4.0",
     "datatables-buttons": "^1.0.3",
     "angular-content-editable": "^1.2.1",
-    "moment": "^2.19.2",
+    "moment": "^2.19.3",
     "moment-timezone": "^0.5.14"
   },
   "scripts": {

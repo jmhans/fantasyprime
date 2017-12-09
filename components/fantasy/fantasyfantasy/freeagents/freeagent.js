@@ -1,16 +1,20 @@
 ﻿fantasyFantasyModule.component('allteams', {
-    bindings: { fantasyTeams: '<', team: '<', week:'<' , roster: '<'},
+    bindings: { fantasyTeams: '<', team: '<', week:'<' , roster: '<', myRosterUpdate: '&'},
     controller: FATableCtrl, 
     templateUrl: 'components/fantasy/fantasyfantasy/freeagents/freeagents.html'
 })
 
-function FATableCtrl($uibModal, $log, $document) {
+function FATableCtrl($uibModal, $log, $document, FFDBService) {
+
+
 
     this.waiversActive = function () {
-        return !this.addsAvailable();
+        d = new Date();
+        return (d <= new Date(this.week['Waiver Period End'])) && (d > new Date(this.week['Waiver Period Start']));
     };
     this.addsAvailable = function () {
-        return (new Date() <= new Date(this.week['Roster Lock Time']));
+        d = new Date();
+        return (d <= new Date(this.week['Roster Lock Time'])) && (d > new Date(this.week['Waiver Period End']));
     };
 
     var $ctrl = this;
@@ -36,9 +40,28 @@ function FATableCtrl($uibModal, $log, $document) {
             // $ctrl.selected = selectedItem;
             $ctrl.addingTeam = teamToAdd;
             $ctrl.droppingTeam = selectedItem;
+            if ($ctrl.teamToAdd.addType == 'add') {
+                $ctrl.addingTeam.prime_owner = $ctrl.team.TEAM_NAME;
+                $ctrl.addingTeam.position = 'Bench';
+                $ctrl.droppingTeam.prime_owner = '';
+                $ctrl.droppingTeam.position = '';
+                FFDBService.updateRosterRecord($ctrl.addingTeam).then(function (result) {
+                    // Finalize add
+                }, function () {
+                    // Process failed
+                })
+                FFDBService.updateRosterRecord($ctrl.droppingTeam).then(function (result) {
+                    // Finalize drop
+                }, function () {
+                    // Process failed.
+                })
+            }
+            
         }, function () {
             $log.info('modal-component dismissed at: ' + new Date());
         })
+
+
     }
 }
 

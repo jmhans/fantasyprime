@@ -136,15 +136,3 @@ module.exports = function (grunt) {
     grunt.registerTask('pkg_and_deploy', ['default', 'copy', 'ftp-deploy']);
     grunt.registerTask('deploy_data', [ 'copy:data', 'ftp-deploy']);
 };
-
-
-
-
-
-
-
-
-
-
-
-

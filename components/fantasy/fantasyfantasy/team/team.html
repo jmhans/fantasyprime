@@ -1,6 +1,8 @@
 ﻿<!--<a ui-sref="roster">Roster</a> | <a ui-sref="detail">Team Information</a>-->
 Go To:<select ng-model="$ctrl.team" ng-options="tm.TEAM_NAME for tm in $ctrl.teams" ng-change="$ctrl.changeTeam()"></select>
 <br />
-<ui-view></ui-view>
+
+{{$ctrl.something}}
+<div ui-view my-roster-update="$ctrl.handleRosterUpdate()" roster="$ctrl.roster"></div>
 
 

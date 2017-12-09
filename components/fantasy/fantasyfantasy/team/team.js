@@ -38,13 +38,13 @@ fantasyFantasyModule.config(function ($stateProvider) {
                   FFDBService.activeTeam = tm;
                   return tm;
               },
-              roster: function (FFDBService, team) {
-                  return FFDBService.getActiveRosters().then(function (allrosters) {
-                      return allrosters.filter(function (rosterRec) {
-                          return (rosterRec.prime_owner == team.TEAM_NAME);
-                      });
-                  });
-              },
+              //roster: function (FFDBService, team) {
+              //    return FFDBService.getActiveRosters().then(function (allrosters) {
+              //        return allrosters.filter(function (rosterRec) {
+              //            return (rosterRec.prime_owner == team.TEAM_NAME);
+              //        });
+              //    });
+              //},
               week: function ($transition$, FantasyFantasyService) {
                  
                   var myWeek = FantasyFantasyService.getWeek((parseInt($transition$.params().weekId) || '')).then(function (resp) { return resp });
@@ -74,7 +74,9 @@ fantasyFantasyModule.config(function ($stateProvider) {
           url: '/detail',
           component: 'team.detail',
           resolve: {
-              
+              roster: function(roster) {
+                  return roster;
+              }
           },
           menu: { name: 'All Teams', priority: 900 },
           tree: { name: 'My Team' }
@@ -106,10 +108,27 @@ fantasyFantasyModule.config(function ($stateProvider) {
 fantasyFantasyModule.component('team', {
     bindings: { team: '<', teams: '<'},
     templateUrl: 'components/fantasy/fantasyfantasy/team/team.html',
-    controller: function ($scope, $state) {
+    controller: function ($scope, $state, FFDBService) {
         this.changeTeam = function () {
             // console.log($scope.$ctrl.activeTeam);
             $state.go($state.current.name, { teamId: $scope.$ctrl.team.id });
+        }
+
+        var $ctrl = this
+
+        this.$onInit = function () {
+            $ctrl.loadRosters();
+        }
+
+        this.loadRosters = function () {
+            FFDBService.getActiveRosters().then(function (allrosters) {
+                $ctrl.roster = allrosters.filter(function (rosterRec) {
+                    return (rosterRec.prime_owner == $ctrl.team.TEAM_NAME);
+                });
+            });
+        }
+        this.handleRosterUpdate = function () {
+            console.log("Roster Updated");
         }
 
 
@@ -117,11 +136,13 @@ fantasyFantasyModule.component('team', {
 })
 
 fantasyFantasyModule.component('team.detail', {
-    bindings: { team: '<', roster: '<', week: '<', teams: '<'},
+    bindings: { team: '<', roster: '<', week: '<', teams: '<', reload: '&'},
     templateUrl: 'components/fantasy/fantasyfantasy/team/detail.html',
-    controller: function () {
+    controller: function ($scope) {
         this.action = 'standard'
-
+        this.$onInit = function () {
+            console.log("initialized");
+        }
         this.$onChanges = function(chg) {
             console.log(chg);
         }
