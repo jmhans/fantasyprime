@@ -26,7 +26,7 @@ module.exports = function (grunt) {
                         'node_modules/datatables-buttons/js/buttons.jqueryui.js',
                         'node_modules/datatables-buttons/js/buttons.print.js',
                         'node_modules/angular/angular.js',
-                        'node_modules/angular-ui-router/release/angular-ui-router.js',
+                        'node_modules/@uirouter/angularjs/release/angular-ui-router.js',
                         'node_modules/angular-ui-router-menus/dist/angular-ui-router-menus.js',
                         'node_modules/angular-google-gapi/dist/angular-google-gapi.js',
                         'node_modules/angular-datatables/dist/angular-datatables.js',
