@@ -269,6 +269,18 @@ fantasyFantasyModule.service('FFDBService', [ '$http', 'TeamsService', '$q', 'Sc
                     return activeRosters;
                 });
             });
+        },
+        submitWaiverClaim: function (addTm, dropTm) {
+            newRec = {
+                REQUESTER_ID: dropTm.prime_owner,
+                ADD_TEAM_ID: addTm.team_id,
+                DROP_TEAM_ID: dropTm.team_id,
+                REQUEST_TIME: new Date()
+            };
+
+            return service.addItemToTable('prime_waivers', newRec).then(function (resp) {
+                return resp; 
+            });
         }
 
 

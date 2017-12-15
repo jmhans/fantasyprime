@@ -38,13 +38,6 @@ fantasyFantasyModule.config(function ($stateProvider) {
                   FFDBService.activeTeam = tm;
                   return tm;
               },
-              //roster: function (FFDBService, team) {
-              //    return FFDBService.getActiveRosters().then(function (allrosters) {
-              //        return allrosters.filter(function (rosterRec) {
-              //            return (rosterRec.prime_owner == team.TEAM_NAME);
-              //        });
-              //    });
-              //},
               week: function ($transition$, FantasyFantasyService) {
                  
                   var myWeek = FantasyFantasyService.getWeek((parseInt($transition$.params().weekId) || '')).then(function (resp) { return resp });
@@ -74,9 +67,9 @@ fantasyFantasyModule.config(function ($stateProvider) {
           url: '/detail',
           component: 'team.detail',
           resolve: {
-              roster: function(roster) {
-                  return roster;
-              }
+              //roster: function(roster) {
+              //    return roster;
+              //}
           },
           menu: { name: 'All Teams', priority: 900 },
           tree: { name: 'My Team' }
@@ -127,8 +120,75 @@ fantasyFantasyModule.component('team', {
                 });
             });
         }
-        this.handleRosterUpdate = function () {
+        this.handleRosterUpdate = function (rosterRec, rosterAction) {
             console.log("Roster Updated");
+            switch (rosterAction) {
+                case 'add':
+                    rosterRec.prime_owner = $ctrl.team.TEAM_NAME;
+                    rosterRec.position = 'Bench';
+                    break;
+                case 'drop':
+                    //drop team
+                    rosterRec.prime_owner = '';
+                    rosterRec.position= '';
+                    break;
+            }
+            $ctrl.beginUpdate(rosterRec, rosterAction);
+            FFDBService.updateRosterRecord(rosterRec).then(function (resp) {
+                $ctrl.endUpdate(resp)
+                $ctrl.loadRosters();
+            }, function (err) {
+                $ctrl.failUpdate(claimingTeam.recno, err);
+            });
+
+        }
+
+        this.submitWaiverClaim = function (claimingTeam, conditionallyDroppingTeam) {
+            // console.log("submitted claim to add " + claimingTeam + " and drop " + conditionallyDroppingTeam);
+            $ctrl.beginUpdate(claimingTeam, 'waiver');
+            FFDBService.submitWaiverClaim(claimingTeam, conditionallyDroppingTeam).then(function (resp) {
+                $ctrl.endUpdate(claimingTeam.recno);
+            }, function (err) {
+                $ctrl.failUpdate(claimingTeam.recno, err);
+            });
+        }
+
+        this.updating = [];
+        this.beginUpdate = function (updateRec, rosterAction) {
+            switch (rosterAction) {
+                case 'add':
+                    updateRec.msg = { text: 'Adding Team' }
+                    break;
+                case 'drop':
+                    updateRec.msg = { text: 'Dropping Team' }
+                    break;
+                case 'waiver':
+                    updateRec.msg = { text: 'Waiver claim submitted for ' }
+                    break;
+                default:
+                    updateRec.msg = { text: 'Updating Team' }
+            }
+
+            updateRec.msg.status = 'In progress'
+            updateRec.msg.type = 'warning'
+            $ctrl.updating.push(updateRec);
+        }
+        this.endUpdate = function (updateRecID) {
+            var idx = $ctrl.updating.findIndex(function (itm) { return (itm.recno == updateRecID); })
+            $ctrl.updating[idx].msg.status = "Successful"
+            $ctrl.updating[idx].msg.type = "success"
+            //$ctrl.updating.splice(idx, 1)
+            $ctrl.loadRosters();
+        }
+
+        this.closeAlert = function (index) {
+            this.updating.splice(index, 1);
+        }
+        this.failUpdate = function (updateRecID, err) {
+            var idx = $ctrl.updating.findIndex(function (itm) { return (itm.recno == updateRecID); });
+            $ctrl.updating[idx].msg.status = "Failed: " + err
+            $ctrl.updating[idx].msg.type = "danger"
+
         }
 
 

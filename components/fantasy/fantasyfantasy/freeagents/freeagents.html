@@ -3,7 +3,7 @@
     <li ng-repeat="tm in $ctrl.fantasyTeams">{{tm}}</li>
 </ul>-->
 
-<button ng-click="$ctrl.onrosterupdate()"></button>
+
 
 <script type="text/ng-template" id="myModalContent.html">
     <div class="modal-header">
@@ -29,6 +29,7 @@
                     <td>
                         <i ng-show="$ctrl.teamToAdd.addType == 'add'" class="fa fa-minus btn btn-danger btn-xs" ng-click="$event.preventDefault(); $ctrl.selected.item = item"></i>
                         <i ng-show="$ctrl.teamToAdd.addType == 'waiver'" class="fa fa-minus btn btn-warning btn-xs" ng-click="$event.preventDefault(); $ctrl.selected.item = item"></i>
+                        
                     </td>
                     <td>
                         {{ item.TEAM_INFO.TEAM_ID }}
@@ -61,17 +62,15 @@
         <div ng-show="$ctrl.selected && $ctrl.teamToAdd.addType != 'add'">Submit waiver claim to add <b>{{$ctrl.teamToAdd.add.TEAM_INFO.TEAM_NAME}}</b> and drop <b>{{ $ctrl.selected.item.TEAM_INFO.TEAM_NAME }}</b>?</div>
 
     </div>
+
     <div class="modal-footer">
         <button class="btn btn-primary" type="button" ng-click="$ctrl.ok()">OK</button>
         <button class="btn btn-warning" type="button" ng-click="$ctrl.cancel()">Cancel</button>
     </div>
 </script>
 
-<div ng-show="$ctrl.addingTeam">Adding: <b>{{ $ctrl.addingTeam.TEAM_INFO.TEAM_NAME }}</b></div>
-<div ng-show="$ctrl.droppingTeam">Dropping: <b>{{ $ctrl.droppingTeam.TEAM_INFO.TEAM_NAME }}</b></div>
 <div class="modal-parent">
 </div>
-
 
 
 <div class="flex-h">
@@ -81,7 +80,7 @@
                 <table class="table table-striped table-sm table-condensed">
                     <thead>
                         <tr>
-                            <th>Action</th>
+                            <th>Action <small>(for week {{$ctrl.week.WeekId}}) | <a>Go to next week</a> </small></th>
                             <th>ID</th>
                             <th>Team Name</th>
                             <th>W</th>

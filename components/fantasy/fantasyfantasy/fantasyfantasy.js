@@ -1,4 +1,4 @@
-﻿var fantasyFantasyModule = angular.module('fantasyfantasy', ['ui.router', 'table-admin'])
+﻿var fantasyFantasyModule = angular.module('fantasyfantasy', ['ui.router', 'table-admin', 'statusMessageList'])
 
 fantasyFantasyModule.config(function ($stateProvider) {
 

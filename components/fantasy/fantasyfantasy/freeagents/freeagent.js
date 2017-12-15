@@ -1,5 +1,5 @@
 ﻿fantasyFantasyModule.component('allteams', {
-    bindings: { fantasyTeams: '<', team: '<', week:'<' , roster: '<', myRosterUpdate: '&'},
+    bindings: { fantasyTeams: '<', team: '<', week:'<' , roster: '<', onRosterUpdate: '&', onWaiverClaim: '&'},
     controller: FATableCtrl, 
     templateUrl: 'components/fantasy/fantasyfantasy/freeagents/freeagents.html'
 })
@@ -19,6 +19,8 @@ function FATableCtrl($uibModal, $log, $document, FFDBService) {
 
     var $ctrl = this;
     this.addTeam = function (teamToAdd, addType) {
+        $ctrl.teamToAdd = teamToAdd;
+        $ctrl.addType = addType;
         var modalInstance = $uibModal.open({
             animation: false,
             component: 'modalComponent',
@@ -38,25 +40,21 @@ function FATableCtrl($uibModal, $log, $document, FFDBService) {
         });
         modalInstance.result.then(function (selectedItem) {
             // $ctrl.selected = selectedItem;
-            $ctrl.addingTeam = teamToAdd;
+            // $ctrl.addingTeam = teamToAdd;
             $ctrl.droppingTeam = selectedItem;
-            if ($ctrl.teamToAdd.addType == 'add') {
-                $ctrl.addingTeam.prime_owner = $ctrl.team.TEAM_NAME;
-                $ctrl.addingTeam.position = 'Bench';
-                $ctrl.droppingTeam.prime_owner = '';
-                $ctrl.droppingTeam.position = '';
-                FFDBService.updateRosterRecord($ctrl.addingTeam).then(function (result) {
-                    // Finalize add
-                }, function () {
-                    // Process failed
-                })
-                FFDBService.updateRosterRecord($ctrl.droppingTeam).then(function (result) {
-                    // Finalize drop
-                }, function () {
-                    // Process failed.
-                })
+
+            switch ($ctrl.addType) {
+                case 'add':
+                    $ctrl.onRosterUpdate({ rosterRec: $ctrl.teamToAdd, rosterAction: 'add' });
+                    $ctrl.onRosterUpdate({ rosterRec: $ctrl.droppingTeam, rosterAction: 'drop' });
+                    break;
+                case 'waiver':
+                    $ctrl.onWaiverClaim({ claimTeam: $ctrl.teamToAdd, conditionalDropTeam: $ctrl.droppingTeam});
+                    break;
+                default: 
+                    
             }
-            
+
         }, function () {
             $log.info('modal-component dismissed at: ' + new Date());
         })
