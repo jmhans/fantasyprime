@@ -1,12 +1,12 @@
 ﻿fantasyFantasyModule.service('TeamsService', function ($http) {
     var service = {
         getAllTeams: function () {
-            return $http.get('data/data.json', { cache: true }).then(function (resp) {
+            return $http.get('data/data.json', { cache: false }).then(function (resp) {
                 return resp.data.teams;
             });
         },
         getFullSchedule: function () {
-            return $http.get('data/data.json', { cache: true }).then(function (resp) {
+            return $http.get('data/data.json', { cache: false }).then(function (resp) {
                 return resp.data.games;
             });
         },
@@ -221,41 +221,21 @@ fantasyFantasyModule.service('FFDBService', [ '$http', 'TeamsService', '$q', 'Sc
 
             });
         },
-        getScoresForWeek: function (week) {
-            return $http.get('http://actuarialgames.x10host.com/includes/api.php/prime_scores?transform=1').then(function (resp) {
-                var scoreRecs = resp.data.prime_scores.filter(function (ps) { return (ps.WEEK == week) });
+        getScoresForWeek: function (week, ssn) {
+            return ScoresService.getScoreRecordsForWeek(week, ssn).then(function (resp) {
+                var scoreRecs = resp;
                 return service.getActiveRosters().then(function (rosterRecs) {
-                    outputArr = [];
+//                    outputArr = [];
                     scoreRecs.forEach(function (scoreRec) {
-                        scoreRec.HOME_OWNER = rosterRecs.find(function (rosterRec) { return (rosterRec.team_id == scoreRec.LEAGUE_ID + '_' + scoreRec.HOME_TEAM_ID); }).OWNER;
-                        scoreRec.AWAY_OWNER = rosterRecs.find(function (rosterRec) { return (rosterRec.team_id == scoreRec.LEAGUE_ID + '_' + scoreRec.AWAY_TEAM_ID); }).OWNER;
-                        outputArr.push({
-                            TEAM_ID: scoreRec.LEAGUE_ID + '_' + scoreRec.HOME_TEAM_ID,
-                            LOCATION: 'HOME',
-                            RESULT: (scoreRec.HOME_SCORE > scoreRec.AWAY_SCORE ? 'W' : (scoreRec.HOME_SCORE < scoreRec.AWAY_SCORE ? 'L' : 'T')),
-                            GAME_INFO: scoreRec,
-                            PRIME_ROSTER_ENTRY: rosterRecs.find(function (rosterRec) { return (rosterRec.team_id == scoreRec.LEAGUE_ID + '_' + scoreRec.HOME_TEAM_ID); }),
-                            OPPONENT: scoreRec.LEAGUE_ID + '_' + scoreRec.AWAY_TEAM_ID,
-                            POINTS_FOR: scoreRec.HOME_SCORE, 
-                            POINTS_AGAINST: scoreRec.AWAY_SCORE,
-                            PROJ_POINTS_FOR: scoreRec.HOME_PROJ,
-                            PROJ_POINTS_AGAINST: scoreRec.AWAY_PROJ
-                        });
-                        outputArr.push({
-                            TEAM_ID: scoreRec.LEAGUE_ID + '_' + scoreRec.AWAY_TEAM_ID,
-                            LOCATION: 'AWAY',
-                            RESULT: (scoreRec.HOME_SCORE > scoreRec.AWAY_SCORE ? 'L' : (scoreRec.HOME_SCORE < scoreRec.AWAY_SCORE ? 'W' : 'T')),
-                            GAME_INFO: scoreRec,
-                            PRIME_ROSTER_ENTRY: rosterRecs.find(function (rosterRec) { return (rosterRec.team_id == scoreRec.LEAGUE_ID + '_' + scoreRec.AWAY_TEAM_ID); }),
-                            OPPONENT: scoreRec.LEAGUE_ID + '_' + scoreRec.HOME_TEAM_ID,
-                            POINTS_FOR: scoreRec.AWAY_SCORE,
-                            POINTS_AGAINST: scoreRec.HOME_SCORE,
-                            PROJ_POINTS_FOR: scoreRec.AWAY_PROJ,
-                            PROJ_POINTS_AGAINST: scoreRec.HOME_PROJ
-                        });
+                        // scoreRec.HOME_OWNER = rosterRecs.find(function (rosterRec) { return (rosterRec.team_id == scoreRec.TEAM_ID); }).OWNER;
+                        // scoreRec.AWAY_OWNER = rosterRecs.find(function (rosterRec) { return (rosterRec.team_id == scoreRec.TEAM_ID); }).OWNER;
+                        scoreRec.PRIME_ROSTER_ENTRY = rosterRecs.find(function (rosterRec) {return (rosterRec.team_id == scoreRec.TEAM_ID)});
+                        scoreRec.RESULT = (scoreRec.POINTS_FOR > scoreRec.POINTS_AGAINST ? 'W' : (scoreRec.POINTS_FOR < scoreRec.POINTS_AGAINST ? 'L' : 'T'));
+
                     });
-                    return outputArr;
+                    return scoreRecs;
                 });
+
             })
         },
         getEnrichedRosters: function () {

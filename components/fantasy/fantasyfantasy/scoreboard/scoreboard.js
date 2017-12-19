@@ -22,9 +22,12 @@ fantasyFantasyModule.config(function ($stateProvider) {
           requiresParams: false,
           component: 'scoreboard.details',
           resolve: {
-              scores: function (FFDBService, $stateParams) {
-                  var rawData = FFDBService.getScoresForWeek($stateParams.weekId);
-                  return rawData;
+              scores: function (FFDBService, $stateParams, ScoresService) {
+
+                  return FFDBService.getScoresForWeek($stateParams.weekId).then(function (resp) {
+                      return resp;
+                  })
+
               },
               teams: function (TeamsService) {
                   return TeamsService.getAllTeams();
@@ -94,18 +97,16 @@ fantasyFantasyModule.component('scoreboard', {
 
 
         $scope.currentWeek = $http.get('data/weekDetails.json').then(function (resp) {
-            for (var i = 0; i < resp.data.weeks.length; i++) {
-                var d = new Date(resp.data.weeks[i]['Scores Final']);
+            
+            var wkDetails = resp.data.weeks.find(function (lookupWk, idx, arr) {
+                var d = new Date(lookupWk['Scores Final']);
                 var curTime = new Date();
-                var lastCheckD = new Date('12/31/2999');
-                var wk = 1;
-                if (curTime < d && d < lastCheckD) {
-                    wk = resp.data.weeks[i]['WeekId'];
-                    lastCheckD = d;
-                }
-            }
-            $scope.goToWeek(wk);
-            return wk;
+                var last_d = (idx > 0 ? new Date(arr[idx-1]['Scores Final']) : new Date('1970-01-01'));
+                return (curTime >= last_d && curTime < d);
+            });
+
+            $scope.goToWeek(wkDetails.WeekId);
+            return wkDetails.WeekId;
 
         });
 
@@ -119,6 +120,7 @@ fantasyFantasyModule.component('scoreboard.details', {
         //$scope.isCollapsed = false;
 
         this.selectedWeek = $state.params.weekId
+
     }
 })
 

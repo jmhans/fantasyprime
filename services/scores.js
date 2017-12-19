@@ -34,7 +34,9 @@
         getScoreRecordsForWeek: function (wk, ssn) {
             var d = new Date();
             ssn = ssn || d.getFullYear()
-            return service.getScoreRecords().filter(function (sr) { return (sr.Week == wk && sr.Season == ssn); });
+            return scoreRecs = service.getScoreRecords().then(function (resp) {
+                return resp.filter(function (sr) { return (sr.WEEK == wk && sr.SEASON == ssn); });
+            });
         }
 
     }
