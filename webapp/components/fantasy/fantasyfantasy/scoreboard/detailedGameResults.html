@@ -1,0 +1,24 @@
+﻿<table class="table table-condensed  text-center">
+    <thead>
+        <tr>
+            <th class="text-center">Position</th>
+            <th class="text-center">Team</th>
+            <th class="text-center">Score <small>(Proj)</small></th>
+            <th class="text-center">Score <small>(Proj)</small></th>
+            <th class="text-center">Opposing Team</th>
+
+        </tr>
+    </thead>
+    <tbody>
+        <tr ng-repeat="gmRec in $ctrl.games | orderBy : $ctrl.orderTeams : true">
+            <td>{{gmRec['PRIME_ROSTER_ENTRY']['position']}}</td>
+            <td>{{gmRec['TEAM_ID']}}</td>
+            <td>{{gmRec['POINTS_FOR']}} <small>({{gmRec['PROJ_POINTS_FOR']}})</small></td>
+            <td>{{gmRec['POINTS_AGAINST']}} <small>({{gmRec['PROJ_POINTS_AGAINST']}})</small></td>
+            <td>{{gmRec['OPPONENT_ID']}}</td>
+
+        </tr>
+    </tbody>
+
+</table>
+        
