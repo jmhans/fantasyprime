@@ -12,7 +12,11 @@
     <tbody>
         <tr ng-repeat="gmRec in $ctrl.games | orderBy : $ctrl.orderTeams : true" ng-style='(gmRec["PRIME_ROSTER_ENTRY"].position == "Bench") && {"background-color":"lightgray"}' >
             <!--<td>{{gmRec['PRIME_ROSTER_ENTRY']['position']}}</td>-->
-            <td>{{gmRec['PRIME_ROSTER_ENTRY']['TEAM_INFO']['TEAM_NAME']}}</td>
+            <td>
+                <a target="_blank" ng-href="http://games.espn.com/ffl/clubhouse?leagueId={{gmRec['PRIME_ROSTER_ENTRY'].TEAM_INFO.LEAGUE_ID}}&teamId={{gmRec['PRIME_ROSTER_ENTRY'].TEAM_INFO.TEAM_ID}}&seasonId={{gmRec['PRIME_ROSTER_ENTRY'].TEAM_INFO.SEASON}}">
+                    {{gmRec['PRIME_ROSTER_ENTRY']['TEAM_INFO']['TEAM_NAME']}}
+                </a>
+            </td>
             <td><span ng-style="({{(gmRec.POINTS_FOR || 0)}} >= {{(gmRec.POINTS_AGAINST || 0)}}) && {'color':'green'} || {'color':'red'} ">{{gmRec['POINTS_FOR']}} - {{gmRec['POINTS_AGAINST']}}</span></td>
             <td><span ng-style="({{(gmRec.PROJ_POINTS_FOR || 0)}} >= {{(gmRec.PROJ_POINTS_AGAINST || 0)}}) && {'color':'green'} || {'color':'red'} "> ({{gmRec['PROJ_POINTS_FOR']}} - {{gmRec['PROJ_POINTS_AGAINST']}})</span></td>
             <td>{{gmRec['OPPONENT_ID']}}</td>
