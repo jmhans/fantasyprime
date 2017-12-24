@@ -1,49 +1,44 @@
-﻿<!--<script async defer src="https://apis.google.com/js/api.js"
-        onload="this.onload=function(){};handleClientLoad()"
-        onreadystatechange="if (this.readyState === 'complete') this.onload()"></script>
-<button id="authorize-button" ng-click="handleAuthClick()">Authorize</button>
-<button id="signout-button" ng-click="handleSignoutClick()">Sign Out</button>-->
-
-
-<h4>Current Standings</h4>
-<div class="flex-h">
-    <div>
-        <div>
-            <form class="form-inline">
-                <table datatable="ng" dt-options="$ctrl.dtOptions" dt-column-defs="$ctrl.dtColumnDefs" dt-instance="$ctrl.dtInstance"class="row-border hover stripe display compact">
-                    <thead>
-                        <tr>
-                            <th>Rank</th>
-                            <th>Owner</th>
-                            <th>W</th>
-                            <th>L</th>
-                            <th>W Pct</th>
-                            <th>FF Pts</th>
-                            <th>Team Pts</th>
-                            <th>Opp FF Pts</th>
-                            <th>Opp Team Pts</th>
-
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr ng-repeat="standingsRec in $ctrl.standings">
-                            <td>{{ standingsRec.Rank }}</td>
-                            <td>{{ standingsRec.Owner }}</td>
-                            <td>{{ standingsRec.W }}</td>
-                            <td>{{ standingsRec.L }}</td>
-                            <td>{{ standingsRec['W Pct'] }}</td>
-                            <td>{{ standingsRec['FF Pts'] }}</td>
-                            <td>{{ standingsRec['Team Pts'] }}</td>
-                            <td>{{ standingsRec['Opp FF Pts'] }}</td>
-                            <td>{{ standingsRec['Opp Team Pts'] }}</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </form>
+﻿<h4>Current Standings</h4>
+<div class="container">
+    <div class="row">
+        <div class="col-sm-1">
+            Rank
         </div>
-
-
+        <div class="col-sm-2">
+            Owner
+        </div>
+        <div class="col-sm-1">
+            W
+        </div>
+        <div class="col-sm-1">
+            L
+        </div>
+        <div class="col-sm-1">
+            W Pct
+        </div>
+        <div class="col-sm-1">
+            FF Pts
+        </div>
+        <div class="col-sm-2">
+            Team Points
+        </div>
+        <div class="col-sm-1">
+            Opp FF Pts
+        </div>
+        <div class="col-sm-2">
+            Opp Team Pts
+        </div>
+    </div>
+    <div class="row" ng-repeat="standingsRec in $ctrl.standings">
+        <div class="col-sm-1">{{ standingsRec.Rank }}</div>
+        <div class="col-sm-2">{{ standingsRec.TEAM_NAME }}</div>
+        <div class="col-sm-1">{{ standingsRec.W }}</div>
+        <div class="col-sm-1">{{ standingsRec.L }}</div>
+        <div class="col-sm-1">{{ standingsRec.W  / (standingsRec.W + standingsRec.L  +standingsRec.T) }}</div>
+        <div class="col-sm-1">{{ standingsRec['FF_POINTS'] }}</div>
+        <div class="col-sm-2">{{ standingsRec['TEAM_POINTS'] }}</div>
+        <div class="col-sm-1">{{ standingsRec['OPP_FF_POINTS'] }}</div>
+        <div class="col-sm-2">{{ standingsRec['OPP_TEAM_POINTS'] }}</div>
     </div>
 </div>
 
-<button ui-sref="teams">Close</button>
