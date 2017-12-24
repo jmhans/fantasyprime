@@ -1,27 +1,110 @@
 ﻿<h4>All Teams</h4>
+<!--<ul>
+    <li ng-repeat="tm in $ctrl.fantasyTeams">{{tm}}</li>
+</ul>-->
+
+
+
+<script type="text/ng-template" id="myModalContent.html">
+    <div class="modal-header">
+        <h3 class="modal-title" id="modal-title">Choose a team to drop</h3>
+    </div>
+    <div class="modal-body" ng-style="{width: 75%}" id="modal-body">
+
+        <table class="table table-striped table-sm table-condensed">
+            <thead>
+                <tr>
+                    <th>{{$ctrl.teamToAdd.addType == 'add' ? 'Drop Team' : 'Conditional Drop'}}</th>
+                    <th>Team ID</th>
+                    <th>Team Name</th>
+                    <th>Record</th>
+                    <th>Points For</th>
+                    <th>Points Against</th>
+                    <th>This Week</th>
+                </tr>
+
+            </thead>
+            <tbody>
+                <tr ng-repeat="item in $ctrl.items">
+                    <td>
+                        <i ng-show="$ctrl.teamToAdd.addType == 'add'" class="fa fa-minus btn btn-danger btn-xs" ng-click="$event.preventDefault(); $ctrl.selected.item = item"></i>
+                        <i ng-show="$ctrl.teamToAdd.addType == 'waiver'" class="fa fa-minus btn btn-warning btn-xs" ng-click="$event.preventDefault(); $ctrl.selected.item = item"></i>
+                        
+                    </td>
+                    <td>
+                        {{ item.TEAM_INFO.TEAM_ID }}
+                    </td>
+                    <td>
+                        <a target="_blank" ng-href="http://games.espn.com/ffl/clubhouse?leagueId={{ item.TEAM_INFO.LEAGUE_ID }}&teamId={{ item.TEAM_INFO.TEAM_ID }}&seasonId={{ item.TEAM_INFO.SEASON }}">
+                            {{ item.TEAM_INFO.TEAM_NAME }}
+                        </a>
+                    </td>
+                    <td>
+                        {{ item.TEAM_INFO.wins }} - {{ item.TEAM_INFO.losses }} - {{ item.TEAM_INFO.ties }}
+                    </td>
+                    <td>
+                        {{ item.TEAM_INFO.TOTAL_POINTS_FOR | number : 2 }}
+                    </td>
+                    <td>
+                        {{ item.TEAM_INFO.TOTAL_POINTS_AGAINST | number : 2 }}
+                    </td>
+                    <td ng-repeat="score in item.TEAM_INFO.scores | filter : {WEEK: $ctrl.week.WeekId, SEASON: 2017} : true"><fantasymatchup ft="item" scorerecords='score'></fantasymatchup></td>
+                </tr>
+            </tbody>
+            <tfoot>
+
+            </tfoot>
+
+
+        </table>
+
+        <div ng-show="$ctrl.selected && $ctrl.teamToAdd.addType == 'add'">Are you sure you want to drop: <b>{{ $ctrl.selected.item.TEAM_INFO.TEAM_NAME }}</b> and add <b>{{$ctrl.teamToAdd.add.TEAM_INFO.TEAM_NAME}}</b>?</div>
+        <div ng-show="$ctrl.selected && $ctrl.teamToAdd.addType != 'add'">Submit waiver claim to add <b>{{$ctrl.teamToAdd.add.TEAM_INFO.TEAM_NAME}}</b> and drop <b>{{ $ctrl.selected.item.TEAM_INFO.TEAM_NAME }}</b>?</div>
+
+    </div>
+
+    <div class="modal-footer">
+        <button class="btn btn-primary" type="button" ng-click="$ctrl.ok()">OK</button>
+        <button class="btn btn-warning" type="button" ng-click="$ctrl.cancel()">Cancel</button>
+    </div>
+</script>
+
+<div class="modal-parent">
+</div>
+
+
 <div class="flex-h">
     <div>
         <div>
             <form class="form-inline">
-                <table datatable="ng" dt-options="$ctrl.dtOptions" dt-column-defs="$ctrl.dtColumnDefs" class="row-border hover stripe">
+                <table class="table table-striped table-sm table-condensed">
                     <thead>
                         <tr>
+                            <th>Action <small>(for week {{$ctrl.week.WeekId}}) <a ui-sref="freeagents({weekId: $ctrl.week.WeekId + 1})" ng-show="($ctrl.week.WeekId < 16)">Go to next week</a> </small></th>
                             <th>ID</th>
                             <th>Team Name</th>
-                            <th>Team Owner</th>
-                            <th>Position</th>
-                            <th></th>
+                            <th>W</th>
+                            <th>L</th>
+                            <th>T</th>
+                            <th>Pts For</th>
+                            <th>Pts Against</th>
+                            <th>This Week's Matchup</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <tr ng-repeat="rosterRec in $ctrl.fantasy_teams">
-                            <td>{{ rosterRec.TeamID }}</td>
-                            <td>{{ rosterRec['TeamName (Ref Only)'] }}</td>
-                            <td>{{ rosterRec.Owner }}</td>
-                            <td></td>
+                        <tr ng-repeat="ft in $ctrl.fantasyTeams | filter : {prime_owner: '' } : true">
                             <td>
-                                <button type="button" ng-click="$ctrl.removePerson($index)" class="btn btn-danger"><i class="fa fa-trash-o"></i></button>
+                                <button ng-if="$ctrl.addsAvailable()" class="btn btn-success btn-xs" ng-click="$ctrl.addTeam(ft, 'add')"><i class="fa fa-plus"> Make Waiver Claim</i></button>
+                                <button ng-if="$ctrl.waiversActive()" class="btn btn-warning btn-xs" ng-click="$ctrl.addTeam(ft, 'waiver')"><i class="fa fa-plus"> Make Waiver Claim</i></button>
                             </td>
+                            <td>{{ ft.team_id }}</td>
+                            <td>{{ ft.TEAM_INFO.TEAM_NAME }}</td>
+                            <td>{{ ft.TEAM_INFO.wins }}</td>
+                            <td>{{ ft.TEAM_INFO.losses }}</td>
+                            <td>{{ ft.TEAM_INFO.ties }}</td>
+                            <td>{{ ft.TEAM_INFO.TOTAL_POINTS_FOR | number : 2}}</td>
+                            <td>{{ ft.TEAM_INFO.TOTAL_POINTS_AGAINST | number : 2}}</td>
+                            <td ng-repeat="score in ft.TEAM_INFO.scores | filter : {WEEK: $ctrl.week.WeekId, SEASON: 2017} : true"><fantasymatchup ft="ft" scorerecords='score'></fantasymatchup></td>
                         </tr>
                     </tbody>
                 </table>
@@ -31,5 +114,3 @@
 
     </div>
 </div>
-
-<button ui-sref="teams">Close</button>

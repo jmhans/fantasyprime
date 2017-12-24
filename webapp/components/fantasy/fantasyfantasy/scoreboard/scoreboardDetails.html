@@ -1,95 +1,114 @@
-﻿
-    <div class="container" ng-repeat="gm in $ctrl.games">
+﻿<!--<ul uib-pagination total-items="$ctrl.totalItems" items-per-page="1" ng-model="$ctrl.selectedWeek" ng-change="$ctrl.pageChanged()"></ul>-->
 
-        
 
-        <table class="table table-condensed text-center">
-            <thead>
-                <tr class="text-center">
-                    <th class="col-md-2 text-center">Game {{gm['Game']}}</th>
-                    <th class="col-md-5 text-center">{{gm['Team Name']}}</th>
-                    <th class="col-md-0 text-center"> vs. </th>
-                    <th class="col-md-5 text-center">{{gm['Opp Name']}}</th>
-                </tr>
 
-            </thead>
-            <tbody>
-                <tr>
-                    <td>
-                        <span class="glyphicon glyphicon-plus-sign" style="color:blue" ng-show="gm.isCollapsed" ng-click="gm.isCollapsed = !gm.isCollapsed" aria-hidden="true"></span>
-                        <span class="glyphicon glyphicon-minus-sign" style="color:red" ng-show="!gm.isCollapsed" ng-click="gm.isCollapsed = !gm.isCollapsed" aria-hidden="true"></span>
-                    </td>
-                    <td>
-                        <div uib-collapse="gm.isCollapsed">
-                            <table class="table table-condensed  text-center">
-                                <thead>
-                                    <tr>
-                                        <th class="text-center">Position</th>
-                                        <th class="text-center">Team</th>
-                                        <th class="text-center">Score <small>(Proj)</small></th>
-                                        <th class="text-center">Score <small>(Proj)</small></th>
-                                        <th class="text-center">Opposing Team</th>
+<a ui-sref="ff.scoreboard.details({weekId: $ctrl.selectedWeek - 1})"  ng-show="($ctrl.selectedWeek > 1)"><i class="fa fa-backward"></i> Previous Week </a>
+| Week {{$ctrl.selectedWeek}} |
+<a ui-sref="ff.scoreboard.details({weekId: $ctrl.selectedWeek + 1})" ng-show="($ctrl.selectedWeek < 16)"> Next Week <i class="fa fa-forward"></i></a>
 
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr ng-repeat="gmRec in gm['Subgame Details']">
-                                        <td>{{gmRec['Position']}}</td>
-                                        <td>{{gmRec['Team Name']}}</td>
-                                        <td>{{gmRec['Score']}} <small>({{gmRec['Proj']}})</small></td>
-                                        <td>{{gmRec['Opp Score']}} <small>({{gmRec['Opp Proj']}})</small></td>
-                                        <td>{{gmRec['Opp Name']}}</td>
 
-                                    </tr>
-                                </tbody>
+<!--<div class="container">
+    <div class="row">
+        <div class="col" ng-repeat="gm in $ctrl.weeklymatchups">
+            <table class="table table-condensed text-center">
+                <thead>
+                    <tr class="text-center">
+                        <th class=" text-center">Game {{gm['Game']}}</th>
+                        <th class=" text-center">{{gm['Team Name']}}</th>
+                        <th class=" text-center"> vs. </th>
+                        <th class=" text-center">{{gm['Opp Name']}}</th>
+                    </tr>
 
-                            </table>
-                        </div>
-                    </td>
-                    <td></td>
-                    <td>
-                        <div uib-collapse="gm.isCollapsed">
-                            <table class="table table-condensed  text-center">
-                                <thead>
-                                    <tr>
-                                        <th class="text-center">Position</th>
-                                        <th class="text-center">Team</th>
-                                        <th class="text-center">Score <small>(Proj)</small></th>
-                                        <th class="text-center">Score <small>(Proj)</small></th>
-                                        <th class="text-center">Opposing Team</th>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>
+                            <span class="glyphicon glyphicon-plus-sign" style="color:blue" ng-show="gm.isCollapsed" ng-click="gm.isCollapsed = !gm.isCollapsed" aria-hidden="true"></span>
+                            <span class="glyphicon glyphicon-minus-sign" style="color:red" ng-show="!gm.isCollapsed" ng-click="gm.isCollapsed = !gm.isCollapsed" aria-hidden="true"></span>
+                        </td>
+                        <td>
+                            <div uib-collapse="gm.isCollapsed">
+                                <detailed-game-results games="gm['Subgame Details']"></detailed-game-results>
+                            </div>
+                        </td>
+                        <td></td>
+                        <td>
+                            <div uib-collapse="gm.isCollapsed">
+                                <detailed-game-results games="gm['Subgame Opp Details']"></detailed-game-results>
+                            </div>
+                        </td>
+                    </tr>
 
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr ng-repeat="gmRec in gm['Subgame Opp Details']">
-                                        <td>{{gmRec['Position']}}</td>
-                                        <td>{{gmRec['Team Name']}}</td>
-                                        <td>{{gmRec['Score']}} <small>({{gmRec['Proj']}})</small></td>
-                                        <td>{{gmRec['Opp Score']}} <small>({{gmRec['Opp Proj']}})</small></td>
-                                        <td>{{gmRec['Opp Name']}}</td>
+                    <tr>
+                        <td>Record</td>
+                        <td>{{gm['Team W']}}-{{gm['Team L']}}-{{gm['Team T']}}</td>
+                        <td></td>
+                        <td>{{gm['Opp W']}}-{{gm['Opp L']}}-{{gm['Opp T']}}</td>
+                    </tr>
+                    <tr>
+                        <td>Points (Bench)</td>
+                        <td>
+                            {{gm['Pts (Starters)'] | number: 2}}
+                            <small>({{gm['Pts (Bench)']| number: 2}})</small>
+                        </td>
+                        <td></td>
+                        <td>
+                            {{gm['Opp Pts (Starters)'] | number: 2}}
+                            <small>({{gm['Opp Pts (Bench)'] | number: 2}})</small>
+                        </td>
+                    </tr>
 
-                                    </tr>
-                                </tbody>
-
-                            </table>
-                        </div>
-                    </td>
-                </tr>
-
-                <tr>
-                    <td>Record</td>
-                    <td>{{gm['Team W']}}-{{gm['Team L']}}-{{gm['Team T']}}</td>
-                    <td></td>
-                    <td>{{gm['Opp W']}}-{{gm['Opp L']}}-{{gm['Opp T']}}</td>
-                </tr>
-                <tr>
-                    <td>Points (Bench)</td>
-                    <td>{{gm['Pts (Starters)']}} ({{gm['Pts (Bench)']}})</td>
-                    <td></td>
-                    <td>{{gm['Opp Pts (Starters)']}} ({{gm['Opp Pts (Bench)']}})</td>
-                </tr>
-                
-            </tbody>
-        </table>
-
+                </tbody>
+            </table>
+        </div>
     </div>
+</div>-->
+
+
+
+
+<div class="container">
+    <div class="row">
+        <div class="col " ng-repeat="gm in $ctrl.weeklymatchups">
+            <div class="container" style="border: 1px solid gray;">
+
+                <div class="row">
+                    <span class="col-sm-2 text-center">Game {{gm['Game']}}</span>
+                    <span class="col-sm-9 text-center">{{gm['Team Name']}} vs. {{gm['Opp Name']}}</span>
+                    <span class="col-sm-1"></span>
+                </div>
+
+                <div class="row">
+                    <span class="col-sm-2 text-center  border border-dark">Record</span>
+                    <span class="col-sm-4 text-center">{{gm['Team W']}}-{{gm['Team L']}}-{{gm['Team T']}}</span>
+                    <span class="col-sm-4 text-center">{{gm['Opp W']}}-{{gm['Opp L']}}-{{gm['Opp T']}}</span>
+                    <span class="col-sm-1 glyphicon glyphicon-plus-sign" ng-show="gm.isCollapsed" style="color:blue" ng-click="gm.isCollapsed = !gm.isCollapsed"></span>
+                    <span class="col-sm-1 glyphicon glyphicon-minus-sign" ng-show="!gm.isCollapsed" style="color:red" ng-click="gm.isCollapsed = !gm.isCollapsed"></span>
+                </div>
+                <div class="row" ng-show="!gm.isCollapsed">
+                    <span class="col-sm-6" uib-collapse="gm.isCollapsed">
+                        <detailed-game-results games="gm['Subgame Details']"></detailed-game-results>
+                    </span>
+                    <span class="col-sm-6" uib-collapse="gm.isCollapsed">
+                        <detailed-game-results games="gm['Subgame Opp Details']"></detailed-game-results>
+                    </span>
+                </div>
+                <div class="row">
+                    <span class="col-sm-2 text-center">Points (Bench)</span>
+                    <span class="col-sm-4 text-center">
+                        {{gm['Pts (Starters)'] | number: 2}}
+                        <small>({{gm['Pts (Bench)']| number: 2}})</small>
+                    </span>
+                    <span class="col-sm-4 text-center">
+                        {{gm['Opp Pts (Starters)'] | number: 2}}
+                        <small>({{gm['Opp Pts (Bench)'] | number: 2}})</small>
+                    </span>
+                    <span class="col-sm-1"></span>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+</div>
+

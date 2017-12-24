@@ -1,7 +1,10 @@
 ﻿<!--<a ui-sref="roster">Roster</a> | <a ui-sref="detail">Team Information</a>-->
+Select Owner: <select ng-model="$ctrl.team" ng-options="tm.TEAM_NAME for tm in $ctrl.teams" ng-change="$ctrl.changeTeam()"></select>
+<br />
 
+<!--<uib-alert ng-repeat="itm in $ctrl.updating"> {{itm.msg.text }}: {{itm.TEAM_INFO.TEAM_NAME}}<div ng-class="'alert alert-' + (itm.msg.type || 'warning')" close="$ctrl.closeAlert($index)">{{itm.msg.status}} </div></uib-alert>-->
+<p ng-repeat="itm in $ctrl.updating" ng-class="'bg bg-' + (itm.msg.type || 'warning')"> <i class="fa fa-times" aria-hidden="true" ng-click="$ctrl.closeAlert($index)"></i> <b> {{itm.msg.status}}</b> | {{itm.msg.text }}: {{itm.TEAM_INFO.TEAM_NAME}} </p>
 
-<info team="$ctrl.team"></info>
-<roster roster="$ctrl.roster"></roster>
+<div ui-view on-roster-update="$ctrl.handleRosterUpdate(rosterRec, rosterAction)" on-waiver-claim="$ctrl.submitWaiverClaim(claimTeam, conditionalDropTeam)" roster="$ctrl.roster"></div>
 
 

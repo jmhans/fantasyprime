@@ -1,15 +1,18 @@
 ﻿
 fantasyFantasyModule.config(function ($stateProvider) {
     var st = {
-        name: 'fantasyfootball.ff.standings',
+        name: 'standings',
+        parent: 'ff',
         url: '/standings',
-        menu: { name: 'Standings', priority: 300 },
+        menu: { name: 'Standings', priority: 300, tag: 'submenu' },
         tree: { name: 'Standings'}, 
         requiresParams: false,
         component: 'standings',
         resolve: {
-            standings: function (GoogleSheetsService) {
-                return GoogleSheetsService.getStandings();
+            standings: function (FFDBService) {
+                return FFDBService.getScheduleAndResults().then(function (resp) {
+                    return resp;
+                });
             }
         }
     };

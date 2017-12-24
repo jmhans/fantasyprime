@@ -29,14 +29,14 @@ actuarialGamesModule.run(['$http', '$rootScope', 'TeamsService', '$state', '$sta
     $rootScope.$state = $state;
     $rootScope.$stateParams = $stateParams;
 
-    getTeams();
+    //getTeams();
 
-    function getTeams() {
-        TeamsService.getAllTeams()
-        .then(function (tms) {
-            $rootScope.teams = tms;
-        })
-    }
+    //function getTeams() {
+    //    TeamsService.getAllTeams()
+    //    .then(function (tms) {
+    //        $rootScope.teams = tms;
+    //    })
+    //}
     $rootScope.$on('$stateChangeStart', function (evt, to, params) {
         if (to.redirectTo) {
             evt.preventDefault();

@@ -152,7 +152,47 @@ fantasyFantasyModule.service('FFDBService', [ '$http', 'TeamsService', '$q', 'Sc
 
             });
         },
+        getWeekSetup: function () {
+            return $http.get('data/weekDetails.json').then(function (resp) {
+                //var wkDetails = resp.data.weeks.find(function (lookupWk, idx, arr) {
+                //    var d = new Date(lookupWk['Scores Final']);
+                //    var curTime = new Date();
+                //    var last_d = (idx > 0 ? new Date(arr[idx-1]['Scores Final']) : new Date('1970-01-01'));
+                //    return (curTime >= last_d && curTime < d);
+                //});
 
+                //$scope.goToWeek(wkDetails.WeekId);
+                return resp.data.weeks;
+            });
+        },
+        
+        getRosterRecordsForWeek: function (wk, ssn) {
+            return $q.all([service.getRosterRecs(), service.getWeekSetup()]).then(function (respArr) {
+                var rosterRecords = respArr[0];
+                var weekDetails = respArr[1];
+                rosterLockTime = new Date(weekDetails.find(function (lookupWk) {return (lookupWk.WeekId == wk);})['Roster Lock Time']);
+                var filteredRosterRecords = rosterRecords.filter(function (rr) {
+                    return (new Date(rr.start_date) <= rosterLockTime);
+                });
+
+                var filteredRosterRecords = filteredRosterRecords.filter(function (rr, idx, arr) {
+                    var teamRecArray = arr.filter(function (tmpRR) { return (rr.team_id == tmpRR.team_id) });
+
+                    if (teamRecArray.length > 1) {
+                        var maxStart = teamRecArray.reduce(function (a, b) { return new Date(a.start_date) > new Date(b.start_date) ? a : b; });
+                        return (rr == maxStart)
+                    } else {
+
+                        return true;
+                    }
+                    
+
+                });
+
+                return filteredRosterRecords;
+                
+            });
+        },
         getOwnerRoster: function (owner) {
             function rosterRecMatchesParam(rosterRec) {
                 return rosterRec.prime_owner === owner;
@@ -171,7 +211,6 @@ fantasyFantasyModule.service('FFDBService', [ '$http', 'TeamsService', '$q', 'Sc
                 
             });
         },
-
         getAllTeamInfo: function () {
             return $http.get('http://actuarialgames.x10host.com/includes/api.php/prime_teams?transform=1').then(function (teams) {
                 return ScoresService.getScoreRecords().then(function (scores) {
@@ -261,6 +300,102 @@ fantasyFantasyModule.service('FFDBService', [ '$http', 'TeamsService', '$q', 'Sc
             return service.addItemToTable('prime_waivers', newRec).then(function (resp) {
                 return resp; 
             });
+        },
+        processWaiverClaims: function () {
+            return $http.get('http://actuarialgames.x10host.com/includes/api.php/prime_waivers?transform=1').then(function (waiverClaims) {
+                return 2;
+            })
+        },
+        getScheduleAndResults: function () {
+
+
+            return $q.all([TeamsService.getFullSchedule(), ScoresService.getScoreRecords()]).then(function (respArr) {
+                var sched = respArr[0];
+                var scores = respArr[1].filter(function (rec) {return rec.SEASON == 2017});
+                var rosterRecs = respArr[2];
+
+                function onlyUnique(value, index, self) {
+                    return self.indexOf(value) === index;
+                }
+
+                weeks = scores.map(function (scr) { return (scr.WEEK); }).filter(onlyUnique);
+                rosterLists = [];
+
+                weeks.forEach(function (wk) {
+                    rosterLists.push(service.getRosterRecordsForWeek(wk, 2017));
+                });
+
+                return $q.all(rosterLists).then(function (respArr) {
+                    scores.forEach(function (scoreRec) {
+                        scoreRec.PRIME_ROSTER_ENTRY = respArr[scoreRec.WEEK - 1].find(function (rr) { return (scoreRec.TEAM_ID == rr.team_id); });
+                        scoreRec.RESULT = (scoreRec.POINTS_FOR > scoreRec.POINTS_AGAINST ? 'W' : (scoreRec.POINTS_FOR < scoreRec.POINTS_AGAINST ? 'L' : 'T'));
+
+                    });
+
+                    sched.forEach(function (gameRec) {
+                        var scoresForTeam = scores.filterWithCriteria({ PRIME_ROSTER_ENTRY: { prime_owner :  gameRec['Team Name'] }, SEASON: 2017, WEEK: gameRec.Week } );
+                        var scoresForOpp = scores.filterWithCriteria({ PRIME_ROSTER_ENTRY: { prime_owner: gameRec['Opp Name'] }, SEASON: 2017, WEEK: gameRec.Week });
+
+                        gameRec['Team W'] = scoresForTeam.filterWithCriteria({ PRIME_ROSTER_ENTRY: { position: 'Starter' }, RESULT: 'W' }).length;
+                        gameRec['Team L'] = scoresForTeam.filterWithCriteria({ PRIME_ROSTER_ENTRY: { position: 'Starter' }, RESULT: 'L' }).length;
+                        gameRec['Team T'] = scoresForTeam.filterWithCriteria({ PRIME_ROSTER_ENTRY: { position: 'Starter' }, RESULT: 'T' }).length;
+
+                        gameRec['Opp W'] = scoresForOpp.filterWithCriteria({ PRIME_ROSTER_ENTRY: { position: 'Starter' }, RESULT: 'W' }).length;
+                        gameRec['Opp L'] = scoresForOpp.filterWithCriteria({ PRIME_ROSTER_ENTRY: { position: 'Starter' }, RESULT: 'L' }).length;
+                        gameRec['Opp T'] = scoresForOpp.filterWithCriteria({ PRIME_ROSTER_ENTRY: { position: 'Starter' }, RESULT: 'T' }).length;
+
+                        gameRec['Pts (Starters)'] = scoresForTeam.SUMIFS('POINTS_FOR', { PRIME_ROSTER_ENTRY: { position: 'Starter' } });
+                        gameRec['Pts (Bench)'] = scoresForTeam.SUMIFS('POINTS_FOR', { PRIME_ROSTER_ENTRY: { position: 'Bench' } });
+                        gameRec['Opp Pts (Starters)'] = scoresForOpp.SUMIFS('POINTS_FOR', { PRIME_ROSTER_ENTRY: { position: 'Starter' } });
+                        gameRec['Opp Pts (Bench)'] = scoresForOpp.SUMIFS('POINTS_FOR', { PRIME_ROSTER_ENTRY: { position: 'Bench' } });
+
+                        gameRec['Team Result'] = determineResult(gameRec);
+                        gameRec['Subgame Details'] = scoresForTeam;
+                        gameRec['Subgame Opp Details'] = scoresForOpp;
+                        gameRec['isCollapsed'] = true;
+                    });
+
+                    var fullresults = sched.reduce(function (result, current) {
+                        result[current['Team Name']] = result[current['Team Name']] || [];
+                        result[current['Team Name']].push(current);
+                        if (current['Opp Name'] != 'BYE') {
+                            result[current['Opp Name']] = result[current['Opp Name']] || [];
+                            result[current['Opp Name']].push(current);
+                        }                        
+                        return result;
+                    }, {});
+                    var standings = [];
+                    Object.keys(fullresults).forEach(function (tm) {
+                        if (tm != 'BYE') {
+                            standings.push(fullresults[tm].reduce(function (result, current) {
+                                var myStr = ( tm == current['Team Name'] ? 'Team' : 'Opp')
+                                var oppStr = ( tm == current['Team Name'] ? 'Opp' : 'Team')
+                                var FF_POINTS = current[myStr + ' W'] + 0.5 * current[myStr + ' T'];
+                                var OPP_POINTS = current[oppStr + ' W'] + 0.5 * current[oppStr + ' T'];
+                                var FF_TEAM_POINTS = (myStr == 'Team' ? current['Pts (Starters)'] : current['Opp Pts (Starters)']);
+                                var OPP_TEAM_POINTS = (myStr == 'Team' ? current['Opp Pts (Starters)'] : current['Pts (Starters)']);
+                                var RESULT = (myStr == 'Team' ? current['Team Result'] : (current['Team Result'] == 'W' ? 'L' : (current['Team Result'] == 'L' ? 'W' : (current['Team Result'] == 'T' ? 'T' : ''))));
+                                result.W = (result.W || 0) + (RESULT == 'W' ? 1 : 0)
+                                result.L =( result.L || 0) + (RESULT == 'L' ? 1 : 0)
+                                result.T = (result.T || 0) + (RESULT == 'T' ? 1 : 0)
+                                result.FF_POINTS = (result.FF_POINTS || 0) + FF_POINTS
+                                result.OPP_FF_POINTS = (result.OPP_FF_POINTS || 0 ) + OPP_POINTS
+                                result.TEAM_POINTS = (result.TEAM_POINTS || 0 ) + FF_TEAM_POINTS
+                                result.OPP_TEAM_POINTS = (result.OPP_TEAM_POINTS || 0) + OPP_TEAM_POINTS
+                                return result;
+                            }, {TEAM_NAME: tm, GAME_RECORDS: fullresults[tm]}))
+                        }
+                    })
+
+                    return standings;
+
+
+
+                })
+
+                
+            });
+
         }
 
 
@@ -268,3 +403,22 @@ fantasyFantasyModule.service('FFDBService', [ '$http', 'TeamsService', '$q', 'Sc
 
     return service;
 }]);
+
+
+
+determineResult = function (gameRec) {
+    var gamePts = gameRec['Team W'] + 0.5 * gameRec['Team T'];
+    var oppPts = gameRec['Opp W'] + 0.5 * gameRec['Opp T'];
+
+    if (gamePts > oppPts) return 'W'
+    if ((gamePts == oppPts) && (gameRec['Pts (Starters)'] > gameRec['Opp Pts (Starters)'])) return 'W';
+    if ((gamePts == oppPts) && (gameRec['Pts (Starters)'] == gameRec['Opp Pts (Starters)']) && (gameRec['Pts (Bench)'] > gameRec['Opp Pts (Bench)'])) return 'W';
+
+    if ((gamePts > 0) || (gameRec['Pts (Starters)'] > 0) || (gameRec['Pts (Bench)'] > 0)) return 'L';
+    return '';
+}
+
+function FantasyFantasyMatchup(gameRec) {
+    // Constructor for FFMatchup - calculates result, status, etc. from a game record that contains a list of subgames. 
+
+}

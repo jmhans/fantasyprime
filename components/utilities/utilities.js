@@ -140,3 +140,4 @@ Date.dateDiff = function (datepart, fromdate, todate) {
 
     return Math.floor(diff / divideBy[datepart]);
 }
+

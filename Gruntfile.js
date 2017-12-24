@@ -1,8 +1,18 @@
-﻿/// <binding BeforeBuild='default' />
+/// <binding BeforeBuild='default' AfterBuild='deploy_data' Clean='deploy_data' />
 module.exports = function (grunt) {
 
     // Project configuration.
     grunt.initConfig({
+        
+        'task-interval': {
+            lib: {
+                options: {
+                    taskIntervals: [
+                      {interval: 1000 * 60 * 30, tasks: ['deploy_data']}
+                    ]
+                }
+            }
+        },
         pkg: grunt.file.readJSON('package.json'),
         concat: {
             options: {
@@ -119,6 +129,15 @@ module.exports = function (grunt) {
                 ],
             },
         },
+        watch: {
+            scripts: {
+                files: ['data/*'],
+                tasks: ['deploy_data'],
+                options: {
+                    spawn: false,
+                },
+            },
+        },
     });
 
     // Load the plugin that provides the "uglify" task.
@@ -129,10 +148,12 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-concat-css');
     grunt.loadNpmTasks('grunt-contrib-copy');
     grunt.loadNpmTasks('grunt-ftp-deploy');
+    grunt.loadNpmTasks('grunt-task-interval');
+    grunt.loadNpmTasks('grunt-contrib-watch');
 
 
     // Default task(s).
     grunt.registerTask('default', ['concat', 'uglify', 'concat_css']);
     grunt.registerTask('pkg_and_deploy', ['default', 'copy', 'ftp-deploy']);
-    grunt.registerTask('deploy_data', [ 'copy:data', 'ftp-deploy']);
+    grunt.registerTask('deploy_data', ['copy:data', 'ftp-deploy']);
 };

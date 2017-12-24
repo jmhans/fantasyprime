@@ -15,17 +15,10 @@
         </li>
     </ul>
     <ul class="nav navbar-nav navbar-right">
-        <li ng-repeat="child in grandChildStates | filter : menuFilter" ui-sref-active="active" class="dropdown">
-            <a class="dropdown-toggle" data-toggle="dropdown">
-                {{selectedTeam.name}}<span class="caret"></span>
-            </a>
+        <li ng-repeat="child in grandChildStates | filter : {tree: {users: 'allTeams'}} : true" ui-sref-active="active" class="dropdown">
             <ul class="dropdown-menu">
-                <li ng-repeat="tm in $ctrl.users">{{tm}}</li>
+                <li ng-repeat="tm in child.tree.users">{{tm}}</li>
             </ul>
-            <ul class="dropdown-menu">
-                <li ng-repeat="tm in teams"><a ui-sref="roster({teamId : {{tm.id}}})">{{tm.name}}</a></li>
-            </ul>
-
         </li>
     </ul>
 

@@ -5,9 +5,8 @@
   "main": "app.js",
   "dependencies": { },
   "devDependencies": {
-    "@uirouter/angularjs": "^1.0.11",
     "angular": "^1.5.8",
-    "grunt": "1.0.1",
+    "grunt": "^0.4.5",
     "grunt-contrib-concat": "^1.0.1",
     "grunt-contrib-jshint": "^1.0.0",
     "grunt-contrib-uglify": "^2.0.0",
@@ -31,7 +30,9 @@
     "datatables-buttons": "^1.0.3",
     "angular-content-editable": "^1.2.1",
     "moment": "^2.19.3",
-    "moment-timezone": "^0.5.14"
+    "moment-timezone": "^0.5.14",
+    "grunt-task-interval": "0.0.1", 
+    "grunt-contrib-watch": "^1.0.0"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
