@@ -1,6 +1,6 @@
 ﻿{
   "app": "fantasyprime",
-  "seasonStartDate" :  "2017-09-07T14:46:30.510Z",
+  "seasonStartDate": "2017-09-07T14:46:30.510Z",
   "teams": [
     {
       "id": 1,
@@ -773,5 +773,5 @@
       "Team Name": "Josh",
       "Opp Name": "Aaron"
     }
-  ],
+  ]
 }
