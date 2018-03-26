@@ -19,6 +19,8 @@ actuarialGamesModule.service('mlbDataService', function ($http, $q) {
             );
         },
         appendStatstoGames: function (dt) {
+            d = new Date(dt);
+            gameDate = d.toISOString().substring(0, 10).replace(/-/g, "");
             var games = service.getGames(dt).then(function (gamesList) {
                 var promArr = []                
                 gamesList.forEach(function (gm) {
@@ -31,7 +33,10 @@ actuarialGamesModule.service('mlbDataService', function ($http, $q) {
                         }
                     })
                     stats.then(
-                        function (result) { gm.stats = result;}, 
+                        function (result) {
+                            gm.stats = result;
+//                            $http.post('http://actuarialgames.x10host.com/site3/server/save_stats.php', {'json': gm });
+                        },
                         function (reason) {
                             console.log(reason);
                         });
@@ -40,10 +45,15 @@ actuarialGamesModule.service('mlbDataService', function ($http, $q) {
                 });
 
                 return $q.all(promArr).then(function () {
+                    $http.post('http://actuarialgames.x10host.com/site3/server/save_stats.php', JSON.stringify({ filename: gameDate, games: gamesList }));
                     return gamesList;
-                });
 
+
+                });
             });
+             //
+            // $http.get('http://actuarialgames.x10host.com/site3/server/save_stats.php'); //
+            
             return games;
         },
         getBatterStats: function (gm_directory) {
@@ -63,6 +73,72 @@ actuarialGamesModule.service('mlbDataService', function ($http, $q) {
                         function (reason) {
                             console.log(reason);
                         });
+        },
+        getDailyStats: function (gm_date) {
+            var inputDate = new Date(gm_date)
+            var day = pad(inputDate.getDate(), 2);
+            var month = pad(inputDate.getMonth() + 1, 2);
+            var year = inputDate.getFullYear();
+
+            return $http.get('data/' + year + month + day + '.json', { cache: false }).then(function (resp) {
+                return resp.data[0].games;
+            }, 
+            // failure function 
+            function () {
+                return 'no data for ' + gm_date;
+            });
+        },
+        getGamesForDate: function (gm_date) {
+            var inputDate = new Date(gm_date)
+            var day = pad(inputDate.getDate(), 2);
+            var month = pad(inputDate.getMonth() + 1, 2);
+            var year = inputDate.getFullYear();
+
+            return $http.get("http://statsapi-default-elb-prod-876255662.us-east-1.elb.amazonaws.com/api/v1/schedule/?sportId=1&date=" + month + "%2F" + day +  "%2F" + year).then(function (resp) {
+                var dateObj = resp.data.dates.find(function (dateObj) { return (dateObj.date == (year + "-" + month + "-" + day)); });
+                return dateObj.games;
+            })
+        },
+        getBoxscoresForGames: function (gamesList) {
+            var promArr = [];
+            gamesList.forEach(function (gm) {
+
+                var stats = new Promise(function (resolve, reject) {
+                    if (gm.status != "Preview") {
+                        resolve(service.getGameBoxscore(gm.gamePk));
+                    } else {
+                        resolve([]);
+                    }
+                })
+                stats.then(
+                    function (result) {
+                        gm.stats = result;
+                        //                            $http.post('http://actuarialgames.x10host.com/site3/server/save_stats.php', {'json': gm });
+                    },
+                    function (reason) {
+                        console.log(reason);
+                    });
+                promArr.push(stats);
+                    
+            });
+            return $q.all(promArr).then(function () {
+               
+                return gamesList;
+
+
+            });
+        },
+        getGameBoxscore: function (gamePk) {
+            return $http.get("http://statsapi-default-elb-prod-876255662.us-east-1.elb.amazonaws.com:80/api/v1/game/" + gamePk + "/boxscore").then(function (resp) {
+                return resp.data;
+            })
+        },
+        saveGameStats: function (gmData) {
+            var d =  new Date(gmData.gameDate);
+            var flname = d.toISOString().substring(0, 10).replace(/-/g, "");
+            return $http.post('http://actuarialgames.x10host.com/site3/server/save_stats.php', JSON.stringify({ filename: flname, games: [gmData] })).then(function (resp) {
+                return resp;
+            });
         }
         
     };

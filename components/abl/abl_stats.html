@@ -11,11 +11,16 @@
                 <span class="input-group-btn">
                     <button type="button" class="btn btn-default" ng-click="open()"><i class="glyphicon glyphicon-calendar"></i></button>
                 </span>
+                
             </p>
         </div>
 
     </div>
 
     <hr />
-</div>
+
+<button type="button" class="btn btn-default" ng-click="$ctrl.getSchedule(dt)">Download List of Games</button></div>
+<ul>
+    <li ng-repeat="gm in $ctrl.availableGames track by $index">{{gm.gamePk}} <button type="button" class="btn btn-default" ng-click="$ctrl.saveGameStats(gm.gamePk)">Save Stats</button> {{gm.isBoxscoreSaved}}</li>
+</ul>
 <ui-view></ui-view>

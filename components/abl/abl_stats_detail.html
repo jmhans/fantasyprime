@@ -9,6 +9,8 @@
             <table class="table table-bordered table-sm no-footer small" >
                 <thead>
                     <tr>
+                        <th>Status</th>
+                        <th>Game Time</th>
                         <th>Player</th>
                         <th>ID</th>
                         <th>pos</th>
@@ -33,6 +35,8 @@
                 </thead>
                 <tbody>
                     <tr ng-repeat="btr in gm.stats track by $index">
+                        <td>{{gm.status}}</td>
+                        <td>{{gm.home_time}} {{gm.home_time_zone}}</td>
                         <td>{{btr.name_display_first_last}}</td>
                         <td>{{btr.id}}</td>
                         <td>{{btr.pos}}</td>

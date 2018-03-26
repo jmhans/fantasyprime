@@ -128,6 +128,11 @@ module.exports = function (grunt) {
 
                 ],
             },
+            php: {
+                files: [
+                    {expand: true, src: ['server/*'], dest: 'webapp/'}
+                ]
+            },
         },
         watch: {
             scripts: {
@@ -156,4 +161,5 @@ module.exports = function (grunt) {
     grunt.registerTask('default', ['concat', 'uglify', 'concat_css']);
     grunt.registerTask('pkg_and_deploy', ['default', 'copy', 'ftp-deploy']);
     grunt.registerTask('deploy_data', ['copy:data', 'ftp-deploy']);
+    grunt.registerTask('deploy_php', ['copy:php', 'ftp-deploy']);
 };

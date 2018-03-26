@@ -55,8 +55,12 @@ ablModule.config(function ($stateProvider) {
                 return ablService.getDougStats();
             },
             games: function ($stateParams, mlbDataService) {
-                var m = mlbDataService.appendStatstoGames($stateParams.dt);
+                var m = mlbDataService.getDailyStats($stateParams.dt); // mlbDataService.appendStatstoGames($stateParams.dt);
                 return m;
+            },
+            games2: function ($stateParams, mlbDataService) {
+                var m = mlbDataService.getGamesForDate($stateParams.dt);
+                return m; 
             }
         }
     },
@@ -108,7 +112,27 @@ ablModule.component('abl.stats', {
     controller: ablStatsCtrl
 });
 
-function ablStatsCtrl() {
+function ablStatsCtrl(mlbDataService) {
+    this.availableGames = []
+    vm = this
+    vm.getSchedule = function (dt) {
+        mlbDataService.getGamesForDate(dt).then(function (resp) {
+            vm.availableGames = resp;
+        });
+
+    };
+
+    vm.saveGameStats = function (gmPk) {
+        mlbDataService.getGameBoxscore(gmPk).then(function (resp) {
+            gm = vm.availableGames.find(function (gmItem) { return (gmItem.gamePk == gmPk); })
+            gm.boxscore = resp;
+            gm.isBoxscoreSaved = false;
+            mlbDataService.saveGameStats(gm).then(function (resp) {
+                gm.isBoxscoreSaved = true;
+            });
+            
+        });
+    };
 
 }
 
@@ -136,11 +160,11 @@ function ablDSCtrl() {
 
     //test comment
 
+
     vm.advance = function (effDate) {
 
         $state.go('abl.stats.detail', { dt: effDate });
     }
-
 
 
 }
