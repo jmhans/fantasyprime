@@ -61,7 +61,6 @@ fantasyFantasyModule.controller('DatepickerCtrl', function ($scope, $rootScope, 
     })*/
 
     $scope.$watch('dt', function (newVal, oldVal) {
-        console.log($scope.dt);
         startDt = $scope.dt;
 
         strDate = stringifyDate(startDt);

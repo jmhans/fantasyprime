@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "\"# fantasyprime\"",
   "main": "app.js",
-  "dependencies": { },
+  "dependencies": {},
   "devDependencies": {
     "angular": "^1.5.8",
     "grunt": "^0.4.5",
@@ -31,8 +31,9 @@
     "angular-content-editable": "^1.2.1",
     "moment": "^2.19.3",
     "moment-timezone": "^0.5.14",
-    "grunt-task-interval": "0.0.1", 
-    "grunt-contrib-watch": "^1.0.0"
+    "grunt-task-interval": "0.0.1",
+    "grunt-contrib-watch": "^1.0.0",
+    "lodash": "^4.17.10"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"

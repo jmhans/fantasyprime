@@ -1,14 +1,15 @@
 ﻿<div>
-    <ul>
-        <li ng-repeat="gm in $ctrl.games track by $index">
-            {{gm.game_data_directory}}
-            <ul>
-                <li>{{gm.status}} (Start Time: {{gm.home_time}} {{gm.home_time_zone}})</li>
-            </ul>
 
+
+    <button type="button" class="btn btn-default" ng-click="$ctrl.saveAllGames()">Save All Games</button>
+    <ul>
+        <li ng-repeat="gm in $ctrl.allGames track by $index">{{gm.gamePk}} | {{gm.status.detailedState}}  | <button type="button" class="btn btn-default" ng-click="$ctrl.saveGameStats(gm.gamePk)">Save Stats</button> {{gm.isBoxscoreSaved}}</li>
+    </ul>
             <table class="table table-bordered table-sm no-footer small" >
                 <thead>
                     <tr>
+                        <th>Status</th>
+                        <th>Game Time</th>
                         <th>Player</th>
                         <th>ID</th>
                         <th>pos</th>
@@ -32,15 +33,17 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr ng-repeat="btr in gm.stats track by $index">
-                        <td>{{btr.name_display_first_last}}</td>
-                        <td>{{btr.id}}</td>
-                        <td>{{btr.pos}}</td>
+                    <tr ng-repeat="btr in $ctrl.stats track by $index">
+                        <td></td>
+                        <td></td>
+                        <td>{{btr.name}}</td>
+                        <td>{{btr.mlbid}}</td>
+                        <td><span ng-repeat="pos in btr.positions">{{pos.abbreviation}}{{$last ? '' : ','}}</span></td>
                         <td>1</td>
                         <td>{{btr.ab}}</td>
                         <td>{{btr.h}}</td>
-                        <td>{{btr.d}}</td>
-                        <td>{{btr.t}}</td>
+                        <td>{{btr['2b']}}</td>
+                        <td>{{btr['3b']}}</td>
                         <td>{{btr.hr}}</td>
                         <td>{{btr.r}}</td>
                         <td>{{btr.rbi}}</td>
@@ -48,7 +51,7 @@
                         <td>{{btr.so}}</td>
                         <td>{{btr.sb}}</td>
                         <td>{{btr.cs}}</td>
-                        <td>{{btr.gidp}}</td>
+                        <td></td>
                         <td>{{btr.e}}</td>
                         <td>{{btr.hbp}}</td>
                         <td>{{btr.sf}}</td>
@@ -57,10 +60,7 @@
                 </tbody>
             </table>
 
-
-        </li>
-    </ul>
-    <table class="table table-bordered no-footer" ui-tree="treeOptions">
+    <!--<table class="table table-bordered no-footer" ui-tree="treeOptions">
         <thead>
             <tr>
                 <th> Player </th>
@@ -110,7 +110,7 @@
                 
             </tr>
         </tbody>
-    </table>
+    </table>-->
 
 </div>
 

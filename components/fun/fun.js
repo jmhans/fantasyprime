@@ -40,7 +40,7 @@ propBetModule.component('propbets', {
 
 
 function propBetCtrl($http, $scope, $q, googleChartApiPromise) {
-    $scope.curYr = 2017;
+    $scope.curYr = 2018;
     $scope.yrs = [];
 
     $q.when($scope.$ctrl.configData, setYrs);

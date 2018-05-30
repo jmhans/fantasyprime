@@ -1,0 +1,17 @@
+﻿
+
+<h4>MLB Wins Pool</h4>
+
+<div class="container-fluid">
+    <ul class="list-group">
+        <li class="list-group-item" ng-repeat="rec in $ctrl.picks | orderBy: $ctrl.winPct : true">
+            <i class="fa fa-plus" ng-show="!rec.show" ng-click="$ctrl.expand(rec)"></i>
+            <i class="fa fa-minus" ng-show="rec.show" ng-click="$ctrl.expand(rec)"></i>
+            {{rec.name}} | {{rec.data.wins}} - {{rec.data.losses}} ({{rec.data.wins / (rec.data.losses + rec.data.wins) | number : 3}}) | Projected Wins: {{rec.data.projectedWins | number : 0}}
+            <ul ng-show="rec.show">
+                <li ng-repeat="pick_detail in rec.data.picks">{{pick_detail.Pick}} | {{pick_detail.leagueRecord.wins}} - {{pick_detail.leagueRecord.losses}} ({{pick_detail.leagueRecord.pct}}) | Projected: {{pick_detail.projectedWins | number: 0}}</li>
+            </ul>
+        </li>
+    </ul>
+</div>
+

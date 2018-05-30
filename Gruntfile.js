@@ -1,4 +1,4 @@
-/// <binding BeforeBuild='default' AfterBuild='deploy_data' Clean='deploy_data' />
+/// <binding BeforeBuild='default' />
 module.exports = function (grunt) {
 
     // Project configuration.
@@ -51,6 +51,7 @@ module.exports = function (grunt) {
                         'node_modules/angular-content-editable/dist/angular-content-editable.min.js',
                         'node_modules/moment/min/moment.min.js',
                         'node_modules/moment-timezone/builds/moment-timezone-with-data.min.js',
+                        'node_modules/lodash/lodash.js',
                         'main.js',                        
                         'components/**/*.js',
                         'services/*.js'

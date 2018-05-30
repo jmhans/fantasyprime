@@ -34,15 +34,8 @@ ablModule.config(function ($stateProvider) {
         requiresParams: false,
         resolve: {
             dougstats: function ($stateParams, ablService) {
-                return ablService.getDougStats();
-            },
-            games: function ($stateParams, mlbDataService) {
-                var m = mlbDataService.appendStatstoGames($stateParams.dt);
-                return m;
-            }/*,
-            dt: function ($stateParams) {
-                return $stateParams.dt;
-            }*/
+                //return ablService.getDougStats();
+            }
         }
     },
     {
@@ -51,16 +44,23 @@ ablModule.config(function ($stateProvider) {
         component: 'ablstatsdetail',
         requiresParams: true,
         resolve: {
-            dougstats: function ($stateParams, ablService) {
-                return ablService.getDougStats();
+            allGames: function ($stateParams, mlbDataService) {
+                return mlbDataService.getGamesForDate($stateParams.dt);
             },
             games: function ($stateParams, mlbDataService) {
-                var m = mlbDataService.getDailyStats($stateParams.dt); // mlbDataService.appendStatstoGames($stateParams.dt);
+                var m = mlbDataService.getDailyStats($stateParams.dt);
                 return m;
             },
-            games2: function ($stateParams, mlbDataService) {
-                var m = mlbDataService.getGamesForDate($stateParams.dt);
-                return m; 
+            stats: function (games) {
+                var statsArr = [];
+                if (games) {
+                    games.forEach(function (gmObj) {
+                        gmObj.players.forEach(function (plyrObj) {
+                            statsArr.push(plyrObj);
+                        });
+                    });
+                }
+                return statsArr;
             }
         }
     },
@@ -112,27 +112,38 @@ ablModule.component('abl.stats', {
     controller: ablStatsCtrl
 });
 
-function ablStatsCtrl(mlbDataService) {
-    this.availableGames = []
-    vm = this
+function ablStatsCtrl(mlbDataService, $scope) {
+
+
+    this.availableGames = [];
+    vm = this;
     vm.getSchedule = function (dt) {
         mlbDataService.getGamesForDate(dt).then(function (resp) {
             vm.availableGames = resp;
         });
 
     };
-
+    vm.saveAllGames = function () {
+        vm.availableGames.forEach(function (gm) {
+            vm.saveGameStats(gm.gamePk);
+        })
+    }
     vm.saveGameStats = function (gmPk) {
-        mlbDataService.getGameBoxscore(gmPk).then(function (resp) {
-            gm = vm.availableGames.find(function (gmItem) { return (gmItem.gamePk == gmPk); })
-            gm.boxscore = resp;
-            gm.isBoxscoreSaved = false;
-            mlbDataService.saveGameStats(gm).then(function (resp) {
-                gm.isBoxscoreSaved = true;
-            });
-            
-        });
+        gm = vm.availableGames.find(function (gmItem) { return (gmItem.gamePk == gmPk); })
+        gm.isBoxscoreSaved = false;
+        getBS = function (gm) {
+            mlbDataService.getGameBoxscore(gm.gamePk).then(function (resp) {
+                gm.boxscore = resp;
+                mlbDataService.saveGameStats(gm).then(function (resp) {
+                    gm.isBoxscoreSaved = true;
+                })
+            })
+        }
+
+        getBS(gm);
+        
     };
+    
 
 }
 
@@ -148,23 +159,40 @@ function ablPlyrCtrl($scope) {
 }
 
 ablModule.component('ablstatsdetail', {
-    bindings: { games:'<', dt:'<'},
+    bindings: { games:'<', dt:'<', stats:'<', allGames:'<'},
     templateUrl: 'components/abl/abl_stats_detail.html',
     controller: ablDSCtrl
 });
 
 
-function ablDSCtrl() {
+function ablDSCtrl(mlbDataService, $scope) {
 
     var vm = this;
 
     //test comment
-
-
-    vm.advance = function (effDate) {
-
-        $state.go('abl.stats.detail', { dt: effDate });
+    vm.saveAllGames = function () {
+        vm.allGames.forEach(function (gm) {
+            vm.saveGameStats(gm.gamePk);
+        })
     }
+    vm.saveGameStats = function (gmPk) {
+        gm = vm.allGames.find(function (gmItem) { return (gmItem.gamePk == gmPk); })
+        gm.isBoxscoreSaved = false;
+        getBS = function (gm) {
+            mlbDataService.getGameBoxscore(gm.gamePk).then(function (resp) {
+                gm.boxscore = resp;
+                mlbDataService.saveGameStats(gm).then(function (resp) {
+                    gm.isBoxscoreSaved = true;
+                })
+            })
+        }
+
+        getBS(gm);
+
+    };
+    $scope.$watch('allGames', function (newValue) {
+        console.log('allGames changed:' + newValue);
+    })
 
 
 }

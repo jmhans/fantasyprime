@@ -141,3 +141,12 @@ Date.dateDiff = function (datepart, fromdate, todate) {
     return Math.floor(diff / divideBy[datepart]);
 }
 
+Date.prototype.slashFormat = function () {
+    
+
+    MyDateString = ('0' + (this.getMonth() + 1)).slice(-2) + '/'
+                    + ('0' + this.getDate()).slice(-2) + '/'
+                    + this.getFullYear();
+
+    return MyDateString;
+}
