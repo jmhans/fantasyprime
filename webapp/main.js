@@ -15,7 +15,8 @@ var actuarialGamesModule = angular.module('actuarial.games',
         'fantasyGolf',
         'propBets',
         'state.tree',
-        'angular-content-editable'
+        'angular-content-editable',
+        'winsPool'
     ]);
 
 actuarialGamesModule.config(function ($stateProvider, $httpProvider) {

@@ -1,0 +1,34 @@
+﻿
+
+<h4>MLB Prop Bets</h4>
+
+
+
+    <!--<ul class="list-group">
+        <li class="list-group-item" ng-repeat="bet in $ctrl.betSummary">
+            {{bet.description}}
+            <ul><li ng-repeat="betSide in bet.sides">{{betSide.dataField}} | <span ng-bind="$parent.$eval(betSide.dataField)"</span></li></ul>
+        </li>
+    </ul>-->
+
+<div class="container-fluid">
+    <div ng-repeat="cht in $ctrl.betGraphConfig">
+        <div id="repeatBlock{{cht.betNumber}}" google-chart chart="{{cht.betDescription}}"></div>
+    </div>
+
+    <!--<table ng-repeat="rec in $ctrl.mlbRecs | orderBy: 'wins' : true">
+        <tbody>
+            <tr ng-repeat="gm in rec.games">
+                <td>{{rec.name}}</td>
+                <td>{{gm.gameDate}}</td>
+                <td>{{gm.gamePk}}</td>
+                <td>{{gm.isWinner}}</td>
+                <td>{{gm.isTie}}</td>
+                <td>{{gm.teamRec.score}}</td>
+                <td>{{gm.teamRec.leagueRecord.wins}}</td>
+                <td>{{gm.teamRec.leagueRecord.losses}}</td>
+            </tr>
+        </tbody>
+    </table>-->
+
+</div>

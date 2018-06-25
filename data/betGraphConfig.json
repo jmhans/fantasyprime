@@ -1,0 +1,120 @@
+[
+  {
+    "betNumber": 2,
+    "betYear": 2018,
+    "betDescription": "Knockout",
+    "yAxisLabel": "Win Differential",
+    "yAxisMin": 0,
+    "xSeries": {
+      "seriesNum": 0,
+      "seriesDescription": "Game Number"
+    },
+    "chartSeries": [
+      {
+        "seriesNum": 0,
+        "seriesType": "line",
+        "seriesDescription": "Win Diff",
+        "seriesColor": "black",
+        "seriesLookup": "winDiff"
+      },
+      {
+        "seriesNum": 0,
+        "seriesType": "line",
+        "seriesDescription": "Min KO",
+        "seriesColor": "#FF0000",
+        "seriesLookup": "minline"
+      },
+      {
+        "seriesNum": 0,
+        "seriesType": "line",
+        "seriesDescription": "Mil KO",
+        "seriesColor": "#3366FF",
+        "seriesLookup": "milline"
+      },
+      {
+        "seriesNum": 0,
+        "seriesType": "bars",
+        "seriesDescription": "Min Result",
+        "seriesColor": "#FF0000",
+        "seriesLookup": "minResult"
+      },
+      {
+        "seriesNum": 0,
+        "seriesType": "bars",
+        "seriesDescription": "Mil Result",
+        "seriesColor": "#3366FF",
+        "seriesLookup": "milResult"
+      }
+    ]
+  },
+  {
+    "betNumber": 4,
+    "betYear": 2018,
+    "betDescription": "Innings_Batted",
+    "yAxisLabel": "Innings",
+    "yAxisMin": 0,
+    "xSeries": {
+        "seriesNum": 0,
+        "seriesDescription": "Game Number"
+      },
+    "chartSeries": [
+      {
+        "seriesNum": 0,
+        "seriesType": "line",
+        "seriesDescription": "Min Innings",
+        "seriesColor": "#FF0000", 
+        "seriesLookup":  "minInnBat"
+      },
+      {
+        "seriesNum": 0,
+        "seriesType": "line",
+        "seriesDescription": "Mil Innings",
+        "seriesColor": "#3366FF",
+        "seriesLookup": "milInnBat"
+      }
+
+    ]
+  },
+  {
+    "betNumber": 5,
+    "betYear": 2018,
+    "betDescription": "Batting_Avg",
+    "yAxisLabel": "Average",
+    "yAxisMin": 0,
+    "xSeries": {
+        "seriesNum": 0,
+        "seriesDescription": "Game Number"
+      },
+    "chartSeries": [
+      {
+        "seriesNum": 0,
+        "seriesType": "line",
+        "seriesDescription": "Min Avg",
+        "seriesColor": "#FF9999", 
+        "seriesLookup":  "minAvg"
+      },
+      {
+        "seriesNum": 0,
+        "seriesType": "line",
+        "seriesDescription": "Mil Avg",
+        "seriesColor": "#C2D1FF",
+        "seriesLookup": "milAvg"
+      },
+      {
+        "seriesNum": 0,
+        "seriesType": "line",
+        "seriesDescription": "Min 95 Avg",
+        "seriesColor": "#FF0000", 
+        "seriesLookup":  "min95Avg"
+      },
+      {
+        "seriesNum": 0,
+        "seriesType": "line",
+        "seriesDescription": "Mil 95 Avg",
+        "seriesColor": "#3366FF",
+        "seriesLookup": "mil95Avg"
+      }
+
+    ]
+  }
+]

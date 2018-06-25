@@ -1,0 +1,23 @@
+{"data": 
+  [
+    {
+      "description": "Win Line",
+      "sides": [
+        {
+          "player": "Justin",
+          "description": "MIN Wins + 0.5",
+          "dataField": "wins",
+          "team": "MIN",
+          "adjustment": "winsCalc"
+        },
+        {
+          "player": "Andy",
+          "description": "MIL Wins",
+          "dataField": "wins",
+          "team": "MIL",
+          "adjustment": "0+4"
+        }
+      ]
+    }
+  ]
+}

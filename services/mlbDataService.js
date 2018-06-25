@@ -1,5 +1,6 @@
 ﻿
 actuarialGamesModule.service('mlbDataService', function ($http, $q) {
+    const BASE_URL = "http://statsapi-default-elb-prod-876255662.us-east-1.elb.amazonaws.com/api/v1"
     var service = {
         getDailyStats: function (gm_date) {
             var inputDate = new Date(gm_date)
@@ -21,7 +22,7 @@ actuarialGamesModule.service('mlbDataService', function ($http, $q) {
             var month = pad(inputDate.getMonth() + 1, 2);
             var year = inputDate.getFullYear();
 
-            return $http.get("http://statsapi-default-elb-prod-876255662.us-east-1.elb.amazonaws.com/api/v1/schedule/?sportId=1&date=" + month + "%2F" + day +  "%2F" + year).then(function (resp) {
+            return $http.get(BASE_URL + "/schedule/?sportId=1&date=" + month + "%2F" + day +  "%2F" + year).then(function (resp) {
                 var dateObj = resp.data.dates.find(function (dateObj) { return (dateObj.date == (year + "-" + month + "-" + day)); });
                 return dateObj.games;
             })
@@ -56,7 +57,7 @@ actuarialGamesModule.service('mlbDataService', function ($http, $q) {
             });
         },
         getGameBoxscore: function (gamePk) {
-            return $http.get("http://statsapi-default-elb-prod-876255662.us-east-1.elb.amazonaws.com:80/api/v1/game/" + gamePk + "/boxscore").then(function (resp) {
+            return $http.get(BASE_URL+ "/game/" + gamePk + "/boxscore").then(function (resp) {
                 return resp.data; //service.saveGameStats(resp);
             })
         },
@@ -73,31 +74,78 @@ actuarialGamesModule.service('mlbDataService', function ($http, $q) {
                 return resp;
             });
         },
-        getSchedule: function (tm, startDate, endDate) {
-            return $http.get('http://statsapi-default-elb-prod-876255662.us-east-1.elb.amazonaws.com/api/v1/schedule/?sportId=1&startDate=03%2F15%2F2018&endDate=05%2F28%2F2018&gameType=R').then(function (resp) {
+        getSchedule: function (startDate, endDate, teamsArr) {
+            teamsString = (teamsArr.length > 0) ? '&teamId=' + encodeURIComponent(teamsArr) : '';
+
+            return $http.get(BASE_URL+ '/schedule/?sportId=1&startDate='+ encodeURIComponent(startDate.slashFormat()) + '&endDate='+encodeURIComponent(endDate.slashFormat())+'&gameType=R' + teamsString).then(function (resp) {
                 var fullResp = resp.data;
-                var results = [];
+
+                let promArray = [];
+                
+                createSummaryTmRec = function (fullRec) {
+                    
+                    Object.keys(fullRec.teams).forEach(function (tmKey) {
+                        fullRec.teams[tmKey].leagueRecord = fullRec.teams[tmKey].team.record.leagueRecord;
+                        fullRec.teams[tmKey].score = fullRec.teams[tmKey].teamStats.batting.runs;
+                        fullRec.teams[tmKey].isWinner = (fullRec.teams[tmKey].teamStats.batting.runs > fullRec.teams[tmKey].teamStats.pitching.runs);
+                    });
+
+                    return fullRec;
+                };
+                
                 for (i = 0; i < fullResp.dates.length; i++) {
                     fullResp.dates[i].games.forEach(function (gm) {
-                        addGameToRec = function (tmGameRec) {
-                            tmRec = results.find(function (res) { return (res.id == tmGameRec.team.id); })
-                            if (!tmRec) {
-                                var idx = results.push({ id: tmGameRec.team.id, name: tmGameRec.team.name });
-                                tmRec = results[idx - 1]
-                            };
-                            if (!tmRec.hasOwnProperty('games')) { tmRec.games = []; }
-                            tmRec.games.push({ gameDate: gm.gameDate, gamePk: gm.gamePk, isWinner: tmGameRec.isWinner });
-
-                        }
+                        
                         if (gm.status.statusCode == 'F') {
+                            if (gm.isTie) {
 
-                            addGameToRec(gm.teams.away);
-                            addGameToRec(gm.teams.home);
+                                if (teamsArr.includes(gm.teams.away.team.id) || teamsArr.includes(gm.teams.home.team.id)) { 
+
+                                // Potential error. Look up full game result.
+                                let promise = new Promise((resolve, reject) => {
+                                    $http.get(BASE_URL+ '/game/' + gm.gamePk + '/boxscore').then(function (resp) {
+                                        gm_boxscore = resp.data;
+                                        gm.isTie = false;
+                                        resolve({respType: "full", boxscore: createSummaryTmRec(gm_boxscore), game: gm });
+                                    });
+
+                                });
+
+                                promArray.push(promise);
+                                }
+                            } else {
+                                let promise = new Promise((resolve, reject) => {
+                                    resolve({ respType: "summary", boxscore: gm, game: gm });
+                                });
+                                promArray.push(promise);
+
+                            }
                         }
                     })
                 }
 
-                return results;
+                return $q.all(promArray).then(function (resArray) {
+                    let results = [];
+                    
+
+                    addGameToRec = function (tmGameRec, gmRec) {
+                        tmRec = results.find(function (res) { return (res.id == tmGameRec.team.id); })
+                        if (!tmRec) {
+                            var idx = results.push({ id: tmGameRec.team.id, name: tmGameRec.team.name });
+                            tmRec = results[idx - 1]
+                        };
+                        if (!tmRec.hasOwnProperty('games')) { tmRec.games = []; }
+                        tmRec.games.push({ gameDate: gmRec.gameDate, gamePk: gmRec.gamePk, isWinner: tmGameRec.isWinner, isTie: gmRec.isTie, teamRec: tmGameRec });
+
+                    };
+
+                    resArray.forEach(function (gm) {
+                        if (teamsArr.includes(gm.boxscore.teams.away.team.id)) { addGameToRec(gm.boxscore.teams.away, gm.game); }
+                        if (teamsArr.includes(gm.boxscore.teams.home.team.id)) { addGameToRec(gm.boxscore.teams.home, gm.game); }
+                    });
+                    return results;
+                });
+
             }, function (err) {
                 return '';
             })
@@ -107,7 +155,7 @@ actuarialGamesModule.service('mlbDataService', function ($http, $q) {
             var twoDaysAgo = new Date(today.getTime());
             twoDaysAgo.setDate(today.getDate() - 2);
 
-            return $http.get('http://statsapi-default-elb-prod-876255662.us-east-1.elb.amazonaws.com/api/v1/schedule/?sportId=1&startDate='
+            return $http.get(BASE_URL+ '/schedule/?sportId=1&startDate='
                                 + encodeURIComponent(twoDaysAgo.slashFormat()) + '&endDate='
                                 + encodeURIComponent(today.slashFormat()) + '&gameType=R').then(function (resp) {
                 var fullResp = resp.data;
@@ -135,7 +183,7 @@ actuarialGamesModule.service('mlbDataService', function ($http, $q) {
         getStandings: function (dt) {
             dt = dt || new Date();
             var result = [];
-            return $http.get('http://statsapi-default-elb-prod-876255662.us-east-1.elb.amazonaws.com/api/v1/standings?leagueId=103,104&season=2018&date='
+            return $http.get(BASE_URL+ '/standings?leagueId=103,104&season=2018&date='
                 + encodeURIComponent(dt.slashFormat())).then(function (resp) {
                     resp.data.records.forEach(function (standingsRec) {
                         standingsRec.teamRecords.forEach(function (teamRec) {
@@ -145,8 +193,68 @@ actuarialGamesModule.service('mlbDataService', function ($http, $q) {
                     return result;
                 });
 
+        },
+        getAllBoxscoresForDates: function (startDate, endDate, teamsArr) {
+            teamsString = (teamsArr.length > 0) ? '&teamId=' + encodeURIComponent(teamsArr) : '';
+
+            return $http.get(BASE_URL+ '/schedule/?sportId=1&startDate=' + encodeURIComponent(startDate.slashFormat()) + '&endDate=' + encodeURIComponent(endDate.slashFormat()) + '&gameType=R' + teamsString).then(function (resp) {
+                var fullResp = resp.data;
+
+                let promArray = [];
+
+                for (i = 0; i < fullResp.dates.length; i++) {
+                    fullResp.dates[i].games.forEach(function (gm) {
+
+                        if (gm.status.statusCode == 'F') {
+                            if (teamsArr.includes(gm.teams.away.team.id) || teamsArr.includes(gm.teams.home.team.id)) {
+
+                                // Potential error. Look up full game result.
+                                let promise = new Promise((resolve, reject) => {
+                                    $http.get(BASE_URL+ '/game/' + gm.gamePk + '/boxscore').then(function (resp) {
+                                        gm_boxscore = resp.data;
+                                        resolve({ respType: "full", boxscore: gm_boxscore, game: gm });
+                                    });
+
+                                });
+
+                                promArray.push(promise);
+                            }
+                        }
+                    })
+                }
+
+                return $q.all(promArray).then(function (resArray) {
+                    let results = [];
+
+
+                    addGameToRec = function (tmGameRec, gmRec, oppGameRec) {
+                        tmRec = results.find(function (res) { return (res.id == tmGameRec.team.id); })
+                        if (!tmRec) {
+                            var idx = results.push({ id: tmGameRec.team.id, name: tmGameRec.team.name });
+                            tmRec = results[idx - 1]
+                        };
+                        if (!tmRec.hasOwnProperty('games')) { tmRec.games = []; }
+                        tmRec.games.push({ gameDate: gmRec.gameDate, gamePk: gmRec.gamePk, boxscore: tmGameRec, opponentBoxscore: oppGameRec});
+
+                    };
+
+                    resArray.forEach(function (gm) {
+                        if (teamsArr.includes(gm.boxscore.teams.away.team.id)) { addGameToRec(gm.boxscore.teams.away, gm.game, gm.boxscore.teams.home); }
+                        if (teamsArr.includes(gm.boxscore.teams.home.team.id)) { addGameToRec(gm.boxscore.teams.home, gm.game, gm.boxscore.teams.away); }
+                    });
+                    return results;
+                });
+
+            }, function (err) {
+                return '';
+            })
+        },
+        getPBP: function (gamePk) {
+            return $http.get(BASE_URL+ '/game/' + gamePk + '/playByPlay').then(function (resp) {
+                return resp.data;
+            })
+
         }
-        
     };
 
     return service;
