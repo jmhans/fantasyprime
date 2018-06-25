@@ -95,14 +95,14 @@ actuarialGamesModule.service('mlbDataService', function ($http, $q) {
                 
                 for (i = 0; i < fullResp.dates.length; i++) {
                     fullResp.dates[i].games.forEach(function (gm) {
-                        
+                        var promise;
                         if (gm.status.statusCode == 'F') {
                             if (gm.isTie) {
 
                                 if (teamsArr.includes(gm.teams.away.team.id) || teamsArr.includes(gm.teams.home.team.id)) { 
 
                                 // Potential error. Look up full game result.
-                                let promise = new Promise((resolve, reject) => {
+                                promise = new Promise(function(resolve, reject) {
                                     $http.get(BASE_URL+ '/game/' + gm.gamePk + '/boxscore').then(function (resp) {
                                         gm_boxscore = resp.data;
                                         gm.isTie = false;
@@ -114,7 +114,7 @@ actuarialGamesModule.service('mlbDataService', function ($http, $q) {
                                 promArray.push(promise);
                                 }
                             } else {
-                                let promise = new Promise((resolve, reject) => {
+                                promise = new Promise(function(resolve, reject) {
                                     resolve({ respType: "summary", boxscore: gm, game: gm });
                                 });
                                 promArray.push(promise);
@@ -125,7 +125,7 @@ actuarialGamesModule.service('mlbDataService', function ($http, $q) {
                 }
 
                 return $q.all(promArray).then(function (resArray) {
-                    let results = [];
+                    var results = [];
                     
 
                     addGameToRec = function (tmGameRec, gmRec) {
@@ -209,7 +209,7 @@ actuarialGamesModule.service('mlbDataService', function ($http, $q) {
                             if (teamsArr.includes(gm.teams.away.team.id) || teamsArr.includes(gm.teams.home.team.id)) {
 
                                 // Potential error. Look up full game result.
-                                let promise = new Promise((resolve, reject) => {
+                                var promise = new Promise(function (resolve, reject) {
                                     $http.get(BASE_URL+ '/game/' + gm.gamePk + '/boxscore').then(function (resp) {
                                         gm_boxscore = resp.data;
                                         resolve({ respType: "full", boxscore: gm_boxscore, game: gm });
@@ -224,7 +224,7 @@ actuarialGamesModule.service('mlbDataService', function ($http, $q) {
                 }
 
                 return $q.all(promArray).then(function (resArray) {
-                    let results = [];
+                    var results = [];
 
 
                     addGameToRec = function (tmGameRec, gmRec, oppGameRec) {

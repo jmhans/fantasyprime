@@ -129,14 +129,14 @@
                 return outputArr1;
 
             });
-        },
-        saveBetData: function (flname, dataObj) {
-            return $http.post('server/save_json.php/' + flname, JSON.stringify({
-                dataObj
-            })).then(function (resp) {
-                return resp;
-            });
-        }
+        }//,
+        //saveBetData: function (flname, dataObj) {
+        //    return $http.post('server/save_json.php/' + flname, JSON.stringify({
+        //        dataObj
+        //    })).then(function (resp) {
+        //        return resp;
+        //    });
+        //}
     };
 
     return service;
@@ -188,8 +188,9 @@ function battingAvg(bs) {
 }
 
 function runningSum(curVal, index, arr) {
-    const add = (a, b) =>
+    var add = function (a, b) {
         a + b
+    }
     if (index > 0) {
         return arr.slice(0, index).reduce(add);
     } else {
