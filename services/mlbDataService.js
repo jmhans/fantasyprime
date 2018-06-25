@@ -80,7 +80,7 @@ actuarialGamesModule.service('mlbDataService', function ($http, $q) {
             return $http.get(BASE_URL+ '/schedule/?sportId=1&startDate='+ encodeURIComponent(startDate.slashFormat()) + '&endDate='+encodeURIComponent(endDate.slashFormat())+'&gameType=R' + teamsString).then(function (resp) {
                 var fullResp = resp.data;
 
-                let promArray = [];
+                var promArray = [];
                 
                 createSummaryTmRec = function (fullRec) {
                     
@@ -200,7 +200,7 @@ actuarialGamesModule.service('mlbDataService', function ($http, $q) {
             return $http.get(BASE_URL+ '/schedule/?sportId=1&startDate=' + encodeURIComponent(startDate.slashFormat()) + '&endDate=' + encodeURIComponent(endDate.slashFormat()) + '&gameType=R' + teamsString).then(function (resp) {
                 var fullResp = resp.data;
 
-                let promArray = [];
+                var promArray = [];
 
                 for (i = 0; i < fullResp.dates.length; i++) {
                     fullResp.dates[i].games.forEach(function (gm) {
