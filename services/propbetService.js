@@ -48,11 +48,54 @@
                 return resp.data;
             })
         },
-        getBetData: function () {
-            //return $http.get("data/betOutputData.json").then(function (resp) {
-            //    return resp.data.data;
-            //});
+        getStoredBetData: function() {
+            return $http.get("data/betData.json").then(function (resp) {
+                return resp.data;
+            })
+        },
+        getBetDataPromise: function () {
+            return service.getBetData().then(function (resp) {
+                var outputBetData = resp
+                minDateCol = outputBetData[0].indexOf("minGameTime");
+                milDateCol = outputBetData[0].indexOf("milGameTime");
+                minMaxDate = outputBetData.reduce(function (maxDate, curArrItem) { return Math.max(new Date(curVal[minDateCol]), curTotal) }, new Date('03/29/2018'));
+                milMaxDate = outputBetData.reduce(function (maxDate, curArrItem) { return Math.max(new Date(curVal[milDateCol]), curTotal) }, new Date('03/29/2018'));
+                s = Math.min(minMaxDate, milMaxDate);
+                tms = [142, 158];
 
+                return mlbDataService.getAllBoxscoresForDates(s, new Date(), tms).then(function (resp) {
+                    var teams = resp;
+                    teams.forEach(function (tm) {
+                        tm.games.sort(function (a, b) { return (new Date(a.gameDate) - new Date(b.gameDate)); });
+                    })
+
+                    for (i = 0; i < teams.length; i++) {
+                        tm = teams[i];
+                        tmOffset = tm.name == ("Minnesota Twins" ? 0 : (tm.name == "Milwaukee Brewers" ? 1 : 0));
+                        tmKOInc = tm.name == ("Minnesota Twins" ? 4 : (tm.name == "Milwaukee Brewers" ? -4 : 0));
+
+                        tm.games.forEach(function (gm) {
+                            gmNum = gm.boxscore.team.record.gamesPlayed
+                            outputBetData[gmNum][0] = teams[1].games[gmNum].boxscore.team.record.wins - teams[1].games[gmNum].boxscore.team.record.wins; // winDiff -- needs to be defined
+                            outputBetData[gmNum][1 + tmOffset] = 4; // minLine -- needs to be defined 
+                            outputBetData[gmNum][3 + tmOffset] = win(gm.boxscore); // minResult
+                            outputBetData[gmNum][5 + tmOffset] = battingAvg(gm.boxscore); // minAvg
+                            outputBetData[gmNum][7 + tmOffset] = Pctile(outputBetData.slice(1, gmNum).map(function (arrRow) { return arrRow[5 + tmOffset]; }), 95); // min95Avg 
+                            outputBetData[gmNum][9 + tmOffset] = inningsBatted(gm.boxscore); // minInnBat
+                            outputBetData[gmNum][11 + tmOffset] = gameTimes(gm.boxscore); // minGameTime
+                            outputBetData[gmNum][13 + tmOffset] = gameNums(gm.boxscore); // minGamePk
+
+                        })
+                    }
+
+                })
+
+            });
+
+
+        },
+        getBetData: function () {
+            
             d = new Date();
             s = new Date('03/29/2018')
             // Minnesota: Team Id = 142
@@ -125,6 +168,11 @@
                 addColToOutputArr({ name: 'mil95Avg', data: createRunningTotalCol(milAvg, avg95Pctile) });
                 addColToOutputArr({ name: 'minInnBat', data: createRunningTotalCol( createStatCol(teams[0].games, inningsBatted), runningSum ) });
                 addColToOutputArr({ name: 'milInnBat', data: createRunningTotalCol(createStatCol(teams[1].games, inningsBatted), runningSum) });
+                addColToOutputArr({ name: 'minGameTime', data: createStatCol(teams[0].games, gameTimes) });
+                addColToOutputArr({ name: 'milGameTime', data: createStatCol(teams[1].games, gameTimes) });
+                addColToOutputArr({ name: 'minGamePk', data: createStatCol(teams[0].games, gameNums) });
+                addColToOutputArr({ name: 'milGamePk', data: createStatCol(teams[1].games, gameNums) });
+                
 
                 return outputArr1;
 
@@ -189,7 +237,7 @@ function battingAvg(bs) {
 
 function runningSum(curVal, index, arr) {
     var add = function (a, b) {
-        a + b
+        return a + b
     }
     if (index > 0) {
         return arr.slice(0, index).reduce(add);
@@ -200,5 +248,18 @@ function runningSum(curVal, index, arr) {
 }
 
 function inningsBatted(bs) {
-    return Math.ceil(parseFloat((bs.opponentBoxscore.teamStats.pitching.inningsPitched)))-9;
+    return Math.ceil(parseFloat((bs.opponentBoxscore.teamStats.pitching.inningsPitched)))-9.0;
+}
+
+function gameTimes(bs) {
+    return bs.gameDate;
+}
+function gameNums(bs) {
+    return bs.gamePk;
+}
+
+function Pctile(arr, pct) {
+    var len = arr.length;
+    var pctile = Math.floor(len * .95) - 1;
+    return arr[pctile];
 }

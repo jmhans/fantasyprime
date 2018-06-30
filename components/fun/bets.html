@@ -16,19 +16,14 @@
         <div id="repeatBlock{{cht.betNumber}}" google-chart chart="{{cht.betDescription}}"></div>
     </div>
 
-    <!--<table ng-repeat="rec in $ctrl.mlbRecs | orderBy: 'wins' : true">
-        <tbody>
-            <tr ng-repeat="gm in rec.games">
-                <td>{{rec.name}}</td>
-                <td>{{gm.gameDate}}</td>
-                <td>{{gm.gamePk}}</td>
-                <td>{{gm.isWinner}}</td>
-                <td>{{gm.isTie}}</td>
-                <td>{{gm.teamRec.score}}</td>
-                <td>{{gm.teamRec.leagueRecord.wins}}</td>
-                <td>{{gm.teamRec.leagueRecord.losses}}</td>
-            </tr>
-        </tbody>
-    </table>-->
+
 
 </div>
+
+<table border="1">
+    <tbody>
+        <tr ng-repeat="rec in $ctrl.betData track by $index ">
+            <td ng-repeat="arrEnt in rec track by $index">{{arrEnt}}</td>
+        </tr>
+    </tbody>
+</table>
