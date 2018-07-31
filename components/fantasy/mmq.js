@@ -34,13 +34,10 @@ function keepersCtrl(DTOptionsBuilder, DTColumnBuilder, $scope, $http, footballd
         DTColumnBuilder.newColumn('Translated Name').withTitle('Player'),
         DTColumnBuilder.newColumn('Last Year Cost').withTitle('Last Year Cost'),
         DTColumnBuilder.newColumn('ADV').withTitle('ESPN ADV'),
-        DTColumnBuilder.newColumn('2016 Keeper Cost').withTitle('2017 Cost')
+        DTColumnBuilder.newColumn('2018 Keeper Cost').withTitle('2018 Cost')
 
     ];
 
-    /*$http.get('data/2017Keepers.JSON').then(function (response) {
-        vm.persons = response.data.data;
-    });*/
 }
 
 

@@ -2,6 +2,41 @@
 
 <h4>MLB Prop Bets</h4>
 
+<table class="table-striped table-bordered">
+    <thead>
+        <tr>
+            <th>Bet Number</th>
+            <th>Year</th>
+            <th>Bet Description</th>
+            <th>Bet Status</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr ng-repeat="rec in $ctrl.betSummary track by $index ">
+            <td>{{rec.betNumber}}</td>
+            <td>{{rec.betYear}}</td>
+            <td>{{rec.betDescription}}</td>
+            <td>
+                <table class="table-bordered">
+                    <!--<thead>
+                        <tr>
+                            <th>Bettor</th>
+                            <th>Current</th>
+                            <th>Projected</th>
+                        </tr>
+                    </thead>-->
+                    <tbody>
+                        <tr ng-repeat="side in rec.betSides track by $index">
+                            <td>{{side.bettor}}</td>
+                            <td>{{side.curVal | numbersWithoutTrailingZero : 3}}</td>
+                            <td></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </td>
+        </tr>
+    </tbody>
+</table>
 
 
     <!--<ul class="list-group">
@@ -20,10 +55,10 @@
 
 </div>
 
-<table border="1">
+<!--<table border="1">
     <tbody>
         <tr ng-repeat="rec in $ctrl.betData track by $index ">
             <td ng-repeat="arrEnt in rec track by $index">{{arrEnt}}</td>
         </tr>
     </tbody>
-</table>
+</table>-->

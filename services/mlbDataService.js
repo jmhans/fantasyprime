@@ -254,6 +254,9 @@ actuarialGamesModule.service('mlbDataService', function ($http, $q) {
                 return resp.data;
             })
 
+        },
+        getAllPBPForTeams: function (teamIds) {
+
         }
     };
 

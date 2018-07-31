@@ -54,40 +54,87 @@
             })
         },
         getBetDataPromise: function () {
-            return service.getBetData().then(function (resp) {
+            return service.getStoredBetData().then(function (resp) {
                 var outputBetData = resp
                 minDateCol = outputBetData[0].indexOf("minGameTime");
                 milDateCol = outputBetData[0].indexOf("milGameTime");
-                minMaxDate = outputBetData.reduce(function (maxDate, curArrItem) { return Math.max(new Date(curVal[minDateCol]), curTotal) }, new Date('03/29/2018'));
-                milMaxDate = outputBetData.reduce(function (maxDate, curArrItem) { return Math.max(new Date(curVal[milDateCol]), curTotal) }, new Date('03/29/2018'));
+                minMaxDate = outputBetData.slice(1).reduce(function (maxDate, curArrItem) { return Math.max(new Date(curArrItem[minDateCol] || maxDate), maxDate) }, new Date('03/29/2018'));
+                milMaxDate = outputBetData.slice(1).reduce(function (maxDate, curArrItem) { return Math.max(new Date(curArrItem[milDateCol] || maxDate), maxDate) }, new Date('03/29/2018'));
                 s = Math.min(minMaxDate, milMaxDate);
                 tms = [142, 158];
+                
 
-                return mlbDataService.getAllBoxscoresForDates(s, new Date(), tms).then(function (resp) {
+                return mlbDataService.getAllBoxscoresForDates(new Date(s), new Date(), tms).then(function (resp) {
+                    function updateKOData(origOutput) {
+                        minInc = 4; milInc = -4;
+                        curMin = minInc; curMil = milInc;
+                        for (i = 1; i < origOutput.length; i++) {
+                            if (origOutput[i][16] && origOutput[i][17]) {
+                                origOutput[i][1] = origOutput[i][16] - origOutput[i][17];
+                                origOutput[i][2] = curMin; origOutput[i][3] = curMil;
+                                if (origOutput[i][1] >= curMin) {
+                                    curMin += minInc; curMil = curMin + milInc;
+                                };
+                                if (origOutput[i][1] <= curMil) {
+                                    curMin = curMil + minInc; curMil += milInc;
+                                }
+
+                            }
+                        };
+                        return origOutput
+                    }
+
                     var teams = resp;
                     teams.forEach(function (tm) {
                         tm.games.sort(function (a, b) { return (new Date(a.gameDate) - new Date(b.gameDate)); });
                     })
 
+                    function getColNum(titleString) { return outputBetData[0].indexOf(titleString);}
+
+
+                    priorMinGames = outputBetData.slice(1).filter(function (curItem) { return curItem[getColNum("minGamePk")] }).length;
+                    priorMilGames = outputBetData.slice(1).filter(function (curItem) { return curItem[getColNum("milGamePk")] }).length;;
+                    maxMinGames = teams[0].games.length + priorMinGames;
+                    maxMilGames = teams[1].games.length + priorMilGames;
+
                     for (i = 0; i < teams.length; i++) {
                         tm = teams[i];
-                        tmOffset = tm.name == ("Minnesota Twins" ? 0 : (tm.name == "Milwaukee Brewers" ? 1 : 0));
-                        tmKOInc = tm.name == ("Minnesota Twins" ? 4 : (tm.name == "Milwaukee Brewers" ? -4 : 0));
+                        tmOffset = (tm.name == "Minnesota Twins") ? 0 : (tm.name == "Milwaukee Brewers") ? 1 : 0;
+                        tmKOInc = (tm.name == "Minnesota Twins") ? { tmKO: 4, oppKO: -4 } : (tm.name == "Milwaukee Brewers") ? { tmKO: -4, oppKO: 4 } : { tmKO: 0, oppKO: 0 };
+                        tmPriorGames = outputBetData.slice(1).filter(function (curItem) { return curItem[getColNum("minWins") + tmOffset] }).length;
+                        oppPriorGames = outputBetData.slice(1).filter(function (curItem) { return curItem[getColNum("minWins") + 1 - tmOffset] }).length;
 
                         tm.games.forEach(function (gm) {
+
                             gmNum = gm.boxscore.team.record.gamesPlayed
-                            outputBetData[gmNum][0] = teams[1].games[gmNum].boxscore.team.record.wins - teams[1].games[gmNum].boxscore.team.record.wins; // winDiff -- needs to be defined
-                            outputBetData[gmNum][1 + tmOffset] = 4; // minLine -- needs to be defined 
-                            outputBetData[gmNum][3 + tmOffset] = win(gm.boxscore); // minResult
-                            outputBetData[gmNum][5 + tmOffset] = battingAvg(gm.boxscore); // minAvg
-                            outputBetData[gmNum][7 + tmOffset] = Pctile(outputBetData.slice(1, gmNum).map(function (arrRow) { return arrRow[5 + tmOffset]; }), 95); // min95Avg 
-                            outputBetData[gmNum][9 + tmOffset] = inningsBatted(gm.boxscore); // minInnBat
-                            outputBetData[gmNum][11 + tmOffset] = gameTimes(gm.boxscore); // minGameTime
-                            outputBetData[gmNum][13 + tmOffset] = gameNums(gm.boxscore); // minGamePk
+                            // outputBetData[gmNum][0] = teams[0].games[gmNum - priorMinGames].boxscore.team.record.wins - teams[1].games[gmNum - priorMilGames].boxscore.team.record.wins; // winDiff -- needs to be error-proofed
+                            if (!outputBetData[gmNum]) {
+                                newRow = [];
+                                for (col = 1; col < outputBetData[0].length; col++) {
+                                    newRow[col] = null;
+                                }
+                                newRow[0] = gmNum;
+                                outputBetData[gmNum] = newRow;
+                            };
+                            outputBetData[gmNum][getColNum("minResult") + tmOffset] = win(gm); // minResult
+                            outputBetData[gmNum][getColNum("minAvg") + tmOffset] = battingAvg(gm); // minAvg
+                            //outputBetData[gmNum][getColNum("min95Avg") + tmOffset] = 
+                            outputBetData[gmNum][getColNum("minInnBat") + tmOffset] = inningsBatted(gm);
+                            outputBetData[gmNum][getColNum("minGameTime") + tmOffset] = gameTimes(gm); // minGameTime
+                            outputBetData[gmNum][getColNum("minGamePk") + tmOffset] = gameNums(gm); // minGamePk
+                            outputBetData[gmNum][getColNum("minWins") + tmOffset] = gm.boxscore.team.record.wins;
+                            
+                        });
 
-                        })
-                    }
+                        // Loop through and populate agg functions now that all raw stat values are included.  
+                        for (gmLoopCtr = Math.min(priorMinGames, priorMilGames) ; gmLoopCtr < gmNum; gmLoopCtr++) {
+                            outputBetData[gmLoopCtr][getColNum("min95Avg") + tmOffset] = Pctile(outputBetData.filter(function (itm) { return (itm[0] <= gmLoopCtr); }).map(function (arrRow) { return arrRow[getColNum("minAvg") + tmOffset]; }), 95); // min95Avg
+                            // outputBetData[gmLoopCtr][getColNum("minInnBat") + tmOffset] += outputBetData[gmLoopCtr - 1][getColNum("minInnBat") + tmOffset]; // minInnBat -- needs to be running sum
+                            outputBetData[gmLoopCtr][getColNum("minInnBatCumulative") + tmOffset] = outputBetData.filter(function (itm) { return (itm[0] <= gmLoopCtr); }).map(function (arrRow) { return arrRow[getColNum("minInnBat") + tmOffset]; }).reduce(function (a, b) { return (a + b); });
+                        };
+                    };
 
+                    return updateKOData(outputBetData);
                 })
 
             });
@@ -260,6 +307,17 @@ function gameNums(bs) {
 
 function Pctile(arr, pct) {
     var len = arr.length;
-    var pctile = Math.floor(len * .95) - 1;
-    return arr[pctile];
+    arr.sort();
+    var lower = Math.floor((len-1) * pct / 100);
+    var upper = Math.ceil((len-1) * pct / 100);
+
+    if (lower != upper) {
+        var interPct = (pct / 100 * (len - 1) - Math.floor(pct / 100 * (len - 1))) / (Math.ceil(pct / 100 * (len - 1)) - Math.floor(pct / 100 * (len - 1)));
+    } else {
+        var interPct = 1;
+    }
+
+    
+
+    return arr[upper] * interPct + arr[lower] * (1 - interPct);
 }

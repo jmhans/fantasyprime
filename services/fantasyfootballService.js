@@ -19,7 +19,7 @@ footballDexModule.service('footballdexService', function ($http) {
 
         },
         getMMQKeepers: function () {
-            return $http.get('data/2017Keepers.JSON').then(function (response) {
+            return $http.get('data/2018Keepers.JSON').then(function (response) {
                 players = response.data.data;
                 return players;
             });

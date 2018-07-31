@@ -1,5 +1,41 @@
 [
   {
+    "betNumber": 1,
+    "betYear": 2018,
+    "betDescription": "Win_Line",
+    "betSides": [
+      {
+        "seriesName": "minWins",
+        "bettor": "Justin",
+        "adjustment":  0.5
+      },
+      {
+        "seriesName": "milWins",
+        "bettor": "Andy",
+        "adjustment":  0
+      }
+    ],
+    "yAxisLabel": "Win Differential",
+    "yAxisMin": 0,
+    "xSeries": {
+      "seriesNum": 0,
+      "seriesDescription": "Game Number"
+    },
+    "chartSeries": [
+      {
+        "seriesType": "line",
+        "seriesDescription": "Min Wins",
+        "seriesColor": "#FF0000",
+        "seriesLookup": "minWins"
+      },
+      {
+        "seriesType": "line",
+        "seriesDescription": "Mil Wins",
+        "seriesColor": "#3366FF",
+        "seriesLookup": "milWins"
+      }
+    ]
+  },{
     "betNumber": 2,
     "betYear": 2018,
     "betDescription": "Knockout",
@@ -11,35 +47,30 @@
     },
     "chartSeries": [
       {
-        "seriesNum": 0,
         "seriesType": "line",
         "seriesDescription": "Win Diff",
         "seriesColor": "black",
         "seriesLookup": "winDiff"
       },
       {
-        "seriesNum": 0,
         "seriesType": "line",
         "seriesDescription": "Min KO",
         "seriesColor": "#FF0000",
         "seriesLookup": "minline"
       },
       {
-        "seriesNum": 0,
         "seriesType": "line",
         "seriesDescription": "Mil KO",
         "seriesColor": "#3366FF",
         "seriesLookup": "milline"
       },
       {
-        "seriesNum": 0,
         "seriesType": "bars",
         "seriesDescription": "Min Result",
         "seriesColor": "#FF0000",
         "seriesLookup": "minResult"
       },
       {
-        "seriesNum": 0,
         "seriesType": "bars",
         "seriesDescription": "Mil Result",
         "seriesColor": "#3366FF",
@@ -51,26 +82,35 @@
     "betNumber": 4,
     "betYear": 2018,
     "betDescription": "Innings_Batted",
+    "betSides": [
+      {
+        "seriesName": "minInnBatCumulative",
+        "bettor": "Justin",
+        "adjustment":  0
+      },
+      {
+        "seriesName": "milInnBatCumulative",
+        "bettor": "Andy",
+        "adjustment":  0
+      }
+    ],
     "yAxisLabel": "Innings",
     "yAxisMin": 0,
     "xSeries": {
-        "seriesNum": 0,
-        "seriesDescription": "Game Number"
-      },
+      "seriesDescription": "Game Number"
+    },
     "chartSeries": [
       {
-        "seriesNum": 0,
         "seriesType": "line",
         "seriesDescription": "Min Innings",
-        "seriesColor": "#FF0000", 
-        "seriesLookup":  "minInnBat"
+        "seriesColor": "#FF0000",
+        "seriesLookup": "minInnBatCumulative"
       },
       {
-        "seriesNum": 0,
         "seriesType": "line",
         "seriesDescription": "Mil Innings",
         "seriesColor": "#3366FF",
-        "seriesLookup": "milInnBat"
+        "seriesLookup": "milInnBatCumulative"
       }
 
     ]
@@ -81,34 +121,42 @@
     "betDescription": "Batting_Avg",
     "yAxisLabel": "Average",
     "yAxisMin": 0,
-    "xSeries": {
-        "seriesNum": 0,
-        "seriesDescription": "Game Number"
+    "betSides": [
+      {
+        "seriesName": "min95Avg",
+        "bettor": "Justin",
+        "adjustment":  0
       },
+      {
+        "seriesName": "mil95Avg",
+        "bettor": "Andy",
+        "adjustment":  0
+      }
+    ],
+    "xSeries": {
+      "seriesNum": 0,
+      "seriesDescription": "Game Number"
+    },
     "chartSeries": [
       {
-        "seriesNum": 0,
         "seriesType": "line",
         "seriesDescription": "Min Avg",
-        "seriesColor": "#FF9999", 
-        "seriesLookup":  "minAvg"
+        "seriesColor": "#FF9999",
+        "seriesLookup": "minAvg"
       },
       {
-        "seriesNum": 0,
         "seriesType": "line",
         "seriesDescription": "Mil Avg",
         "seriesColor": "#C2D1FF",
         "seriesLookup": "milAvg"
       },
       {
-        "seriesNum": 0,
         "seriesType": "line",
         "seriesDescription": "Min 95 Avg",
-        "seriesColor": "#FF0000", 
-        "seriesLookup":  "min95Avg"
+        "seriesColor": "#FF0000",
+        "seriesLookup": "min95Avg"
       },
       {
-        "seriesNum": 0,
         "seriesType": "line",
         "seriesDescription": "Mil 95 Avg",
         "seriesColor": "#3366FF",

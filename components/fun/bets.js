@@ -20,14 +20,34 @@ betsModule.config(function ($stateProvider) {
                     return resp;
                 });
             },
-            betSummary: function (propBetService) {
-                return propBetService.getBetList();
-            },
+            //betSummary: function (propBetService) {
+            //    return propBetService.getBetList();
+            //},
             betData: function (propBetService) {
-                return propBetService.getBetData();
+                return propBetService.getBetDataPromise();
             },
+            //betDataPromise: function (propBetService) {
+            //    return propBetService.getBetDataPromise();
+            //},
             betGraphConfig: function (propBetService) {
                 return propBetService.getGraphConfig();
+            },
+            betSummary: function (betGraphConfig, betData) {
+                var betSummary = []
+                for (i = 0; i < betGraphConfig.length; i++) {
+                    if (betGraphConfig[i].betSides) {
+                        betGraphConfig[i].betSides.forEach(function (side) {
+                            side.curVal = getValFromArrayColumn(betData, side.seriesName) + side.adjustment
+                        });
+                    };
+                    betSummary.push({
+                        "betNumber": betGraphConfig[i].betNumber,
+                        "betYear": betGraphConfig[i].betYear,
+                        "betDescription": betGraphConfig[i].betDescription,
+                        "betSides" : betGraphConfig[i].betSides
+                    });
+                }
+                return betSummary;
             }
 
         }
@@ -100,3 +120,28 @@ function drawGoogleChart(dataVu, options) {
         data: dataVu
     };
 }
+
+
+function getValFromArrayColumn(data,columnName, rowNum) {
+    var colNum = data[0].indexOf(columnName);
+    var len = data.length;
+    var retVal = '';
+    if (rowNum) {
+        return data[rowNum][colNum];
+    } else {
+        rowNum = len -1;
+        while (!data[rowNum][colNum]){
+            rowNum--;
+        };
+        return data[rowNum][colNum];
+    }
+}
+
+betsModule.filter('numbersWithoutTrailingZero', function ($filter) {
+    return function (input, decimalPlaces) {
+        if (input % 1) {
+            return $filter('number')(input, decimalPlaces);
+        }
+        return $filter('number')(input, 0);
+    };
+});
