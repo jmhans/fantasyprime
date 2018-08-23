@@ -45,7 +45,7 @@
     </script>
 </head>
 
-<body ng-app="actuarial.games">
+<body ng-app="actuarial.games" ng-controller="ApplicationController">
     <nav class="navbar navbar-default navbar-inverse navbar-toggleable-md">
         <!--<button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
@@ -69,18 +69,11 @@
 
                 </li>
             </ul>
-            <!--<ul class="nav navbar-nav navbar-right">
-                <li class="dropdown">
-                    <a class="dropdown-toggle" data-toggle="dropdown">
-                        {{selectedTeam.name}}<span class="caret"></span>
-                    </a>
-                    <ul class="dropdown-menu">
-                        <li ng-repeat="tm in teams"><a ui-sref="teams.team.roster({teamId : {{tm.id}}})">{{tm.name}}</a></li>
-                    </ul>
-                </li>
-
-            </ul-->
-            >
+            <ul class="nav navbar-nav navbar-right">
+                <li><a ng-if="!isAuthorized()" ui-sref="login">Sign In</a></li>
+                <li><a ng-if="isAuthorized()">{{currentUser.username}}</a></li>
+                <li><a ng-click="signOut()">Sign Out</a></li>
+            </ul>
         </div>
 
     </nav>

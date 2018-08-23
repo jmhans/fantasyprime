@@ -52,6 +52,9 @@ module.exports = function (grunt) {
                         'node_modules/moment/min/moment.min.js',
                         'node_modules/moment-timezone/builds/moment-timezone-with-data.min.js',
                         'node_modules/lodash/lodash.js',
+                        'node_modules/amazon-cognito-identity-js/dist/aws-cognito-sdk.min.js',
+                        'node_modules/amazon-cognito-identity-js/dist/amazon-cognito-identity.min.js',
+                        'node_modules/aws-sdk/dist/aws-sdk.min.js',
                         'main.js',                        
                         'components/**/*.js',
                         'services/*.js'
