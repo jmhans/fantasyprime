@@ -1,4 +1,4 @@
-﻿actuarialGamesModule.service('cognitoService', function () {
+actuarialGamesModule.service('cognitoService', function () {
 
     // Region
     AWS.config.region = 'us-east-1'; // Region
@@ -95,7 +95,7 @@
                 return session.isValid();
                 //console.log('session validity: ' + session.isValid());
             });
-        };
+        }
         return;
         
     };
