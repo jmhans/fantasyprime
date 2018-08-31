@@ -1,4 +1,4 @@
-﻿
+
 'use strict';
 
 var loginModule = angular.module('login', [])
@@ -18,8 +18,7 @@ loginModule.controller('LoginCtrl', function ($scope, $state, $rootScope, $locat
         cognitoUser.authenticateUser(authenticationDetails, {
             onSuccess: function (result) {
                 var accessToken = result.getAccessToken().getJwtToken();
-                $scope.accessToken = accessToken;
-                $rootScope.$broadcast(AUTH_EVENTS.loginSuccess, userPool.getCurrentUser());
+                $rootScope.$broadcast(AUTH_EVENTS.loginSuccess, accessToken);
             },
             onFailure: function (err) {
                 $scope.errorMessage = err.message;

@@ -1,4 +1,4 @@
-﻿'use strict';
+'use strict';
 
 var AWScognito = angular.module('aws-cognito', ['login', 'signup', 'activate']);
 
@@ -76,7 +76,7 @@ activateModule.controller('ActivateCtrl', function ($scope, $rootScope, $locatio
 
 'use strict';
 
-activateModule.controller('ContentsCtrl', function ($scope, $rootScope, $location, cognitoService) {
+activateModule.controller('ContentsCtrl', function ($scope, $rootScope, $state, $http, $location, cognitoService) {
 
     //var userPool = cognitoService.getUserPool();
 
@@ -94,37 +94,42 @@ activateModule.controller('ContentsCtrl', function ($scope, $rootScope, $locatio
 
 
     //console.log(currentUser);
-
-    var params = {
-        ExpressionAttributeValues: {
-            ":v1": {
-                S: "No One You Know"
-            }
-        },
-        KeyConditionExpression: "Artist = :v1",
-        ProjectionExpression: "SongTitle",
-        TableName: "Music"
-    };
-    dynamodb.query(params, function (err, data) {
-        if (err) console.log(err, err.stack); // an error occurred
-        else console.log(data);           // successful response
-        /*
-        data = {
-         ConsumedCapacity: {
-         }, 
-         Count: 2, 
-         Items: [
-            {
-           "SongTitle": {
-             S: "Call Me Today"
-            }
-          }
-         ], 
-         ScannedCount: 2
-        }
-        */
-    });
-
+  
+var authToken;
+  cognitoService.authToken.then(function setAuthToken(token) {
+    
+    if (token) {
+      authToken = token;
+    
+      $http({
+  method: 'POST',
+  url: "https://s6hvfgl42c.execute-api.us-east-1.amazonaws.com/prod/teststats", 
+  headers: {
+    Authorization: authToken
+  },
+  data: JSON.stringify({
+                PickupLocation: {
+                    Latitude: 47.61226823896646,
+                    Longitude: -122.30073028564247
+                }
+  }),
+            contentType: 'application/json'
+  
+}).then(function successCallback(response) {
+              console.log("AWS DB API call worked:" + response);
+            }, function ajaxError(jqXHR, textStatus, errorThrown) {
+                console.error('Error requesting ride: ', textStatus, ', Details: ', errorThrown);
+                console.error('Response: ', jqXHR.responseText);
+                alert('An error occured when requesting your unicorn:\n' + jqXHR.responseText);
+            });
+      
+      
+      
+    }
+    else {
+      $state.go('login');
+    }
+  });
 
 
 

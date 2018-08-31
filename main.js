@@ -1,4 +1,4 @@
-﻿
+
 var actuarialGamesModule = angular.module('actuarial.games',
     [
         'ui.router',
@@ -110,7 +110,8 @@ actuarialGamesModule.controller('ApplicationController', function ($scope, $root
 
     $scope.$on(AUTH_EVENTS.loginSuccess, function (event, data) {
         console.log("Successfully logged in");
-        $scope.setCurrentUser(data);
+        $scope.setCurrentUser(cognitoService.getCurrentUser());  
+        $scope.accessToken = data;
         $state.go('contents');
         $scope.$apply();
     });

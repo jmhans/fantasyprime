@@ -1,4 +1,4 @@
-﻿
+
 var ablModule = angular.module('abl', [])
 
 ablModule.config(function ($stateProvider) {

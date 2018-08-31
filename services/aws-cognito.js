@@ -99,6 +99,23 @@ actuarialGamesModule.service('cognitoService', function () {
         return;
         
     };
+    authService.authToken = new Promise(function fetchCurrentAuthToken(resolve, reject) {
+        var cognitoUser = authService.getCurrentUser();
+
+        if (cognitoUser) {
+            cognitoUser.getSession(function sessionCallback(err, session) {
+                if (err) {
+                    reject(err);
+                } else if (!session.isValid()) {
+                    resolve(null);
+                } else {
+                    resolve(session.getIdToken().getJwtToken());
+                }
+            });
+        } else {
+            resolve(null);
+        }
+    });
     
     authService.isAuthorized = function () {
         //if (!angular.isArray(authorizedRoles)) {
