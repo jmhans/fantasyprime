@@ -1,8 +1,15 @@
-﻿fantasyFantasyModule.service('TeamsService', function ($http) {
+﻿const BASE_URL = "https://s6hvfgl42c.execute-api.us-east-1.amazonaws.com/prod/fantasyprime";
+
+fantasyFantasyModule.service('AWSFantasyService', function ($http, $q, ScoresService) {
     var service = {
         getAllTeams: function () {
-            return $http.get('data/ffSetup.json', { cache: false }).then(function (resp) {
-                return resp.data.teams;
+            postData = {
+                tableName: "FantasyPrime_Owners", 
+                requestType: "QUERY", 
+                record: {}
+            };
+            return $http.post(BASE_URL, postData).then(function (resp) {
+                return resp.data;
             });
         },
         getFullSchedule: function () {
@@ -28,8 +35,13 @@
             });
         },
         getPrimeTeams: function () {
-            return $http.get('http://actuarialgames.x10host.com/includes/api.php/prime_owners?transform=1').then(function (response) {
-                players = response.data.prime_owners;
+            postData = {
+                tableName: "FantasyPrime_Owners", 
+                requestType: "QUERY", 
+                record: {}
+            };
+            return $http.post(BASE_URL, postData).then(function (response) {
+                players = response.data;
                 return players;
             });
         },
@@ -37,65 +49,43 @@
             return service.getPrimeTeams().then(function (resp) {
                 return resp.filter(function (PT) { return (PT.TEAM_NAME == ownerName); })
             });
-        }
+        }, 
 
-    }
-
-    return service;
-})
-
-fantasyFantasyModule.service('FFDBService', [ '$http', 'TeamsService', '$q', 'ScoresService', function ( $http, TeamsService, $q, ScoresService) {
-    this.activeTeam = {};
-
-    var service = {
 
         addTeam: function (ownerName, teamName, season) {
-            var tmObj = {
-                TEAM_OWNER: ownerName,
-                TEAM_NAME: teamName,
-                SEASON: season
-            };
 
-            return $http.post('http://actuarialgames.x10host.com/includes/api.php/prime_owners', tmObj).then(function (resp) {
-                return resp.data;
-            });
+            var existingData = getPrimeTeams();
+            var curIDMax = existingData.reduce(function(curMax, tm) {return (Math.max(curMax, parseInt(tm.ownerID)))});
+            var record = {
+                    ownerID: (curIDMax + 1).toString(), 
+                    TEAM_OWNER: ownerName,
+                    TEAM_NAME: teamName, 
+                    SEASON: season
+                };
+            return service.addItemToTable("FantasyPrime_Owners", record);
 
-
         },
-        getTeams: function () {
-            return $http.get('http://actuarialgames.x10host.com/includes/api.php/prime_owners?transform=1').then(function (response) {
-                players = response.data.prime_owners;
-                return players;
-            });
-        },
-        deleteTeam: function (teamID) {
-            return $http.delete('http://actuarialgames.x10host.com/includes/api.php/prime_owners/' + teamID).then(function (response) {
-                return response.data;
-            });
-        },
-        updateItem: function (item) {
-            return $http.put('http://actuarialgames.x10host.com/includes/api.php/prime_owners/' + item.id, item).then(function (response) {
-                return response.data;
-            })
-        },
-        updateTable: function (tbl, item) {
-            return $http.put('http://actuarialgames.x10host.com/includes/api.php/' + tbl + '/' + item.recno).then(function (response) {
-                return response.data;
-            })
-        },
-        getTeam: function (teamID) {
-            return service.getTeams().then(function (response) {
-                return response.find(function (tm) { return (tm.id == teamID) });
-            });
+        updateOwner: function (item) {
+            return addItemToTable("FantasyPrime_Owners", item)
         },
         addItemToTable: function (tbl, item) {
-            return $http.post('http://actuarialgames.x10host.com/includes/api.php/' + tbl, item).then(function (resp) {
+            var postData = {
+                tableName: tbl,
+                requestType: "ADD",
+                record: item
+            }
+            return $http.post(BASE_URL, postData).then(function (resp) {
                 return resp.data;
             });
         },
         getRosterRecs: function () {
-            return $http.get('http://actuarialgames.x10host.com/includes/api.php/prime_rosters?transform=1').then(function (resp) {
-                return resp.data.prime_rosters;
+            postData = {
+                tableName: "FantasyPrime_RosterRecords",
+                requestType: "QUERY",
+                record: {}
+            }
+            return $http.post(BASE_URL, postData).then(function (resp) {
+                return resp.data;
             });
         },
         getActiveRosters: function () {
@@ -140,37 +130,18 @@ fantasyFantasyModule.service('FFDBService', [ '$http', 'TeamsService', '$q', 'Sc
                     return activeRecords;
                 });
 
-
-                //return service.getTeams().then(function (PTs) {
-                //    activeRecords.forEach(function (activeRosterRec) {
-                //        activeRosterRec.OWNER = PTs.find(function (PT) { return (PT.TEAM_NAME == activeRosterRec.prime_owner); });
-                //    });
-
-                //    return activeRecords;
-                //});
-                    
-
             });
         },
         getWeekSetup: function () {
             return $http.get('data/weekDetails.json').then(function (resp) {
-                //var wkDetails = resp.data.weeks.find(function (lookupWk, idx, arr) {
-                //    var d = new Date(lookupWk['Scores Final']);
-                //    var curTime = new Date();
-                //    var last_d = (idx > 0 ? new Date(arr[idx-1]['Scores Final']) : new Date('1970-01-01'));
-                //    return (curTime >= last_d && curTime < d);
-                //});
-
-                //$scope.goToWeek(wkDetails.WeekId);
                 return resp.data.weeks;
             });
         },
-        
         getRosterRecordsForWeek: function (wk, ssn) {
             return $q.all([service.getRosterRecs(), service.getWeekSetup()]).then(function (respArr) {
                 var rosterRecords = respArr[0];
                 var weekDetails = respArr[1];
-                rosterLockTime = new Date(weekDetails.find(function (lookupWk) {return (lookupWk.WeekId == wk);})['Roster Lock Time']);
+                rosterLockTime = new Date(weekDetails.find(function (lookupWk) { return (lookupWk.WeekId == wk); })['Roster Lock Time']);
                 var filteredRosterRecords = rosterRecords.filter(function (rr) {
                     return (new Date(rr.start_date) <= rosterLockTime);
                 });
@@ -185,12 +156,12 @@ fantasyFantasyModule.service('FFDBService', [ '$http', 'TeamsService', '$q', 'Sc
 
                         return true;
                     }
-                    
+
 
                 });
 
                 return filteredRosterRecords;
-                
+
             });
         },
         getOwnerRoster: function (owner) {
@@ -208,11 +179,11 @@ fantasyFantasyModule.service('FFDBService', [ '$http', 'TeamsService', '$q', 'Sc
                     });
                     return filteredRosterRecords;
                 })
-                
+
             });
         },
         getAllTeamInfo: function () {
-            return $http.get('http://actuarialgames.x10host.com/includes/api.php/prime_teams?transform=1').then(function (teams) {
+            var teams = service.getTeams();
                 return ScoresService.getScoreRecords().then(function (scores) {
                     teams.data.prime_teams.forEach(function (tm) {
                         tm.scores = scores.filter(function (score) {
@@ -228,47 +199,47 @@ fantasyFantasyModule.service('FFDBService', [ '$http', 'TeamsService', '$q', 'Sc
                     return teams.data.prime_teams;
                 });
 
-                
-            });
         },
-        getTeamInfo: function(teamId) {
-            return service.getAllTeamInfo().then(function (tms) {
-                return tms.find(function (tm) { return ((tm.LEAGUE_ID + '_' +  tm.TEAM_ID) == teamId); })
-            });
-        },
-        getRosterRecord: function(teamId) {
+        getRosterRecord: function (teamId) {
             return service.getActiveRosters().then(function (rrs) {
-                return rrs.find(function (rr) { return (rr.team_id == teamId);})
+                return rrs.find(function (rr) { return (rr.team_id == teamId); })
             })
         },
         updateRosterRecord: function (updateRecord) {
-            expireRecord = {
-                recno: updateRecord.recno,
-                end_date: new Date()
+            var expireRecord = getRosterRecord(updateRecord.team_id);
+            expireRecord.end_date = new Date();
+            var expirePost = {
+                tableName: "FantasyPrime_RosterRecords", 
+                requestType: "ADD", 
+                record: expireRecord
             }
-            newRecord = {
-                team_id: updateRecord.team_id,
-                start_date: new Date(),
-                position: updateRecord.position,
-                prime_owner: updateRecord.prime_owner,
-
-            }
-            return $http.put('http://actuarialgames.x10host.com/includes/api.php/prime_rosters/' + expireRecord.recno, expireRecord).then(function (response) {
-                return $http.post('http://actuarialgames.x10host.com/includes/api.php/prime_rosters', newRecord).then(function (response) {
+            var createPost = {
+                tableName: "FantasyPrime_RosterRecords", 
+                requestType: "ADD", 
+                record: { 
+                    SEASON: expireRecord.end_date.getFullYear(),
+                    TIMESTAMP: expireRecord.end_date, 
+                    team_id: updateRecord.team_id,
+                    start_date: new Date(),
+                    position: updateRecord.position,
+                    prime_owner: updateRecord.prime_owner,
+                }
+            };
+            return $http.post(BASE_URL, expirePost).then(function () {
+                return $http.post(BASE_URL, createPost).then(function (response) {
                     return response.data;
                 });
-
             });
         },
         getScoresForWeek: function (week, ssn) {
             return ScoresService.getScoreRecordsForWeek(week, ssn).then(function (resp) {
                 var scoreRecs = resp;
                 return service.getActiveRosters().then(function (rosterRecs) {
-//                    outputArr = [];
+                    //                    outputArr = [];
                     scoreRecs.forEach(function (scoreRec) {
                         // scoreRec.HOME_OWNER = rosterRecs.find(function (rosterRec) { return (rosterRec.team_id == scoreRec.TEAM_ID); }).OWNER;
                         // scoreRec.AWAY_OWNER = rosterRecs.find(function (rosterRec) { return (rosterRec.team_id == scoreRec.TEAM_ID); }).OWNER;
-                        scoreRec.PRIME_ROSTER_ENTRY = rosterRecs.find(function (rosterRec) {return (rosterRec.team_id == scoreRec.TEAM_ID)});
+                        scoreRec.PRIME_ROSTER_ENTRY = rosterRecs.find(function (rosterRec) { return (rosterRec.team_id == scoreRec.TEAM_ID) });
                         scoreRec.RESULT = (scoreRec.POINTS_FOR > scoreRec.POINTS_AGAINST ? 'W' : (scoreRec.POINTS_FOR < scoreRec.POINTS_AGAINST ? 'L' : 'T'));
 
                     });
@@ -294,24 +265,17 @@ fantasyFantasyModule.service('FFDBService', [ '$http', 'TeamsService', '$q', 'Sc
                 REQUESTER_ID: dropTm.prime_owner,
                 ADD_TEAM_ID: addTm.team_id,
                 DROP_TEAM_ID: dropTm.team_id,
-                REQUEST_TIME: new Date()
+                TIMESTAMP: new Date()
             };
 
-            return service.addItemToTable('prime_waivers', newRec).then(function (resp) {
-                return resp; 
+            return service.addItemToTable('FantasyPrime_Waivers', newRec).then(function (resp) {
+                return resp;
             });
         },
-        processWaiverClaims: function () {
-            return $http.get('http://actuarialgames.x10host.com/includes/api.php/prime_waivers?transform=1').then(function (waiverClaims) {
-                return 2;
-            })
-        },
         getScheduleAndResults: function () {
-
-
-            return $q.all([TeamsService.getFullSchedule(), ScoresService.getScoreRecords()]).then(function (respArr) {
+            return $q.all([service.getFullSchedule(), ScoresService.getScoreRecords()]).then(function (respArr) {
                 var sched = respArr[0];
-                var scores = respArr[1].filter(function (rec) {return rec.SEASON == 2017});
+                var scores = respArr[1].filter(function (rec) { return rec.SEASON == CURRENT_SEASON });
                 var rosterRecs = respArr[2];
 
                 function onlyUnique(value, index, self) {
@@ -322,7 +286,7 @@ fantasyFantasyModule.service('FFDBService', [ '$http', 'TeamsService', '$q', 'Sc
                 rosterLists = [];
 
                 weeks.forEach(function (wk) {
-                    rosterLists.push(service.getRosterRecordsForWeek(wk, 2017));
+                    rosterLists.push(service.getRosterRecordsForWeek(wk, CURRENT_SEASON));
                 });
 
                 return $q.all(rosterLists).then(function (respArr) {
@@ -333,7 +297,7 @@ fantasyFantasyModule.service('FFDBService', [ '$http', 'TeamsService', '$q', 'Sc
                     });
 
                     sched.forEach(function (gameRec) {
-                        var scoresForTeam = scores.filterWithCriteria({ PRIME_ROSTER_ENTRY: { prime_owner :  gameRec['Team Name'] }, SEASON: 2017, WEEK: gameRec.Week } );
+                        var scoresForTeam = scores.filterWithCriteria({ PRIME_ROSTER_ENTRY: { prime_owner: gameRec['Team Name'] }, SEASON: 2017, WEEK: gameRec.Week });
                         var scoresForOpp = scores.filterWithCriteria({ PRIME_ROSTER_ENTRY: { prime_owner: gameRec['Opp Name'] }, SEASON: 2017, WEEK: gameRec.Week });
 
                         gameRec['Team W'] = scoresForTeam.filterWithCriteria({ PRIME_ROSTER_ENTRY: { position: 'Starter' }, RESULT: 'W' }).length;
@@ -361,50 +325,45 @@ fantasyFantasyModule.service('FFDBService', [ '$http', 'TeamsService', '$q', 'Sc
                         if (current['Opp Name'] != 'BYE') {
                             result[current['Opp Name']] = result[current['Opp Name']] || [];
                             result[current['Opp Name']].push(current);
-                        }                        
+                        }
                         return result;
                     }, {});
                     var standings = [];
                     Object.keys(fullresults).forEach(function (tm) {
                         if (tm != 'BYE') {
                             standings.push(fullresults[tm].reduce(function (result, current) {
-                                var myStr = ( tm == current['Team Name'] ? 'Team' : 'Opp')
-                                var oppStr = ( tm == current['Team Name'] ? 'Opp' : 'Team')
+                                var myStr = (tm == current['Team Name'] ? 'Team' : 'Opp')
+                                var oppStr = (tm == current['Team Name'] ? 'Opp' : 'Team')
                                 var FF_POINTS = current[myStr + ' W'] + 0.5 * current[myStr + ' T'];
                                 var OPP_POINTS = current[oppStr + ' W'] + 0.5 * current[oppStr + ' T'];
                                 var FF_TEAM_POINTS = (myStr == 'Team' ? current['Pts (Starters)'] : current['Opp Pts (Starters)']);
                                 var OPP_TEAM_POINTS = (myStr == 'Team' ? current['Opp Pts (Starters)'] : current['Pts (Starters)']);
                                 var RESULT = (myStr == 'Team' ? current['Team Result'] : (current['Team Result'] == 'W' ? 'L' : (current['Team Result'] == 'L' ? 'W' : (current['Team Result'] == 'T' ? 'T' : ''))));
                                 result.W = (result.W || 0) + (RESULT == 'W' ? 1 : 0)
-                                result.L =( result.L || 0) + (RESULT == 'L' ? 1 : 0)
+                                result.L = (result.L || 0) + (RESULT == 'L' ? 1 : 0)
                                 result.T = (result.T || 0) + (RESULT == 'T' ? 1 : 0)
                                 result.FF_POINTS = (result.FF_POINTS || 0) + FF_POINTS
-                                result.OPP_FF_POINTS = (result.OPP_FF_POINTS || 0 ) + OPP_POINTS
-                                result.TEAM_POINTS = (result.TEAM_POINTS || 0 ) + FF_TEAM_POINTS
+                                result.OPP_FF_POINTS = (result.OPP_FF_POINTS || 0) + OPP_POINTS
+                                result.TEAM_POINTS = (result.TEAM_POINTS || 0) + FF_TEAM_POINTS
                                 result.OPP_TEAM_POINTS = (result.OPP_TEAM_POINTS || 0) + OPP_TEAM_POINTS
                                 return result;
-                            }, {TEAM_NAME: tm, GAME_RECORDS: fullresults[tm]}))
+                            }, { TEAM_NAME: tm, GAME_RECORDS: fullresults[tm] }))
                         }
                     })
 
                     return standings;
 
-
-
                 })
 
-                
+
             });
 
         }
 
-
-    };
+    }
 
     return service;
-}]);
-
-
+})
 
 determineResult = function (gameRec) {
     var gamePts = gameRec['Team W'] + 0.5 * gameRec['Team T'];
@@ -416,9 +375,4 @@ determineResult = function (gameRec) {
 
     if ((gamePts > 0) || (gameRec['Pts (Starters)'] > 0) || (gameRec['Pts (Bench)'] > 0)) return 'L';
     return '';
-}
-
-function FantasyFantasyMatchup(gameRec) {
-    // Constructor for FFMatchup - calculates result, status, etc. from a game record that contains a list of subgames. 
-
 }

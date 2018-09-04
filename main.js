@@ -1,4 +1,4 @@
-
+﻿
 var actuarialGamesModule = angular.module('actuarial.games',
     [
         'ui.router',
@@ -62,7 +62,6 @@ actuarialGamesModule.config(function ($stateProvider, $httpProvider) {
 
 // To account for plunker embeds timing out, preload the async data
 actuarialGamesModule.run(['$http', '$rootScope', '$state', '$stateParams', 'cognitoService', function ($http, $rootScope, $state, $stateParams, cognitoService) {
-    // $http.get('data/data.json', { cache: true });
 
     $rootScope.$state = $state;
     $rootScope.$stateParams = $stateParams;

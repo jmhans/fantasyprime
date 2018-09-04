@@ -1,0 +1,777 @@
+﻿{
+  "app": "fantasyprime",
+  "seasonStartDate": "2018-09-07T00:20:00Z",
+  "teams": [
+    {
+      "id": 1,
+      "name": "Justin"
+    },
+    {
+      "id": 2,
+      "name": "Andy"
+    },
+    {
+      "id": 3,
+      "name": "JoshR"
+    },
+    {
+      "id": 4,
+      "name": "Josh"
+    },
+    {
+      "id": 5,
+      "name": "Brendan"
+    },
+    {
+      "id": 6,
+      "name": "Adam"
+    },
+    {
+      "id": 7,
+      "name": "Kyle"
+    },
+    {
+      "id": 8,
+      "name": "Austin"
+    },
+    {
+      "id": 9,
+      "name": "Mikey"
+    },
+    {
+      "id": 10,
+      "name": "Arians"
+    }
+  ],
+  "games": [
+    {
+      "gameId": 1,
+      "Week": 1,
+      "Game": 1,
+      "Team": 1,
+      "Opp": 6,
+      "Team Name": "Andy",
+      "Opp Name": "Arians"
+    },
+    {
+      "gameId": 2,
+      "Week": 1,
+      "Game": 2,
+      "Team": 2,
+      "Opp": 7,
+      "Team Name": "Adam",
+      "Opp Name": "Justin"
+    },
+    {
+      "gameId": 3,
+      "Week": 1,
+      "Game": 3,
+      "Team": 3,
+      "Opp": 8,
+      "Team Name": "Mikey",
+      "Opp Name": "Kyle"
+    },
+    {
+      "gameId": 4,
+      "Week": 1,
+      "Game": 4,
+      "Team": 4,
+      "Opp": 9,
+      "Team Name": "Josh",
+      "Opp Name": "Josher"
+    },
+    {
+      "gameId": 5,
+      "Week": 1,
+      "Game": 5,
+      "Team": 5,
+      "Opp": 10,
+      "Team Name": "Brendan",
+      "Opp Name": "Austin"
+    },
+    {
+      "gameId": 6,
+      "Week": 2,
+      "Game": 1,
+      "Team": 1,
+      "Opp": 7,
+      "Team Name": "Andy",
+      "Opp Name": "Justin"
+    },
+    {
+      "gameId": 7,
+      "Week": 2,
+      "Game": 2,
+      "Team": 6,
+      "Opp": 8,
+      "Team Name": "Arians",
+      "Opp Name": "Kyle"
+    },
+    {
+      "gameId": 8,
+      "Week": 2,
+      "Game": 3,
+      "Team": 2,
+      "Opp": 9,
+      "Team Name": "Adam",
+      "Opp Name": "Josher"
+    },
+    {
+      "gameId": 9,
+      "Week": 2,
+      "Game": 4,
+      "Team": 3,
+      "Opp": 10,
+      "Team Name": "Mikey",
+      "Opp Name": "Austin"
+    },
+    {
+      "gameId": 10,
+      "Week": 2,
+      "Game": 5,
+      "Team": 4,
+      "Opp": 5,
+      "Team Name": "Josh",
+      "Opp Name": "Brendan"
+    },
+    {
+      "gameId": 11,
+      "Week": 3,
+      "Game": 1,
+      "Team": 1,
+      "Opp": 8,
+      "Team Name": "Andy",
+      "Opp Name": "Kyle"
+    },
+    {
+      "gameId": 12,
+      "Week": 3,
+      "Game": 2,
+      "Team": 7,
+      "Opp": 9,
+      "Team Name": "Justin",
+      "Opp Name": "Josher"
+    },
+    {
+      "gameId": 13,
+      "Week": 3,
+      "Game": 3,
+      "Team": 6,
+      "Opp": 10,
+      "Team Name": "Arians",
+      "Opp Name": "Austin"
+    },
+    {
+      "gameId": 14,
+      "Week": 3,
+      "Game": 4,
+      "Team": 2,
+      "Opp": 5,
+      "Team Name": "Adam",
+      "Opp Name": "Brendan"
+    },
+    {
+      "gameId": 15,
+      "Week": 3,
+      "Game": 5,
+      "Team": 3,
+      "Opp": 4,
+      "Team Name": "Mikey",
+      "Opp Name": "Josh"
+    },
+    {
+      "gameId": 16,
+      "Week": 4,
+      "Game": 1,
+      "Team": 1,
+      "Opp": 9,
+      "Team Name": "Andy",
+      "Opp Name": "Josher"
+    },
+    {
+      "gameId": 17,
+      "Week": 4,
+      "Game": 2,
+      "Team": 8,
+      "Opp": 10,
+      "Team Name": "Kyle",
+      "Opp Name": "Austin"
+    },
+    {
+      "gameId": 18,
+      "Week": 4,
+      "Game": 3,
+      "Team": 7,
+      "Opp": 5,
+      "Team Name": "Justin",
+      "Opp Name": "Brendan"
+    },
+    {
+      "gameId": 19,
+      "Week": 4,
+      "Game": 4,
+      "Team": 6,
+      "Opp": 4,
+      "Team Name": "Arians",
+      "Opp Name": "Josh"
+    },
+    {
+      "gameId": 20,
+      "Week": 4,
+      "Game": 5,
+      "Team": 2,
+      "Opp": 3,
+      "Team Name": "Adam",
+      "Opp Name": "Mikey"
+    },
+    {
+      "gameId": 21,
+      "Week": 5,
+      "Game": 1,
+      "Team": 1,
+      "Opp": 10,
+      "Team Name": "Andy",
+      "Opp Name": "Austin"
+    },
+    {
+      "gameId": 22,
+      "Week": 5,
+      "Game": 2,
+      "Team": 9,
+      "Opp": 5,
+      "Team Name": "Josher",
+      "Opp Name": "Brendan"
+    },
+    {
+      "gameId": 23,
+      "Week": 5,
+      "Game": 3,
+      "Team": 8,
+      "Opp": 4,
+      "Team Name": "Kyle",
+      "Opp Name": "Josh"
+    },
+    {
+      "gameId": 24,
+      "Week": 5,
+      "Game": 4,
+      "Team": 7,
+      "Opp": 3,
+      "Team Name": "Justin",
+      "Opp Name": "Mikey"
+    },
+    {
+      "gameId": 25,
+      "Week": 5,
+      "Game": 5,
+      "Team": 6,
+      "Opp": 2,
+      "Team Name": "Arians",
+      "Opp Name": "Adam"
+    },
+    {
+      "gameId": 26,
+      "Week": 6,
+      "Game": 1,
+      "Team": 1,
+      "Opp": 5,
+      "Team Name": "Andy",
+      "Opp Name": "Brendan"
+    },
+    {
+      "gameId": 27,
+      "Week": 6,
+      "Game": 2,
+      "Team": 10,
+      "Opp": 4,
+      "Team Name": "Austin",
+      "Opp Name": "Josh"
+    },
+    {
+      "gameId": 28,
+      "Week": 6,
+      "Game": 3,
+      "Team": 9,
+      "Opp": 3,
+      "Team Name": "Josher",
+      "Opp Name": "Mikey"
+    },
+    {
+      "gameId": 29,
+      "Week": 6,
+      "Game": 4,
+      "Team": 8,
+      "Opp": 2,
+      "Team Name": "Kyle",
+      "Opp Name": "Adam"
+    },
+    {
+      "gameId": 30,
+      "Week": 6,
+      "Game": 5,
+      "Team": 7,
+      "Opp": 6,
+      "Team Name": "Justin",
+      "Opp Name": "Arians"
+    },
+    {
+      "gameId": 31,
+      "Week": 7,
+      "Game": 1,
+      "Team": 1,
+      "Opp": 4,
+      "Team Name": "Andy",
+      "Opp Name": "Josh"
+    },
+    {
+      "gameId": 32,
+      "Week": 7,
+      "Game": 2,
+      "Team": 5,
+      "Opp": 3,
+      "Team Name": "Brendan",
+      "Opp Name": "Mikey"
+    },
+    {
+      "gameId": 33,
+      "Week": 7,
+      "Game": 3,
+      "Team": 10,
+      "Opp": 2,
+      "Team Name": "Austin",
+      "Opp Name": "Adam"
+    },
+    {
+      "gameId": 34,
+      "Week": 7,
+      "Game": 4,
+      "Team": 9,
+      "Opp": 6,
+      "Team Name": "Josher",
+      "Opp Name": "Arians"
+    },
+    {
+      "gameId": 35,
+      "Week": 7,
+      "Game": 5,
+      "Team": 8,
+      "Opp": 7,
+      "Team Name": "Kyle",
+      "Opp Name": "Justin"
+    },
+    {
+      "gameId": 36,
+      "Week": 8,
+      "Game": 1,
+      "Team": 1,
+      "Opp": 3,
+      "Team Name": "Andy",
+      "Opp Name": "Mikey"
+    },
+    {
+      "gameId": 37,
+      "Week": 8,
+      "Game": 2,
+      "Team": 4,
+      "Opp": 2,
+      "Team Name": "Josh",
+      "Opp Name": "Adam"
+    },
+    {
+      "gameId": 38,
+      "Week": 8,
+      "Game": 3,
+      "Team": 5,
+      "Opp": 6,
+      "Team Name": "Brendan",
+      "Opp Name": "Arians"
+    },
+    {
+      "gameId": 39,
+      "Week": 8,
+      "Game": 4,
+      "Team": 10,
+      "Opp": 7,
+      "Team Name": "Austin",
+      "Opp Name": "Justin"
+    },
+    {
+      "gameId": 40,
+      "Week": 8,
+      "Game": 5,
+      "Team": 9,
+      "Opp": 8,
+      "Team Name": "Josher",
+      "Opp Name": "Kyle"
+    },
+    {
+      "gameId": 41,
+      "Week": 9,
+      "Game": 1,
+      "Team": 1,
+      "Opp": 2,
+      "Team Name": "Andy",
+      "Opp Name": "Adam"
+    },
+    {
+      "gameId": 42,
+      "Week": 9,
+      "Game": 2,
+      "Team": 3,
+      "Opp": 6,
+      "Team Name": "Mikey",
+      "Opp Name": "Arians"
+    },
+    {
+      "gameId": 43,
+      "Week": 9,
+      "Game": 3,
+      "Team": 4,
+      "Opp": 7,
+      "Team Name": "Josh",
+      "Opp Name": "Justin"
+    },
+    {
+      "gameId": 44,
+      "Week": 9,
+      "Game": 4,
+      "Team": 5,
+      "Opp": 8,
+      "Team Name": "Brendan",
+      "Opp Name": "Kyle"
+    },
+    {
+      "gameId": 45,
+      "Week": 9,
+      "Game": 5,
+      "Team": 10,
+      "Opp": 9,
+      "Team Name": "Austin",
+      "Opp Name": "Josher"
+    },
+    {
+      "gameId": 46,
+      "Week": 10,
+      "Game": 1,
+      "Team": 1,
+      "Opp": 6,
+      "Team Name": "Mikey",
+      "Opp Name": "Brendan"
+    },
+    {
+      "gameId": 47,
+      "Week": 10,
+      "Game": 2,
+      "Team": 2,
+      "Opp": 7,
+      "Team Name": "Josh",
+      "Opp Name": "Austin"
+    },
+    {
+      "gameId": 48,
+      "Week": 10,
+      "Game": 3,
+      "Team": 3,
+      "Opp": 8,
+      "Team Name": "Justin",
+      "Opp Name": "Josher"
+    },
+    {
+      "gameId": 49,
+      "Week": 10,
+      "Game": 4,
+      "Team": 4,
+      "Opp": 9,
+      "Team Name": "Arians",
+      "Opp Name": "Adam"
+    },
+    {
+      "gameId": 50,
+      "Week": 10,
+      "Game": 5,
+      "Team": 5,
+      "Opp": 10,
+      "Team Name": "Kyle",
+      "Opp Name": "Andy"
+    },
+    {
+      "gameId": 51,
+      "Week": 11,
+      "Game": 1,
+      "Team": 1,
+      "Opp": 7,
+      "Team Name": "Mikey",
+      "Opp Name": "Austin"
+    },
+    {
+      "gameId": 52,
+      "Week": 11,
+      "Game": 2,
+      "Team": 6,
+      "Opp": 8,
+      "Team Name": "Brendan",
+      "Opp Name": "Josher"
+    },
+    {
+      "gameId": 53,
+      "Week": 11,
+      "Game": 3,
+      "Team": 2,
+      "Opp": 9,
+      "Team Name": "Josh",
+      "Opp Name": "Adam"
+    },
+    {
+      "gameId": 54,
+      "Week": 11,
+      "Game": 4,
+      "Team": 3,
+      "Opp": 10,
+      "Team Name": "Justin",
+      "Opp Name": "Andy"
+    },
+    {
+      "gameId": 55,
+      "Week": 11,
+      "Game": 5,
+      "Team": 4,
+      "Opp": 5,
+      "Team Name": "Arians",
+      "Opp Name": "Kyle"
+    },
+    {
+      "gameId": 56,
+      "Week": 12,
+      "Game": 1,
+      "Team": 1,
+      "Opp": 8,
+      "Team Name": "Mikey",
+      "Opp Name": "Josher"
+    },
+    {
+      "gameId": 57,
+      "Week": 12,
+      "Game": 2,
+      "Team": 7,
+      "Opp": 9,
+      "Team Name": "Austin",
+      "Opp Name": "Adam"
+    },
+    {
+      "gameId": 58,
+      "Week": 12,
+      "Game": 3,
+      "Team": 6,
+      "Opp": 10,
+      "Team Name": "Brendan",
+      "Opp Name": "Andy"
+    },
+    {
+      "gameId": 59,
+      "Week": 12,
+      "Game": 4,
+      "Team": 2,
+      "Opp": 5,
+      "Team Name": "Josh",
+      "Opp Name": "Kyle"
+    },
+    {
+      "gameId": 60,
+      "Week": 12,
+      "Game": 5,
+      "Team": 3,
+      "Opp": 4,
+      "Team Name": "Justin",
+      "Opp Name": "Arians"
+    },
+    {
+      "gameId": 61,
+      "Week": 13,
+      "Game": 1,
+      "Team": 1,
+      "Opp": 9,
+      "Team Name": "Mikey",
+      "Opp Name": "Adam"
+    },
+    {
+      "gameId": 62,
+      "Week": 13,
+      "Game": 2,
+      "Team": 8,
+      "Opp": 10,
+      "Team Name": "Josher",
+      "Opp Name": "Andy"
+    },
+    {
+      "gameId": 63,
+      "Week": 13,
+      "Game": 3,
+      "Team": 7,
+      "Opp": 5,
+      "Team Name": "Austin",
+      "Opp Name": "Kyle"
+    },
+    {
+      "gameId": 64,
+      "Week": 13,
+      "Game": 4,
+      "Team": 6,
+      "Opp": 4,
+      "Team Name": "Brendan",
+      "Opp Name": "Arians"
+    },
+    {
+      "gameId": 65,
+      "Week": 13,
+      "Game": 5,
+      "Team": 2,
+      "Opp": 3,
+      "Team Name": "Josh",
+      "Opp Name": "Justin"
+    },
+    {
+      "gameId": 66,
+      "Week": 14,
+      "Game": 1,
+      "Team": 0,
+      "Opp": 0,
+      "Team Name": "",
+      "Opp Name": "BYE"
+    },
+    {
+      "gameId": 67,
+      "Week": 14,
+      "Game": 2,
+      "Team": 0,
+      "Opp": 0,
+      "Team Name": "",
+      "Opp Name": ""
+    },
+    {
+      "gameId": 68,
+      "Week": 14,
+      "Game": 3,
+      "Team": 0,
+      "Opp": 0,
+      "Team Name": "",
+      "Opp Name": ""
+    },
+    {
+      "gameId": 69,
+      "Week": 14,
+      "Game": 4,
+      "Team": 0,
+      "Opp": 0,
+      "Team Name": "",
+      "Opp Name": "BYE"
+    },
+    {
+      "gameId": 70,
+      "Week": 14,
+      "Game": 5,
+      "Team": 0,
+      "Opp": 0,
+      "Team Name": "",
+      "Opp Name": ""
+    },
+    {
+      "gameId": 71,
+      "Week": 14,
+      "Game": 6,
+      "Team": 0,
+      "Opp": 0,
+      "Team Name": "",
+      "Opp Name": ""
+    },
+    {
+      "gameId": 72,
+      "Week": 15,
+      "Game": 1,
+      "Team": 0,
+      "Opp": 0,
+      "Team Name": "",
+      "Opp Name": ""
+    },
+    {
+      "gameId": 73,
+      "Week": 15,
+      "Game": 2,
+      "Team": 0,
+      "Opp": 0,
+      "Team Name": "",
+      "Opp Name": ""
+    },
+    {
+      "gameId": 74,
+      "Week": 15,
+      "Game": 3,
+      "Team": 0,
+      "Opp": 0,
+      "Team Name": "",
+      "Opp Name": ""
+    },
+    {
+      "gameId": 75,
+      "Week": 15,
+      "Game": 4,
+      "Team": 0,
+      "Opp": 0,
+      "Team Name": "",
+      "Opp Name": ""
+    },
+    {
+      "gameId": 76,
+      "Week": 15,
+      "Game": 5,
+      "Team": 0,
+      "Opp": 0,
+      "Team Name": "",
+      "Opp Name": ""
+    },
+    {
+      "gameId": 77,
+      "Week": 16,
+      "Game": 1,
+      "Team": 0,
+      "Opp": 0,
+      "Team Name": "",
+      "Opp Name": ""
+    },
+    {
+      "gameId": 78,
+      "Week": 16,
+      "Game": 2,
+      "Team": 0,
+      "Opp": 0,
+      "Team Name": "",
+      "Opp Name": ""
+    },
+    {
+      "gameId": 79,
+      "Week": 16,
+      "Game": 3,
+      "Team": 0,
+      "Opp": 0,
+      "Team Name": "",
+      "Opp Name": ""
+    },
+    {
+      "gameId": 80,
+      "Week": 16,
+      "Game": 4,
+      "Team": 0,
+      "Opp": 0,
+      "Team Name": "",
+      "Opp Name": ""
+    },
+    {
+      "gameId": 81,
+      "Week": 16,
+      "Game": 5,
+      "Team": 0,
+      "Opp": 0,
+      "Team Name": "",
+      "Opp Name": ""
+    }
+  ]
+}

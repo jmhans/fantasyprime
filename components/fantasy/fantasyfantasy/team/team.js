@@ -31,10 +31,6 @@ fantasyFantasyModule.config(function ($stateProvider) {
           resolve: {
               team: function (teams, FFDBService, $transition$) {
                   var tm = teams.find(function (team) { return team.id == $transition$.params().teamId; });
-                  /*return FFDBService.getTeam($stateParams.teamId).then(function (tm) {
-                      $rootScope.selectedTeam = tm;
-                      return $rootScope.selectedTeam;
-                  });*/
                   FFDBService.activeTeam = tm;
                   return tm;
               },

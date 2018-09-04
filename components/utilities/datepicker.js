@@ -60,13 +60,6 @@ fantasyFantasyModule.controller('DatepickerCtrl', function ($scope, $rootScope, 
         $state.go('abl.stats.detail', { dt: strDate });
     })*/
 
-    $scope.$watch('dt', function (newVal, oldVal) {
-        startDt = $scope.dt;
-
-        strDate = stringifyDate(startDt);
-
-        $state.go('abl.stats.detail', { dt: strDate });
-    })
 
 
 

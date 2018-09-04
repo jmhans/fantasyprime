@@ -1,4 +1,4 @@
-'use strict';
+﻿'use strict';
 
 var AWScognito = angular.module('aws-cognito', ['login', 'signup', 'activate']);
 
@@ -78,22 +78,7 @@ activateModule.controller('ActivateCtrl', function ($scope, $rootScope, $locatio
 
 activateModule.controller('ContentsCtrl', function ($scope, $rootScope, $state, $http, $location, cognitoService) {
 
-    //var userPool = cognitoService.getUserPool();
-
-    //var currentUser = userPool.getCurrentUser();
-
-    //if (currentUser != null) {
-    //    currentUser.getSession(function (err, session) {
-    //        if (err) {
-    //            alert(err);
-    //            return;
-    //        }
-    //        console.log('session validity: ' + session.isValid());
-    //    });
-    //}
-
-
-    //console.log(currentUser);
+    this.dt = new Date();
   
 var authToken;
   cognitoService.authToken.then(function setAuthToken(token) {
@@ -102,17 +87,17 @@ var authToken;
       authToken = token;
     
       $http({
-  method: 'POST',
-  url: "https://s6hvfgl42c.execute-api.us-east-1.amazonaws.com/prod/teststats", 
+  method: 'GET',
+  url: "https://s6hvfgl42c.execute-api.us-east-1.amazonaws.com/prod/teststats?&gamedate=2018-08-15", 
   headers: {
     Authorization: authToken
   },
-  data: JSON.stringify({
-                PickupLocation: {
-                    Latitude: 47.61226823896646,
-                    Longitude: -122.30073028564247
-                }
-  }),
+  //data: JSON.stringify({
+  //              PickupLocation: {
+  //                  Latitude: 47.61226823896646,
+  //                  Longitude: -122.30073028564247
+  //              }
+  //}),
             contentType: 'application/json'
   
 }).then(function successCallback(response) {

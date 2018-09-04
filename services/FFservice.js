@@ -7,12 +7,12 @@ fantasyFantasyModule.service('FantasyFantasyService', function ($http) {
             });
         },
         getWeekDetails: function (week) {
-            return $http.get('data/weekDetails.json', { cache: true }).then(function (resp) {
+            return $http.get('data/weekDetails.json', { cache: false }).then(function (resp) {
                 return resp.data.weeks.find(function (wk) {return wk.WeekId == week});
             });
         },
         getWeek: function (weekNum) {
-            return $http.get('data/weekDetails.json', {cache: true}).then(function (resp) {
+            return $http.get('data/weekDetails.json', {cache: false}).then(function (resp) {
                 allWeeks = resp.data.weeks;
                 
                 if (weekNum == '') {

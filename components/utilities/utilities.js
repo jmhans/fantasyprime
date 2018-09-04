@@ -1,4 +1,6 @@
-﻿function pad(num, size) {
+﻿const CURRENT_SEASON = 2018
+
+function pad(num, size) {
     var s = num + "";
     while (s.length < size) s = "0" + s;
     return s;
