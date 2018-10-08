@@ -1,4 +1,4 @@
-﻿
+
 var actuarialGamesModule = angular.module('actuarial.games',
     [
         'ui.router',
@@ -93,7 +93,7 @@ actuarialGamesModule.run(['$http', '$rootScope', '$state', '$stateParams', 'cogn
 ]);
 
 
-actuarialGamesModule.controller('ApplicationController', function ($scope, $rootScope, $state, USER_ROLES, AUTH_EVENTS, cognitoService) {
+actuarialGamesModule.controller('ApplicationController', function ($scope, $rootScope, $http, $state, USER_ROLES, AUTH_EVENTS, cognitoService) {
     var userPool = cognitoService.getUserPool();
     $scope.currentUser = userPool.getCurrentUser();
     $scope.userRoles = USER_ROLES;
@@ -107,6 +107,9 @@ actuarialGamesModule.controller('ApplicationController', function ($scope, $root
         $rootScope.$broadcast(AUTH_EVENTS.logoutSuccess);
     }
 
+    $http.get('http://games.espn.com/ffl/api/v2/scoreboard?leagueId=44600&matchupPeriodId=1&seasonId=2018').then(function (resp) {
+      var a = resp.data;
+    });
     $scope.$on(AUTH_EVENTS.loginSuccess, function (event, data) {
         console.log("Successfully logged in");
         $scope.setCurrentUser(cognitoService.getCurrentUser());  

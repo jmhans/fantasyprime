@@ -1,4 +1,4 @@
-﻿
+
 var propBetModule = angular.module('propBets', [])
 
 propBetModule.config(function ($stateProvider) {

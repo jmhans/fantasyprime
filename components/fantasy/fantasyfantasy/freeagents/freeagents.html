@@ -1,4 +1,4 @@
-﻿<h4>All Teams</h4>
+<h4>All Teams</h4>
 <!--<ul>
     <li ng-repeat="tm in $ctrl.fantasyTeams">{{tm}}</li>
 </ul>-->
@@ -92,7 +92,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <tr ng-repeat="ft in $ctrl.fantasyTeams | filter : {prime_owner: '' } : true">
+                        <tr ng-repeat="ft in $ctrl.fantasyTeams | filter : {PRIME_OWNER: '' } : true">
                             <td>
                                 <button ng-if="$ctrl.addsAvailable()" class="btn btn-success btn-xs" ng-click="$ctrl.addTeam(ft, 'add')"><i class="fa fa-plus"> Make Waiver Claim</i></button>
                                 <button ng-if="$ctrl.waiversActive()" class="btn btn-warning btn-xs" ng-click="$ctrl.addTeam(ft, 'waiver')"><i class="fa fa-plus"> Make Waiver Claim</i></button>

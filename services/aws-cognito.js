@@ -2,9 +2,9 @@ actuarialGamesModule.service('cognitoService', function () {
 
     // Region
     AWS.config.region = 'us-east-1'; // Region
-    //AWS.config.credentials = new AWS.CognitoIdentityCredentials({
-    //    IdentityPoolId: 'us-east-1:71b6f6ff-517a-4cf8-8bd3-f9f1ddbe6fae',
-    //});
+    AWS.config.credentials = new AWS.CognitoIdentityCredentials({
+        IdentityPoolId: 'us-east-1:167da025-fe57-48c9-a814-d956ca92ca95',
+    });
 
     //// Cognito User Pool Id
     //AWSCognito.config.region = 'us-east-1';
@@ -12,7 +12,7 @@ actuarialGamesModule.service('cognitoService', function () {
     //    IdentityPoolId: 'us-east-1_JkFX0MtS9'
     //});
     authService = {};
-
+    authService.currentAuthToken = '';
     authService.getUserPool = function () {
         var poolData = {
             UserPoolId: 'us-east-1_JkFX0MtS9',
@@ -100,21 +100,26 @@ actuarialGamesModule.service('cognitoService', function () {
         
     };
     authService.authToken = new Promise(function fetchCurrentAuthToken(resolve, reject) {
-        var cognitoUser = authService.getCurrentUser();
-
-        if (cognitoUser) {
-            cognitoUser.getSession(function sessionCallback(err, session) {
-                if (err) {
-                    reject(err);
-                } else if (!session.isValid()) {
-                    resolve(null);
-                } else {
-                    resolve(session.getIdToken().getJwtToken());
-                }
-            });
+        if (authService.currentAuthToken !== '') {
+          resolve(authService.currentAuthToken);
         } else {
-            resolve(null);
+          var cognitoUser = authService.getCurrentUser();
+
+          if (cognitoUser) {
+              cognitoUser.getSession(function sessionCallback(err, session) {
+                  if (err) {
+                      reject(err);
+                  } else if (!session.isValid()) {
+                      resolve(null);
+                  } else {
+                      resolve(session.getIdToken().getJwtToken());
+                  }
+              });
+          } else {
+              resolve(null);
+          }  
         }
+        
     });
     
     authService.isAuthorized = function () {

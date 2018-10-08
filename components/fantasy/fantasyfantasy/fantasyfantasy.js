@@ -1,4 +1,4 @@
-﻿var fantasyFantasyModule = angular.module('fantasyfantasy', ['ui.router', 'table-admin', 'statusMessageList'])
+var fantasyFantasyModule = angular.module('fantasyfantasy', ['ui.router', 'table-admin', 'statusMessageList'])
 
 fantasyFantasyModule.config(function ($stateProvider) {
 
@@ -13,12 +13,7 @@ fantasyFantasyModule.config(function ($stateProvider) {
         tree: {
             name: 'Fantasy Fantasy', users: 'allTeams'
         },
-        //resolve: {
-        //    allTeams: function (FFDBService) {
-        //        var a = FFDBService.getTeams();
-        //        return a;
-        //    }
-        //},
+
         requiresParams: false
     },
 
@@ -39,6 +34,6 @@ fantasyFantasyModule.component('fantasyfantasy', {
 })
 
 
-function ffCtrl($http, $scope, TeamsService, FFDBService) {
+function ffCtrl() {
     var a = 1;
 }

@@ -1,4 +1,4 @@
-﻿
+
 fantasyFantasyModule.component('roster', {
     bindings: { roster: '<', team:'<', week: '<', action: '<', weekdetails:'<'},
     controller: RosterTableCtrl, 
@@ -7,7 +7,7 @@ fantasyFantasyModule.component('roster', {
 })
 
 
-function RosterTableCtrl($http, FFDBService, $scope, $compile) {
+function RosterTableCtrl($http, AWSFantasyService, $scope, $compile) {
 
     var vm = this;
 
@@ -18,7 +18,7 @@ function RosterTableCtrl($http, FFDBService, $scope, $compile) {
     vm.error = '';
     vm.successMessage = '';
 
-    vm.dbService = FFDBService
+    vm.dbService = AWSFantasyService
 
     vm.updateRoster = _updateRoster
 
@@ -37,13 +37,6 @@ function RosterTableCtrl($http, FFDBService, $scope, $compile) {
         starters = vm.roster.filter(function (rr) {return (rr.position == 'Starter');});
         
         if (starters.length <= 7) {
-            //newObj = {
-            //    team_id: rosterRec.TeamID,
-            //    prime_owner: rosterRec.Owner,
-            //    start_date: rosterRec.StartDate,
-            //    end_date: '',
-            //    position: 'Bench'
-            //}
             rosterRec.updating = true;
             rosterRec.info = 'Saving...'
             this.dbService.updateRosterRecord(rosterRec).then(function (response) {

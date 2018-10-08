@@ -1,4 +1,4 @@
-﻿
+
 fantasyFantasyModule.config(function ($stateProvider) {
     var st = {
         name: 'standings',
@@ -9,8 +9,8 @@ fantasyFantasyModule.config(function ($stateProvider) {
         requiresParams: false,
         component: 'standings',
         resolve: {
-            standings: function (FFDBService) {
-                return FFDBService.getScheduleAndResults().then(function (resp) {
+            standings: function (AWSFantasyService) {
+                return AWSFantasyService.getScheduleAndResults().then(function (resp) {
                     return resp;
                 });
             }

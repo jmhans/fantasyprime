@@ -1,4 +1,4 @@
-﻿fantasyFantasyModule.service('RostersService', ['GoogleSheetsService',  function (GoogleSheetsService) {
+fantasyFantasyModule.service('RostersService', ['GoogleSheetsService',  function (GoogleSheetsService) {
 
     var service = {
         getAllRosterRecords: function () {
@@ -50,7 +50,7 @@
 
         getOwnerRoster: function (owner) {
             function rosterRecMatchesParam(rosterRec) {
-                return rosterRec.prime_owner === owner;
+                return rosterRec.PRIME_OWNER === owner;
             }
 
             return service.getActiveRosters().then(function (rosterRecords) {

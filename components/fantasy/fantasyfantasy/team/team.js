@@ -1,4 +1,4 @@
-﻿
+
 fantasyFantasyModule.config(function ($stateProvider) {
     var states = [
       {
@@ -8,13 +8,14 @@ fantasyFantasyModule.config(function ($stateProvider) {
           component: 'teams',
           requiresParams: false,
           resolve: {
-              teams: function (FFDBService) {
-                  return FFDBService.getTeams();
+              teams: function ( AWSFantasyService) {
+                return AWSFantasyService.getAllTeams();
               },
-              fantasyTeams: function (FFDBService) {
-                  return FFDBService.getEnrichedRosters().then(function (response) {
-                      return response;
-                  });
+              fantasyTeams: function ( AWSFantasyService) {
+                return AWSFantasyService.getEnrichedRosters().then(function (response) {
+                  return response;
+                })
+
               }
 
           }
@@ -29,14 +30,13 @@ fantasyFantasyModule.config(function ($stateProvider) {
           // It delegates to the PeopleService, passing the personId parameter
           requiresParams: true,
           resolve: {
-              team: function (teams, FFDBService, $transition$) {
-                  var tm = teams.find(function (team) { return team.id == $transition$.params().teamId; });
-                  FFDBService.activeTeam = tm;
+              team: function (teams, $transition$) {
+                  var tm = teams.find(function (team) { return team.OWNER_ID == $transition$.params().teamId; });
                   return tm;
               },
-              week: function ($transition$, FantasyFantasyService) {
+              week: function ($transition$, AWSFantasyService) {
                  
-                  var myWeek = FantasyFantasyService.getWeek((parseInt($transition$.params().weekId) || '')).then(function (resp) { return resp });
+                  var myWeek = AWSFantasyService.getWeek((parseInt($transition$.params().weekId) || '')).then(function (resp) { return resp });
                   return myWeek;   
               }
           },
@@ -63,9 +63,14 @@ fantasyFantasyModule.config(function ($stateProvider) {
           url: '/detail',
           component: 'team.detail',
           resolve: {
-              //roster: function(roster) {
-              //    return roster;
-              //}
+            roster: function(AWSFantasyService, team) {
+              AWSFantasyService.getActiveRosters().then(function (allrosters) {
+              var a = allrosters.filter(function (rosterRec) {
+                return (rosterRec.PRIME_OWNER == team.TEAM_NAME);
+              })
+              return a;
+            });
+            }
           },
           menu: { name: 'All Teams', priority: 900 },
           tree: { name: 'My Team' }
@@ -77,12 +82,11 @@ fantasyFantasyModule.config(function ($stateProvider) {
           component: 'addteam',
           requiresParams: false,
           resolve: {
-              addTeam: function (FFDBService, $transition$, roster) {
-                  return FFDBService.getRosterRecord($transition$.params().addTeamId).then(function (tm) {
-                      tm.action = 'Add'
-                      // roster.push(tm);
-                      return tm;
-                  });
+              addTeam: function ( AWSFantasyService, $transition$, roster) {
+                return AWSFantasyService.getRosterRecord($transition$.params().addTeamId).then(function(tm) {
+                  tm.action = 'Add';
+                  return tm;
+                });
               }
           }
       }
@@ -97,10 +101,10 @@ fantasyFantasyModule.config(function ($stateProvider) {
 fantasyFantasyModule.component('team', {
     bindings: { team: '<', teams: '<'},
     templateUrl: 'components/fantasy/fantasyfantasy/team/team.html',
-    controller: function ($scope, $state, FFDBService) {
+    controller: function ($scope, $state, AWSFantasyService) {
         this.changeTeam = function () {
             // console.log($scope.$ctrl.activeTeam);
-            $state.go($state.current.name, { teamId: $scope.$ctrl.team.id });
+            $state.go($state.current.name, { teamId: $scope.$ctrl.team.OWNER_ID });
         }
 
         var $ctrl = this
@@ -110,43 +114,46 @@ fantasyFantasyModule.component('team', {
         }
 
         this.loadRosters = function () {
-            FFDBService.getActiveRosters().then(function (allrosters) {
-                $ctrl.roster = allrosters.filter(function (rosterRec) {
-                    return (rosterRec.prime_owner == $ctrl.team.TEAM_NAME);
-                });
-            });
+          AWSFantasyService.getActiveRosters().then(function (allrosters) {
+            var a = allrosters.filter(function (rosterRec) {
+              return (rosterRec.PRIME_OWNER == $ctrl.team.TEAM_NAME);
+            })
+            $ctrl.roster = a;
+          });
+
         }
         this.handleRosterUpdate = function (rosterRec, rosterAction) {
             console.log("Roster Updated");
             switch (rosterAction) {
                 case 'add':
-                    rosterRec.prime_owner = $ctrl.team.TEAM_NAME;
-                    rosterRec.position = 'Bench';
+                    rosterRec.PRIME_OWNER = $ctrl.team.TEAM_NAME;
+                    rosterRec.POSITION = 'Bench';
                     break;
                 case 'drop':
                     //drop team
-                    rosterRec.prime_owner = '';
-                    rosterRec.position= '';
+                    rosterRec.PRIME_OWNER = '';
+                    rosterRec.POSITION= '';
                     break;
             }
             $ctrl.beginUpdate(rosterRec, rosterAction);
-            FFDBService.updateRosterRecord(rosterRec).then(function (resp) {
-                $ctrl.endUpdate(resp)
-                $ctrl.loadRosters();
+            AWSFantasyService.updateRosterRecord(rosterRec).then(function (resp) {
+              $ctrl.endUpdate(resp);
+              $ctrl.loadRosters();
             }, function (err) {
-                $ctrl.failUpdate(claimingTeam.recno, err);
+              $ctrl.failUpdate(claimingTeam.RECORD_ID, err)
             });
-
+          
         }
 
         this.submitWaiverClaim = function (claimingTeam, conditionallyDroppingTeam) {
             // console.log("submitted claim to add " + claimingTeam + " and drop " + conditionallyDroppingTeam);
             $ctrl.beginUpdate(claimingTeam, 'waiver');
-            FFDBService.submitWaiverClaim(claimingTeam, conditionallyDroppingTeam).then(function (resp) {
-                $ctrl.endUpdate(claimingTeam.recno);
+            AWSFantasyService.submitWaiverClaim(claimingTeam, conditionallyDroppingTeam).then(function (resp) {
+              $ctrl.endUpdate(claimingTeam.RECORD_ID);
             }, function (err) {
-                $ctrl.failUpdate(claimingTeam.recno, err);
+              $ctrl.failUpdate(claimingTeam.RECORD_ID, err)
             });
+
         }
 
         this.updating = [];
@@ -214,7 +221,7 @@ fantasyFantasyModule.component('info', {
 })
 
 
-function teamDetailController(FFDBService, $scope) {
+function teamDetailController(AWSFantasyService, $scope) {
 
     this.statusMessage = '';
     this.editMode = false;
@@ -227,10 +234,10 @@ function teamDetailController(FFDBService, $scope) {
     }
 
     this.saveDataChanges = function () {
-        FFDBService.updateItem(this.team).then(function (resp) {
-            console.log('Saved');
-            $scope.$ctrl.edited = false;
-        });
+      AWSFantasyService.updateOwner(this.team).then(function (resp) {
+        console.log('Saved');
+        $scope.$ctrl.edited = false;
+      });
     }
 
     //this.$onInit = function () {
@@ -255,13 +262,13 @@ function teamDetailController(FFDBService, $scope) {
         if (this.editMode) {
 
             var newObj = {
-                id: itemToUpdate.id,
+                OWNER_ID: itemToUpdate.OWNER_ID,
                 SEASON: itemToUpdate.editTeamSeason,
                 TEAM_NAME: itemToUpdate.editTeamName,
                 TEAM_OWNER: itemToUpdate.editTeamOwner
             };
             this.statusMessage = 'Updating data'
-            FFDBService.updateItem(newObj).then(reloadData);
+          AWSFantasyService.updateOwner(newObj).then(reloadData);
         }
     }
 

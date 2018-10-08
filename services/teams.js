@@ -1,4 +1,4 @@
-﻿fantasyFantasyModule.service('TeamsService', function ($http) {
+fantasyFantasyModule.service('TeamsService', function ($http) {
     var service = {
         getAllTeams: function () {
             return $http.get('data/ffSetup.json', { cache: false }).then(function (resp) {
@@ -20,7 +20,7 @@
 
         getTeam: function (id) {
             function teamMatchesParam(team) {
-                return team.id === id;
+                return team.OWNER_ID === id;
             }
 
             return service.getAllTeams().then(function (teams) {
@@ -45,7 +45,6 @@
 })
 
 fantasyFantasyModule.service('FFDBService', [ '$http', 'TeamsService', '$q', 'ScoresService', function ( $http, TeamsService, $q, ScoresService) {
-    this.activeTeam = {};
 
     var service = {
 

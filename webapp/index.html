@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 
 <html>
 <head>
@@ -6,8 +6,14 @@
     <script src="//npmcdn.com/angular-ui-router@1.0.0-beta.3/release/angular-ui-router.js"></script>-->
     <!--script src="https://apis.google.com/js/api.js"></!--script>-->
 
-    <script src="lib/fantasyprime.js"></script>
+    <script src="//unpkg.com/angular@1.6.5/angular.js"></script>
+    <script src="//unpkg.com/@uirouter/angularjs@1.0.15/release/angular-ui-router.js"></script>
 
+    <!--script src="lib/fantasyprime.js"></script-->
+    <script src="lib/fantasyprime_external.js"></script>
+    <script src="lib/fantasyprime_custom.js"></script>
+
+    <script src="https://use.fontawesome.com/c71c8de0c3.js"></script>
 
     <style>
         .active {
@@ -30,38 +36,47 @@
     <!-- Optional theme -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
     <link rel="stylesheet" href="https://cdn.datatables.net/1.10.13/css/jquery.dataTables.min.css" />
+    <link rel="stylesheet" href="https://cdn.datatables.net/buttons/1.4.0/css/buttons.dataTables.min.css" />
+
     <link rel="stylesheet" href="css/styles.css" />
 
+
     <script src="https://apis.google.com/js/client.js">
+
+
     </script>
 </head>
 
-<body ng-app="fantasyfantasy">
-    <nav class="navbar navbar-default navbar-inverse">
+<body ng-app="actuarial.games" ng-controller="ApplicationController">
+    <nav class="navbar navbar-default navbar-inverse navbar-toggleable-md">
+        <!--<button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>-->
 
         <div class="navbar-header">
             <a class="navbar-brand" href="#">Actuarial Games</a>
+            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
         </div>
+        <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+            <ul class="nav navbar-nav " menus="menuItems" tag="topmenu">
+                <li ng-repeat="menu in menuItems | orderBy:'-priority'" ui-sref-active="active">
+                    <a ng-if="menu.state.requiresParams == true" ui-sref="{{menu.state.name}}({teamId : selectedTeam.OWNER_ID})">{{menu.name}}</a>
 
-        <ul class="nav navbar-nav" menus="menuItems" tag="topmenu">
-            <li ng-repeat="menu in menuItems | orderBy:'-priority'">
-                <a ng-if="menu.state.requiresParams == true" ui-sref="{{menu.state.name}}({teamId : selectedTeam.id})">{{menu.name}}</a>
+                    <a ng-if="menu.state.requiresParams == false" ui-sref="{{menu.state.name}}">{{menu.name}}</a>
 
-                <a ng-if="menu.state.requiresParams == false" ui-sref="{{menu.state.name}}">{{menu.name}}</a>
-
-            </li>
-        </ul>
-        <ul class="nav navbar-nav navbar-right">
-            <li class="dropdown">
-                <a class="dropdown-toggle" data-toggle="dropdown">
-                    {{selectedTeam.name}}<span class="caret"></span>
-                </a>
-                <ul class="dropdown-menu">
-                    <li ng-repeat="tm in teams"><a ui-sref="teams.team.roster({teamId : {{tm.id}}})">{{tm.name}}</a></li>
-                </ul>
-            </li>
-
-        </ul>
+                </li>
+            </ul>
+            <ul class="nav navbar-nav navbar-right">
+                <li><a ng-if="!isAuthorized()" ui-sref="login">Sign In</a></li>
+                <li><a ng-if="isAuthorized()">{{currentUser.username}}</a></li>
+                <li><a ng-click="signOut()">Sign Out</a></li>
+            </ul>
+        </div>
 
     </nav>
 

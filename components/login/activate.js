@@ -1,4 +1,4 @@
-﻿'use strict';
+'use strict';
 
 var AWScognito = angular.module('aws-cognito', ['login', 'signup', 'activate']);
 
@@ -76,42 +76,53 @@ activateModule.controller('ActivateCtrl', function ($scope, $rootScope, $locatio
 
 'use strict';
 
-activateModule.controller('ContentsCtrl', function ($scope, $rootScope, $state, $http, $location, cognitoService) {
+activateModule.controller('ContentsCtrl', function($scope, $rootScope, $state, $http, $location, cognitoService) {
 
-    this.dt = new Date();
-  
-var authToken;
+  this.dt = new Date();
+
+  var authToken;
   cognitoService.authToken.then(function setAuthToken(token) {
-    
+
     if (token) {
       authToken = token;
-    
+
       $http({
-  method: 'GET',
-  url: "https://s6hvfgl42c.execute-api.us-east-1.amazonaws.com/prod/teststats?&gamedate=2018-08-15", 
-  headers: {
-    Authorization: authToken
-  },
-  //data: JSON.stringify({
-  //              PickupLocation: {
-  //                  Latitude: 47.61226823896646,
-  //                  Longitude: -122.30073028564247
-  //              }
-  //}),
-            contentType: 'application/json'
-  
-}).then(function successCallback(response) {
-              console.log("AWS DB API call worked:" + response);
-            }, function ajaxError(jqXHR, textStatus, errorThrown) {
-                console.error('Error requesting ride: ', textStatus, ', Details: ', errorThrown);
-                console.error('Response: ', jqXHR.responseText);
-                alert('An error occured when requesting your unicorn:\n' + jqXHR.responseText);
-            });
+        method: 'GET',
+        url: "https://s6hvfgl42c.execute-api.us-east-1.amazonaws.com/prod/teststats?&gamedate=2018-08-15",
+        headers: {
+          Authorization: authToken
+        },
+        //data: JSON.stringify({
+        //              PickupLocation: {
+        //                  Latitude: 47.61226823896646,
+        //                  Longitude: -122.30073028564247
+        //              }
+        //}),
+        contentType: 'application/json'
+
+      }).then(function successCallback(response) {
+        console.log("AWS DB API call worked:" + response);
+      }, function ajaxError(jqXHR, textStatus, errorThrown) {
+        console.error('Error requesting ride: ', textStatus, ', Details: ', errorThrown);
+        console.error('Response: ', jqXHR.responseText);
+        alert('An error occured when requesting your unicorn:\n' + jqXHR.responseText);
+      });
       
-      
-      
-    }
-    else {
+      $http({
+        method: 'POST', 
+        url: "https://s6hvfgl42c.execute-api.us-east-1.amazonaws.com/prod/fantasyprime", 
+        headers: {
+          Authorization: authToken
+        }, 
+        data: JSON.stringify({tableName: "FANTASY_TEAMS", requestType: 'QUERY', record: {}})
+      }).then(function successCallback(response) {
+        console.log("AWS API call worked:" + response);
+        
+      }, function ajaxError(jqXHR, textStatus, errorThrown) {
+        console.error('Error', textStatus, ', Details: ', errorThrown);
+      });
+
+    } else {
       $state.go('login');
     }
   });

@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 
 <html>
 <head>
@@ -9,7 +9,9 @@
     <script src="//unpkg.com/angular@1.6.5/angular.js"></script>
     <script src="//unpkg.com/@uirouter/angularjs@1.0.15/release/angular-ui-router.js"></script>
 
-    <script src="lib/fantasyprime.js"></script>
+    <!--script src="lib/fantasyprime.js"></script-->
+    <script src="lib/fantasyprime_external.js"></script>
+    <script src="lib/fantasyprime_custom.js"></script>
 
     <script src="https://use.fontawesome.com/c71c8de0c3.js"></script>
 
@@ -63,7 +65,7 @@
         <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
             <ul class="nav navbar-nav " menus="menuItems" tag="topmenu">
                 <li ng-repeat="menu in menuItems | orderBy:'-priority'" ui-sref-active="active">
-                    <a ng-if="menu.state.requiresParams == true" ui-sref="{{menu.state.name}}({teamId : selectedTeam.id})">{{menu.name}}</a>
+                    <a ng-if="menu.state.requiresParams == true" ui-sref="{{menu.state.name}}({teamId : selectedTeam.OWNER_ID})">{{menu.name}}</a>
 
                     <a ng-if="menu.state.requiresParams == false" ui-sref="{{menu.state.name}}">{{menu.name}}</a>
 

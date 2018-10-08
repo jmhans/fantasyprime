@@ -1,4 +1,4 @@
-﻿<!--<script async defer src="https://apis.google.com/js/api.js"
+<!--<script async defer src="https://apis.google.com/js/api.js"
         onload="this.onload=function(){};handleClientLoad()"
         onreadystatechange="if (this.readyState === 'complete') this.onload()"></script>
 <button id="authorize-button" ng-click="handleAuthClick()">Authorize</button>
@@ -23,29 +23,22 @@ Week {{rosterCtrl.week.WeekId}}
             </tr>
         </thead>
         <tbody>
-            <tr ng-style='(rosterRec.position == "Bench") && {"background-color":"lightgray"}' ng-repeat="rosterRec in rosterCtrl.roster | filter : {action: '!Add'} : true | orderBy: 'position': true">
+            <tr ng-style='(rosterRec.POSITION == "Bench") && {"background-color":"lightgray"}' ng-repeat="rosterRec in rosterCtrl.roster | filter : {action: '!Add'} : true | orderBy: 'POSITION': true">
                 <td ng-if="rosterCtrl.action == 'add_drop'">
-                    <!--<button ng-click="rosterCtrl.processAdd(rosterRec)">{{rosterRec.action}}</button>-->
                     <button >Drop</button>
-                    <!--<select ng-model="rosterRec.action">
-                        <option>{{rosterRec.prime_owner ?  '' : 'Add'}}</option>
-                        <option>{{rosterRec.prime_owner != '' ? 'Drop' : ''}}</option>
-                        <option>{{rosterRec.position == 'Starter' ? 'Move to Bench' : 'Make Starter'}}</option>
-
-                    </select>-->
 
                 </td>
                 <td>
-                    <select ng-show="(rosterCtrl.updateAllowed())" ng-model="rosterRec.position" ng-change="rosterCtrl.updateRoster(rosterRec)">
+                    <select ng-show="(rosterCtrl.updateAllowed())" ng-model="rosterRec.POSITION" ng-change="rosterCtrl.updateRoster(rosterRec)">
                         <option>Starter</option>
                         <option>Bench</option>
                     </select>
-                    <span ng-show="(!rosterCtrl.updateAllowed())">{{rosterRec.position}}</span>
+                    <span ng-show="(!rosterCtrl.updateAllowed())">{{rosterRec.POSITION}}</span>
 
                     <span ng-show="rosterRec.info != ''">{{rosterRec.info}}</span>
                 </td>
                 <td>
-                    {{rosterRec.team_id}}
+                    {{rosterRec.TEAM_ID}} {{rosterRec.RECORD_ID}}
                 </td>
                 <td>
                     <a target="_blank" ng-href="http://games.espn.com/ffl/clubhouse?leagueId={{rosterRec.TEAM_INFO.LEAGUE_ID}}&teamId={{rosterRec.TEAM_INFO.TEAM_ID}}&seasonId={{rosterRec.TEAM_INFO.SEASON}}">

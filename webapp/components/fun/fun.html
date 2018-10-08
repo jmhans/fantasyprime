@@ -4,8 +4,9 @@
 
 
 <div class="container-fluid">
+    <div></div>
     <select ng-model="curYr" ng-options="x for x in yrs"></select>
-
+    <small> Data Last Updated: {{$ctrl.updateTime | date:'EEE M/dd/yy, h:mm:ss a'}}</small>
     <div id="betTable" google-chart chart="betTable"></div>
 
     <div ng-repeat="cht in $ctrl.filteredRecs">

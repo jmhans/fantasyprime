@@ -1,4 +1,4 @@
-﻿var fantasyFootballModule = angular.module('fantasyFootball', ['footballDex', 'fantasyfantasy'])
+var fantasyFootballModule = angular.module('fantasyFootball', ['footballDex', 'fantasyfantasy'])
 
 fantasyFootballModule.config(function ($stateProvider) {
 
@@ -128,7 +128,6 @@ function fantasyfootballCtrl($scope, $state, $rootScope, $stateTree) {
         refreshGrandchildren($scope.activeChild);
 
     });
-    //$scope.users = [];
 
     $scope.setUsers = function (usrList) {
         $scope.users = usrList;

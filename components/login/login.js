@@ -19,8 +19,10 @@ loginModule.controller('LoginCtrl', function ($scope, $state, $rootScope, $locat
             onSuccess: function (result) {
                 var accessToken = result.getAccessToken().getJwtToken();
                 $rootScope.$broadcast(AUTH_EVENTS.loginSuccess, accessToken);
+                $rootScope.$broadcast(AUTH_EVENTS.authenticated, accessToken);
             },
             onFailure: function (err) {
+                $rootScope.$broadcast(AUTH_EVENTS.notAuthenticated, '');
                 $scope.errorMessage = err.message;
                 $scope.$apply();
             },

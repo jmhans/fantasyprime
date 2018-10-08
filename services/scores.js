@@ -1,4 +1,4 @@
-﻿fantasyFantasyModule.service('ScoresService', function ($http) {
+fantasyFantasyModule.service('ScoresService', function ($http) {
     var service = {
         getScoreRecords: function () {
             return $http.get('data/ResultsStore.json', { cache: false }).then(function (resp) {

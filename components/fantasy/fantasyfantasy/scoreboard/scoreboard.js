@@ -1,4 +1,4 @@
-﻿
+
 fantasyFantasyModule.config(function ($stateProvider) {
     var states = [{
         name: 'ff.scoreboard',
@@ -8,7 +8,7 @@ fantasyFantasyModule.config(function ($stateProvider) {
         requiresParams: false,
         component: 'scoreboard',
         resolve: {
-            scores: function (FFDBService, $stateParams) {
+            scores: function ($stateParams) {
 
             },
             ff_matchups: function (TeamsService, scores, $stateParams) {
@@ -22,10 +22,9 @@ fantasyFantasyModule.config(function ($stateProvider) {
           requiresParams: false,
           component: 'scoreboard.details',
           resolve: {
-              scores: function (FFDBService, $stateParams, ScoresService) {
-
-                  return FFDBService.getScoresForWeek($stateParams.weekId).then(function (resp) {
-                      return resp;
+              scores: function (AWSFantasyService, $stateParams, ScoresService) {
+                  var a = AWSFantasyService.getScoresForWeek($stateParams.weekId).then(function (resp) {
+                    return resp;
                   })
 
               },

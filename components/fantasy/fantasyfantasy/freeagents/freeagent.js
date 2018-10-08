@@ -1,10 +1,10 @@
-﻿fantasyFantasyModule.component('allteams', {
+fantasyFantasyModule.component('allteams', {
     bindings: { fantasyTeams: '<', team: '<', week:'<' , roster: '<', onRosterUpdate: '&', onWaiverClaim: '&'},
     controller: FATableCtrl, 
     templateUrl: 'components/fantasy/fantasyfantasy/freeagents/freeagents.html'
 })
 
-function FATableCtrl($uibModal, $log, $document, FFDBService) {
+function FATableCtrl($uibModal, $log, $document) {
 
 
 

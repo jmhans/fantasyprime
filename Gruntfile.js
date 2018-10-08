@@ -62,6 +62,48 @@ module.exports = function (grunt) {
                         
                 ],
                 dest: 'lib/<%= pkg.name %>.js'
+            }, 
+            base: {
+              src: ['node_modules/jquery/dist/jquery.js',
+                    'node_modules/datatables/media/js/jquery.dataTables.js',
+                    'node_modules/datatables-buttons/js/dataTables.buttons.js',
+                    'node_modules/datatables-buttons/js/buttons.bootstrap.js',
+                    'node_modules/datatables-buttons/js/buttons.colVis.js',
+                    'node_modules/datatables-buttons/js/buttons.flash.js',
+                    'node_modules/datatables-buttons/js/buttons.foundation.js',
+                    'node_modules/datatables-buttons/js/buttons.html5.js',
+                    'node_modules/datatables-buttons/js/buttons.jqueryui.js',
+                    'node_modules/datatables-buttons/js/buttons.print.js',
+                    //'node_modules/angular/angular.js',
+                    //'node_modules/@uirouter/angularjs/release/angular-ui-router.js',
+                    'node_modules/angular-ui-router-menus/dist/angular-ui-router-menus.js',
+                    'node_modules/angular-google-gapi/dist/angular-google-gapi.js',
+                    'node_modules/angular-datatables/dist/angular-datatables.js',
+                    'node_modules/angular-datatables/dist/plugins/bootstrap/angular-datatables.bootstrap.js',
+                    'node_modules/angular-datatables/dist/plugins/buttons/angular-datatables.buttons.js',
+                    'node_modules/angular-ui-bootstrap/dist/ui-bootstrap-tpls.js',
+                    'node_modules/angular-ui-sortable/dist/sortable.js',
+                    'node_modules/ng-sortable/dist/ng-sortable.js',
+                    'node_modules/angular-ui-tree/dist/angular-ui-tree.js',
+                    'node_modules/angular-google-chart/ng-google-chart.js',
+                    'node_modules/papaparse/papaparse.js',
+                    'node_modules/angular-content-editable/dist/angular-content-editable.min.js',
+                    'node_modules/moment/min/moment.min.js',
+                    'node_modules/moment-timezone/builds/moment-timezone-with-data.min.js',
+                    'node_modules/lodash/lodash.js',
+                    'node_modules/amazon-cognito-identity-js/dist/aws-cognito-sdk.min.js',
+                    'node_modules/amazon-cognito-identity-js/dist/amazon-cognito-identity.min.js',
+                    'node_modules/aws-sdk/dist/aws-sdk.min.js'
+              ], 
+              dest: 'lib/<%= pkg.name %>_external.js'
+            }, 
+            custom: {
+              src: [                        
+                'main.js',                        
+                'components/**/*.js',
+                'services/*.js'
+              ], 
+              dest: 'lib/<%= pkg.name %>_custom.js'
             }
         },
         concat_css: {
@@ -162,8 +204,9 @@ module.exports = function (grunt) {
 
 
     // Default task(s).
-    grunt.registerTask('default', ['concat', 'uglify', 'concat_css']);
+    grunt.registerTask('default', ['concat', /*'uglify',*/ 'concat_css']);
     grunt.registerTask('pkg_and_deploy', ['default', 'copy', 'ftp-deploy']);
     grunt.registerTask('deploy_data', ['copy:data', 'ftp-deploy']);
     grunt.registerTask('deploy_php', ['copy:php', 'ftp-deploy']);
+    grunt.registerTask('minimal_build', [ 'concat:custom', 'uglify', 'concat_css']);
 };

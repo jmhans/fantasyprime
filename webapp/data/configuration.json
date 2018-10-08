@@ -1,1 +1,27 @@
-[["Chart","Season","Title","X series","Dark Blue","Dark Red","Light Blue","Light Red","Y Axis Label","Y Axis Minimum"],[1,2015,"Wins Minus Losses",0,1,6,11,14,"Win Differential",0],[2,2015,"Rally",0,12,15,2,7,"Rally count",0],[3,2015,"Strikeouts",0,3,8,null,null,"Strikeouts",1000],[4,2015,"Hit Batters",0,4,9,null,null,"HBP + HB",0],[5,2015,"Innings Played",0,13,16,5,10,"Innings",0],[1,2016,"Wins",0,25,25,null,null,"Wins",0],[2,2016,"Rally",0,12,15,2,7,"Rally count",0],[3,2016,"Double Plays",0,20,21,null,null,"GDP + Def GDP",0],[4,2016,"Innings Played",0,13,16,5,10,"Innings",0],[5,2016,"Knockout",0,24,24,29,28,"Win Differential",0],[1,2017,"Wins",0,25,25,null,null,"Wins",0],[2,2017,"Knockout",0,24,24,29,28,"Win Differential",0],[3,2017,"Starting_Pitchers",0,37,36,null,null,"Pitchers",0],[4,2017,"Run_Diff",0,39,38,null,null,"Cumulative Run Diff",0],[5,2017,"Innings_Played",0,13,16,5,10,"Innings",0]]
+{
+  "createTime": "2018-06-11T19:14:14.000Z",
+  "data": [
+    [ "Chart", "Season", "Title", "X series", "Dark Blue", "Dark Red", "Light Blue", "Light Red", "Y Axis Label", "Y Axis Minimum" ],
+    [ 1, 2015, "Wins Minus Losses", 0, 1, 6, 11, 14, "Win Differential", 0 ],
+    [ 2, 2015, "Rally", 0, 12, 15, 2, 7, "Rally count", 0 ],
+    [ 3, 2015, "Strikeouts", 0, 3, 8, null, null, "Strikeouts", 1000 ],
+    [ 4, 2015, "Hit Batters", 0, 4, 9, null, null, "HBP + HB", 0 ],
+    [ 5, 2015, "Innings Played", 0, 13, 16, 5, 10, "Innings", 0 ],
+    [ 1, 2016, "Wins", 0, 25, 25, null, null, "Wins", 0 ],
+    [ 2, 2016, "Rally", 0, 12, 15, 2, 7, "Rally count", 0 ],
+    [ 3, 2016, "Double Plays", 0, 20, 21, null, null, "GDP + Def GDP", 0 ],
+    [ 4, 2016, "Innings Played", 0, 13, 16, 5, 10, "Innings", 0 ],
+    [ 5, 2016, "Knockout", 0, 24, 24, 29, 28, "Win Differential", 0 ],
+    [ 1, 2017, "Wins Against Spread", 0, 25, 25, null, null, "Wins", 0 ],
+    [ 2, 2017, "Knockout", 0, 24, 24, 29, 28, "Win Differential", 0 ],
+    [ 3, 2017, "Starting_Pitchers", 0, 37, 36, null, null, "Pitchers", 0 ],
+    [ 4, 2017, "Run_Diff", 0, 39, 38, null, null, "Cumulative Run Diff", 0 ],
+    [ 5, 2017, "Innings_Played", 0, 13, 16, 5, 10, "Innings", 0 ],
+    [ 6, 2017, "Wins", 0, 19, 18, null, null, "Wins", 0 ],
+    [ 1, 2018, "Wins Against Spread", 0, 25, 25, null, null, "Wins", 0 ],
+    [ 2, 2018, "Knockout", 0, 24, 24, 29, 28, "Win Differential", 0 ],
+    [ 3, 2018, "Game Batting Avg", 0, 43, 42, 47, 46, "Avg", 0 ],
+    [ 4, 2018, "Mound Visits", 0, 41, 40, null, null, "MVs", 0 ],
+    [ 5, 2018, "Innings Batted", 0, 45, 44, null, null, "Innings", 0 ]
+  ]
+}

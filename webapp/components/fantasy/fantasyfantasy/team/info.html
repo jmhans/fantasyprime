@@ -1,4 +1,4 @@
-﻿<div ng-show="$ctrl.edited" class="alert alert-warning">
+<div ng-show="$ctrl.edited" class="alert alert-warning">
     <strong> Changes have been made to team information. </strong><button ng-if="$ctrl.edited" ng-click="$ctrl.saveDataChanges()" class="btn btn-success"><i class="fa fa-floppy-o"></i> Save Changes</button>
 </div>
 
@@ -11,7 +11,7 @@
 <div>
     <small>
         <span id="TeamID">
-            ID: {{$ctrl.team.id}}
+            ID: {{$ctrl.team.OWNER_ID}}
         </span> |
         <span id="OwnerDiv">
             Owner: <span id="TEAM_OWNER" ng-model="$ctrl.team.TEAM_OWNER" edit-callback="$ctrl.editHandler(text, elem)" content-editable></span>
